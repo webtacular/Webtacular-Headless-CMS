@@ -4,7 +4,7 @@ const express:any = require('express'),
     app:any = express(),
     settings = require('../settings.json');
 
-import { httpErrorHandler } from './public/response_handler';
+import { httpErrorHandler, locals, returnLocal } from './public/response_handler';
 import { default as route, strictRest } from './public/router';
 
 const port:number = 3000,
@@ -33,7 +33,7 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { addMongoDB, getMongoDBclient } from './internal/database';
+import { addMongoDB } from './internal/database';
 
 // Global variables set by the settings file
 declare global {
@@ -82,5 +82,5 @@ route('users', app, {
 
 //Cataches all other routes and sends a 404 error
 app.all('/*', (req:any, res:any) =>
-    httpErrorHandler(404, res, 'Resource not found')
+    httpErrorHandler(404, res)
 );

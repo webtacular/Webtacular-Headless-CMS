@@ -2,11 +2,13 @@
     "EN": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "User created successfully, please check your email for verification",
         "USER_SUCCESSFULLY_ADDED_MOBILE": "User created successfully, please check your phone for verification",
-        "USER_SUCCESSFULLY_ADDED": "User created successfully"
+        "USER_SUCCESSFULLY_ADDED": "User created successfully",
+        "DATABASE_UNKNOWN_ERROR": "Unknown MongoDB error, please try again later"
     },
-    "KEYS": [
-        "USER_SUCCESSFULLY_ADDED_EMAIL",
-        "USER_SUCCESSFULLY_ADDED_MOBILE",
-        "USER_SUCCESSFULLY_ADDED"
-    ]
+    "KEYS": {
+        "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
+        "USER_SUCCESSFULLY_ADDED_MOBILE": "USER_SUCCESSFULLY_ADDED_MOBILE",
+        "USER_SUCCESSFULLY_ADDED": "USER_SUCCESSFULLY_ADDED",
+        "DATABASE_UNKNOWN_ERROR": "DATABASE_UNKNOWN_ERROR"
+    }
 }

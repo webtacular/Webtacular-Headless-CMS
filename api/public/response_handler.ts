@@ -139,7 +139,7 @@ export const mongoErrorCodes: { [key:number]: { error:string, code:number } } = 
  */
 export function mongoErrorHandler(errorCode:number, res:any, message?:string):void {
     // Check if the error code is valid
-    if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, 'Unknown MongoDB error');
+    if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
 
     // respond with the error code and message and close the connection
     res.status(mongoErrorCodes[errorCode].code).send(JSON.stringify({

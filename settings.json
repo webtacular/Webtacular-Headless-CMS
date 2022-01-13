@@ -1,0 +1,15 @@
+{
+    "api": {
+        "production": false,
+
+        "mongodb": {
+            "dev_uri": "mongodb+srv://",
+            "dev_db": "test",
+            "dev_collection": "dev", 
+
+            "prod_uri": "mongodb+srv://",
+            "prod_db": "test",
+            "prod_collection": "dev"
+        }
+    }
+}

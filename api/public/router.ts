@@ -1,5 +1,5 @@
 import { isResourceInterface, ResourceInterface, RouterCallback} from './interfaces';
-import { errorHandler } from './common';
+import { httpErrorHandler } from './response_handler';
 
 /**
  * This function takes in a path to a directory and maps each file to a specific method for that resource.
@@ -24,9 +24,6 @@ export default (resource:string, app:any, aditionalResources?:Array<string> | Re
 
         case false:
             return arrayResourceManager(resource, aditionalResources as Array<string> | [], app);
-        
-        default:
-            return;
     }
 }
 
@@ -81,7 +78,7 @@ let methodManager = (req:any, res:any, resource:string):void => {
         let resources:Array<string> = [req.url.split('/').slice(1), req.params];
         require(`./${resource}/${req.method}`).default(req, res, resources);
     } catch {
-        errorHandler(501, res);
+        return httpErrorHandler(501, res);
     }
 }
 
@@ -94,5 +91,5 @@ let methodManager = (req:any, res:any, resource:string):void => {
 **/
 export function strictRest(req:any, res:any, next:any):void {
     if(['GET', 'POST', 'DELETE', 'PUT'].includes(req.method) === true) next();
-    else errorHandler(405, res);
+    else return httpErrorHandler(405, res);
 }

@@ -141,7 +141,7 @@ export const mongoErrorCodes: { [key:number]: { error:string, code:number } } = 
  */
 export function mongoErrorHandler(errorCode:number, res:any, message?:string):void {
     // Check if the error code is valid
-    if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
+    if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR, res.language));
 
     // respond with the error code and message and close the connection
     res.status(mongoErrorCodes[errorCode].code).send(JSON.stringify({
@@ -160,8 +160,16 @@ export function mongoErrorHandler(errorCode:number, res:any, message?:string):vo
 //  888       o `88b    d88' `88b    ooo   .8'     `888.   888       o oo     .d8P 
 // o888ooooood8  `Y8bood8P'   `Y8bood8P'  o88o     o8888o o888ooooood8 8""88888P'  
 
+// Exports the locals language object
 export const locals = require('../locals.json');
 
+/**
+ * This function is used to return a localized string from the locals.json file
+ * 
+ * @param key string - the key to get the value of
+ * @param lang string - the language to get the value of, defaults to 'en'
+ * @returns 
+ */
 export function returnLocal(key:string, lang:string = 'EN') {
     key = key.toUpperCase();
     lang = lang.toUpperCase();
@@ -172,4 +180,65 @@ export function returnLocal(key:string, lang:string = 'EN') {
     else return locals[lang][key];
 }
 
-//TODO: Localization middleware section
+/**
+ * This express middleware is used to check if the client provided a language(s) request header,
+ * it will check if we support that language, if not, it will default to the language specified in the 'defaultLanguage' parameter
+ * 
+ * @param availableLanguages Array<string> - the languages that are available for the client to choose from, in 2 letter ISO format
+ * @param defaultLanguage string - the default language to use if the client does not specify one, in 2 letter ISO format
+ */
+export function localMiddleware(availableLanguages:Array<string>, defaultLanguage:string = 'EN') {
+    return (req:any, res:any, next:any) => {
+        // Check if header exists, if not set it to the default language
+        // or if the user provided an empty 'availableLanguages' array, set it to the default language
+        if(!req.headers['accept-language'] || availableLanguages.length === 0) {
+            req.language = defaultLanguage;
+            res.language = defaultLanguage;
+            return next();
+        }
+
+        // This regex will match the language code from the header and the language weight
+        //
+        // Example - de;q=0.9, fr-CH, en;q=0.8
+        //
+        // ([a-zA-Z]{2}) -- Checks for the 2 letter country code (en, fr, etc)
+        // [-;] -- Checks where the 2 letter languae code ends, eg de(;)q=0.9 or fr(-)CH
+        // (q=([01].[0-9])) -- Checks for the q=0.0 part of the language code, and gets the float, eg en;q=0.9 -> 0.9
+        //
+        const lang_regex:RegExp = /([a-zA-Z]{2})[-;](q=([01].[0-9]))*/gm;
+
+        // Simple object to hold the languages and their weight values
+        let langs:{ [key: string]: number } = {};
+
+        let m:any;
+        while((m = lang_regex.exec(req.headers['accept-language'])) !== null) {
+            // Parse the weight of the language, if it doesn't exist, set it to 0.1
+            // and if it is greater than 1, set it to 1
+            let weight = (parseFloat(m[3]) > 1.0 ? 1.0 : parseFloat(m[3])) || 0.1;
+
+            m[1] = m[1].toUpperCase();
+
+            // If e.g EN is already in the object, we keep the higher weight
+            if(m[1] in langs && langs[m[1]] > weight) continue;   
+
+            // Otherwise we add it to the object
+            else langs[m[1]] = weight;
+        }
+
+        // Sort the languages by weight
+        let largest:{ lang:string, weight:number } = { lang: '', weight: 0.0 };
+        for(let lang in langs) {
+            if(lang in availableLanguages && langs[lang] > largest.weight) largest = { lang, weight: langs[lang] };
+        }
+
+        // If no language was found, set it to EN
+        if(largest.lang === '') largest = { lang: defaultLanguage, weight: 1.0 };
+
+        // Set the language to the request
+        req.language = largest.lang;
+        res.language = largest.lang;
+
+        // Continue with the request
+        next();
+    }
+}

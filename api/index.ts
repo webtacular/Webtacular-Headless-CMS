@@ -4,7 +4,7 @@ const express:any = require('express'),
     app:any = express(),
     settings = require('../settings.json');
 
-import { httpErrorHandler, locals, returnLocal } from './public/response_handler';
+import { httpErrorHandler, localMiddleware, locals } from './public/response_handler';
 import { default as route, strictRest } from './public/router';
 
 const port:number = 3000,
@@ -12,10 +12,15 @@ const port:number = 3000,
 
 //Express middleware that only allows POST, PUT, DELETE and GET requests
 app.use(strictRest);
+
 //Express middleware that parses the body of the request
 app.use('/', json({limit: maxBodySize}));
+
 //Express setting that disables the X-Powered-By header
 app.disable("x-powered-by");
+
+//Exppres middleware that checks if the request contains a language header
+app.use(localMiddleware(locals.supported_languages));
 
 //Express middleware that handles json body parsing errors
 app.use(function (error:any, req:any, res:any, next:any){
@@ -38,6 +43,7 @@ import { addMongoDB } from './internal/database';
 // Global variables set by the settings file
 declare global {
     var __DEF_DATABASE__: string;
+    var __AVAILABLE_LANGUAGES__: string[];
 }
 
 (async() => {

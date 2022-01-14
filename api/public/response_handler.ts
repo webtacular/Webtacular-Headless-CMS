@@ -7,6 +7,7 @@
 // o888o   o888o     o888o         o888o     o888o        
 // HTTP section
 
+//This is an object that contains all the http codes and their descriptions
 export const httpCodes: { [key:number]: string } = {
     100 : "CONTINUE",
     101 : "SWITCHING_PROTOCOLS",
@@ -119,6 +120,7 @@ function httpRespone(statusCode:number, res:any, success:boolean, message?:strin
 //                                        "Y88888P'                                       
 // MongoDB section
 
+//This is an object that contains some the mongoDB error codes and their descriptions
 export const mongoErrorCodes: { [key:number]: { error:string, code:number } } = {
     11000 : {
         error: "DUPLICATE_KEY_ERRROR",
@@ -164,6 +166,10 @@ export function returnLocal(key:string, lang:string = 'EN') {
     key = key.toUpperCase();
     lang = lang.toUpperCase();
 
+    // Check if the key exists in the locales object
     if (key in locals[lang] !== true) return key;
+    // if it does, return the value
     else return locals[lang][key];
 }
+
+//TODO: Localization middleware section

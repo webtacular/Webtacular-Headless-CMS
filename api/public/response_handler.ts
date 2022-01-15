@@ -176,24 +176,44 @@ export function returnLocal(key:string, lang:string = 'EN') {
 
     // Check if the key exists in the locales object
     if (key in locals[lang] !== true) return key;
+
     // if it does, return the value
     else return locals[lang][key];
+}
+
+export interface AvailableLanguagesInterface {
+    [key:string]: {
+        variants: Array<string>, 
+        defualt:string 
+    }
+}
+
+export interface LanguageInterface {
+    language:string, 
+    variant:string, 
+    weight:number 
 }
 
 /**
  * This express middleware is used to check if the client provided a language(s) request header,
  * it will check if we support that language, if not, it will default to the language specified in the 'defaultLanguage' parameter
  * 
- * @param availableLanguages Array<string> - the languages that are available for the client to choose from, in 2 letter ISO format
+ * @param availableLanguages AvailableLanguagesInterface - the languages that are available for the client to choose from, in 2 letter ISO format and an array of region variants and the default variant
  * @param defaultLanguage string - the default language to use if the client does not specify one, in 2 letter ISO format
  */
-export function localMiddleware(availableLanguages:Array<string>, defaultLanguage:string = 'EN') {
+export function localMiddleware(availableLanguages:AvailableLanguagesInterface, defaultLanguage:string = 'EN') {
     return (req:any, res:any, next:any) => {
+        let langObj:LanguageInterface = {
+            language: defaultLanguage,
+            variant: availableLanguages[defaultLanguage].defualt,
+            weight: 0.0,
+        };
+
         // Check if header exists, if not set it to the default language
         // or if the user provided an empty 'availableLanguages' array, set it to the default language
-        if(!req.headers['accept-language'] || availableLanguages.length === 0) {
-            req.language = defaultLanguage;
-            res.language = defaultLanguage;
+        if(!req.headers['accept-language'] || Object.keys(availableLanguages).length === 0) {
+            req.language = langObj;
+            res.language = langObj;
             return next();
         }
 
@@ -201,44 +221,120 @@ export function localMiddleware(availableLanguages:Array<string>, defaultLanguag
         //
         // Example - de;q=0.9, fr-CH, en;q=0.8
         //
-        // ([a-zA-Z]{2}) -- Checks for the 2 letter country code (en, fr, etc)
+        // ([a-zA-Z]{2}) -- Checks for the 2 letter country code (en, fr, etc) -> en-US = en
         // [-;] -- Checks where the 2 letter languae code ends, eg de(;)q=0.9 or fr(-)CH
+        // ([a-zA-Z]{2}) -- Checks for the 2 letter region code (US, UK, etc) -> en-US = US
         // (q=([01].[0-9])) -- Checks for the q=0.0 part of the language code, and gets the float, eg en;q=0.9 -> 0.9
         //
-        const lang_regex:RegExp = /([a-zA-Z]{2})[-;](q=([01].[0-9]))*/gm;
+        const lang_regex:RegExp = /([a-zA-Z]{2})(-([a-zA-Z]{2}))*[;,](q=([01].[0-9]))*/gm;
 
         // Simple object to hold the languages and their weight values
-        let langs:{ [key: string]: number } = {};
+        let languages:{ [key: string]: {
+                region:string, 
+                weight:number 
+            } 
+        } = {};
 
         let m:any;
         while((m = lang_regex.exec(req.headers['accept-language'])) !== null) {
             // Parse the weight of the language, if it doesn't exist, set it to 0.1
             // and if it is greater than 1, set it to 1
-            let weight = (parseFloat(m[3]) > 1.0 ? 1.0 : parseFloat(m[3])) || 0.1;
-
-            m[1] = m[1].toUpperCase();
+            let weight = (parseFloat(m[5]) > 1.0 ? 1.0 : parseFloat(m[5])) || 0.1,
+                name = m[1].toUpperCase(),
+                region = m[3]?.toUpperCase();
 
             // If e.g EN is already in the object, we keep the higher weight
-            if(m[1] in langs && langs[m[1]] > weight) continue;   
+            if(languages[name]?.weight > weight) continue;   
+
+            // If the language variant is not in the available languages variant, try to get the default variant
+            if(!availableLanguages[name]?.variants?.includes(region)) 
+                if(availableLanguages[name]?.defualt) region = availableLanguages[name].defualt;
+                else region = '';
 
             // Otherwise we add it to the object
-            else langs[m[1]] = weight;
+            Object.assign(languages, {
+                [name]: {
+                    weight: weight,
+                    region: region,
+                }
+            });
         }
 
         // Sort the languages by weight
-        let largest:{ lang:string, weight:number } = { lang: '', weight: 0.0 };
-        for(let lang in langs) {
-            if(lang in availableLanguages && langs[lang] > largest.weight) largest = { lang, weight: langs[lang] };
+        for(let language in languages) {
+            if(Object.keys(availableLanguages).includes(language) && languages[language].weight > langObj.weight) langObj = { 
+                language,
+                weight: languages[language].weight, 
+                variant: languages[language].region
+            };
         }
 
-        // If no language was found, set it to EN
-        if(largest.lang === '') largest = { lang: defaultLanguage, weight: 1.0 };
-
         // Set the language to the request
-        req.language = largest.lang;
-        res.language = largest.lang;
+        req.language = langObj;
+        res.language = langObj;
 
         // Continue with the request
         next();
     }
 }
+
+// export function verifyLocals(obj:any){
+//     if(!obj?.supported_languages) throw new Error('The supported_languages property is not properly defined in the locals.json file');
+//     if(!obj?.KEYS) throw new Error('The KEYS property is not properly defined in the locals.json file');
+
+//     const language_regex = /^[A-Z]{2}$/,
+//         skip_keys = ['supported_languages', 'KEYS'];
+
+//     let local_keys:any = {};
+
+//     Object.keys(obj).forEach(key => {
+
+//         //Non valid country code
+//         if(!language_regex.test(key) && !skip_keys.includes(key))
+//             throw new Error(`The key ${key} is not a valid language code, it must be in 2 letter ISO format (e.g. EN, FR, etc)`);
+        
+//         //save the valid keys for later
+//         if(language_regex.test(key))
+//             local_keys[key] = obj[key];
+        
+//     });
+
+//     Object.keys(obj.supported_languages).forEach(key => {
+        
+//         // VARIATIONS ARRAY VALIDATION
+//         if(!language_regex.test(key))
+//             throw new Error(`The key ${key} is not a valid language code, it must be in 2 letter ISO format (e.g. EN, FR, etc)`);
+
+//         if(!obj.supported_languages[key].variants)
+//             throw new Error(`The key ${key} is required to have a variants string array, even if its empty`);
+        
+//         Object.keys(obj.supported_languages[key].variants).forEach(variant => {
+//             if(!language_regex.test(variant))
+//                 console.log(variant)
+//         });
+
+//         //DEFAULT VARIANT VALIDATION
+        
+//         if(!obj.supported_languages[key].defualt)
+//             throw new Error(`The key ${key} is required to have a default variant`);
+
+//         if(!language_regex.test(obj.supported_languages[key].defualt))
+//             throw new Error(`The key ${key} has an invalid default variant ${obj.supported_languages[key].defualt}, it must be in 2 letter ISO format`);
+//     });
+    
+//     //Check if all the keys are defined
+//     Object.keys(local_keys).forEach(language => {
+//         const language_keys = local_keys[language];
+
+//         Object.keys(obj.KEYS).forEach(required_key => {
+//             // if a key is defined in KEYS but not in the language object, throw an error
+//             if(!language_keys[required_key])
+//                 throw new Error(`The key ${required_key} is not defined in the ${language} language object`);
+
+//             // if a key in KEYS is not the same as its value, throw an error
+//             if(required_key !== obj.KEYS[required_key])
+//                 throw new Error(`${required_key} string property (${obj.KEYS[required_key]}) is required to be the same as the KEY`);
+//         });
+//     });
+    
+// }

@@ -42,10 +42,12 @@ export async function addMongoDB(cs:string, db:string, collection:string):Promis
  * @returns Collection - the collection object
 **/
 export function getMongoDBclient(db:string, collection?:string, res?:any):Collection<{[key: string | number]: any}> {
+    
     // If the database doesn't exist, throw an error
     if(!mongo_databases[db]) {
         // If the response object is defined, send an error to the client
         if(res) httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
+
         // Otherwise, throw an error
         else throw new Error(`MongoDB database ${db} not found`);
     }

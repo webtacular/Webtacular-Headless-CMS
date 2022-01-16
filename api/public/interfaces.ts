@@ -33,7 +33,7 @@ export interface UserInterface {
         user_name: string;
         email: string;
         password: string;
-        language: string;
+        language?: string;
     };
 
     previous_info: {

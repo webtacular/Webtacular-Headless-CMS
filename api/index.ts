@@ -1,5 +1,4 @@
 const express:any = require('express'),
-    bodyParser = require('express-body-parser-error-handler'),
     { json } = require('body-parser'),
     app:any = express(),
     settings = require('../settings.json');
@@ -14,7 +13,7 @@ const port:number = 3000,
 app.use(strictRest);
 
 //Express middleware that parses the body of the request
-app.use('/', json({limit: maxBodySize}));
+app.use('/', json({ limit: maxBodySize }));
 
 //Express setting that disables the X-Powered-By header
 app.disable("x-powered-by");
@@ -44,6 +43,7 @@ import { addMongoDB } from './internal/database';
 declare global {
     var __DEF_DATABASE__: string;
     var __AVAILABLE_LANGUAGES__: string[];
+    var __SALT_ROUNDS__: number;
 }
 
 (async() => {
@@ -59,6 +59,8 @@ declare global {
             break;
     }
 
+    global.__SALT_ROUNDS__ = settings.api.security.salt_rounds;
+    
     app.listen(port, (error:any) => {
         if (error) console.error(error);
         else console.log(`Server listening on port: ${port}`);

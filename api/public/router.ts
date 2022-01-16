@@ -107,7 +107,8 @@ let methodManager = (req:any, res:any, resource:string):void => {
 
         //and call the method specific function function
         require(`./${resource}/${req.method}`).default(req, res, resources);
-    } catch {
+    } catch (err) { //TODO: Better error repoting
+        console.log(err)
         //if the method specific function doesn't exist, return a 501 Not Implemented error
         return httpErrorHandler(501, res);
     }

@@ -25,47 +25,56 @@ export let isResourceInterface = (obj: any):boolean => {
 //
 // Database interfaces
 //
+export interface IpInterface {
+    _id?: ObjectId | string;
+    ip: string;
+    last_accessed: number;
+    accounts: { user_id:string, timestamp:number }[];
+}
 
 export interface UserInterface {
     _id?: ObjectId | string;
 
-    current_info: {
-        user_name: string;
-        email: string;
-        password: string;
-        language?: string;
-    };
+    user_name: string;
+    email: string;
+    password: string;
+    language?: string;
 
     previous_info: {
         user_name: {
             previous: string;
-            timestamp: Date;
+            timestamp: number;
         }[];
         email: {
             previous: string;
-            timestamp: Date;
+            timestamp: number;
         }[];
         password: {
             previous: string;
-            timestamp: Date;
+            timestamp: number;
         }[];
     };
 
     security_info: {
-        attempts_left: number;
+        signup_ip: string;
+        attempts: number;
+        last_login: number;
         email_verified: boolean;
+        last_email: number;
+        account_creation: number;
+        account_lock: boolean;
         
         trusted_devices?: {
             ip: string;
-            creation: Date;
-            expiration: Date;
+            creation: number;
+            expiration: number;
             user_agent: string;
             trusted_token: string;
         }[];
 
         login_attempts?:{
             ip: string;
-            timestamp: Date;
+            timestamp: number;
             user_agent: string;
             succsess: boolean;
         }[];
@@ -76,13 +85,11 @@ export interface UserInterface {
 //and edit the object without having to clone it.
 export let UserInterfaceTemplate = (): UserInterface => {
     return {
-        current_info: {
-            user_name: '',
-            email: '',
-            password: '',
-            language: 'EN',
-        },
-
+        user_name: '',
+        email: '',
+        password: '',
+        language: 'EN',
+        
         previous_info: {
             user_name: [],
             email: [],
@@ -90,10 +97,22 @@ export let UserInterfaceTemplate = (): UserInterface => {
         },
 
         security_info: {
-            attempts_left: 0,
+            last_login: Date.now(),
+            signup_ip: '',
+            account_lock: false,
+            attempts: 0,
+            last_email: Date.now(),
+            account_creation: Date.now(),
             email_verified: false,
             trusted_devices: [],
             login_attempts: [],
         }
     };
+}
+
+export interface AuthCollection {
+    ip_collection: string;
+    user_collection: string;
+    accounts_per_ip: number;
+    new_account_timeout: number;
 }

@@ -170,15 +170,20 @@ export const locals = require('../locals.json');
  * @param lang string - the language to get the value of, defaults to 'en'
  * @returns 
  */
-export function returnLocal(key:string, lang:string = 'EN') {
-    key = key.toUpperCase();
-    lang = lang.toUpperCase();
+export function returnLocal(key:string, lang:string = 'EN', conCat?:any) {
+    key = key?.toUpperCase();
+    lang = lang?.toUpperCase();
 
     // Check if the key exists in the locales object
     if (key in locals[lang] !== true) return key;
 
+    let string:string = locals[lang][key];
+
+    if(conCat) Object.keys(conCat).forEach((key:string, i:number) => 
+        string = string.replace(`{${i}}`, conCat[key]));
+
     // if it does, return the value
-    else return locals[lang][key];
+    return string;
 }
 
 export interface AvailableLanguagesInterface {

@@ -38,12 +38,15 @@ app.use(function (error:any, req:any, res:any, next:any){
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
 import { addMongoDB } from './internal/database';
+import { AuthCollection } from './public/interfaces';
 
 // Global variables set by the settings file
 declare global {
     var __DEF_DATABASE__: string;
     var __AVAILABLE_LANGUAGES__: string[];
     var __SALT_ROUNDS__: number;
+
+    var __AUTH_COLLECTIONS__:AuthCollection;
 }
 
 (async() => {
@@ -60,7 +63,14 @@ declare global {
     }
 
     global.__SALT_ROUNDS__ = settings.api.security.salt_rounds;
-    
+
+    global.__AUTH_COLLECTIONS__ = {
+        ip_collection: 'ip',
+        user_collection: 'users',
+        accounts_per_ip: 5,
+        new_account_timeout: 0,
+    }
+
     app.listen(port, (error:any) => {
         if (error) console.error(error);
         else console.log(`Server listening on port: ${port}`);
@@ -84,8 +94,9 @@ route('link', app, {
 
 //Users resource
 route('users', app, { 
-    POST: [':id'],
     GET: [':id'],
+    PUT: [':id'],
+    DELETE: [':id']
 });
 
 //Cataches all other routes and sends a 404 error

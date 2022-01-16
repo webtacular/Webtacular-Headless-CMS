@@ -1,5 +1,20 @@
 TODO: Improve the start sequence of the api, add proper error handling for the settings json.
 TODO: Once we get stable, we need to add proper testing
 
--------DONE-------
-Create express middle ware to check if a language cookie exists, which will be used to set the language of the api messages. DONE
+TODO: Make sure we are GDPR complient
+
+[1] People generally have the right to ask you to delete all the personal data you have about them, and you have to honor their request within about a month. There are a five grounds on which you can deny the request, such as the exercise of freedom of speech or compliance with a legal obligation. You must also try to verify the identity of the person making the request.
+
+eg, very understandable, Goal would be to create a task schedular that runs every 1 to 2 weeks, fulfilling clients requests.
+
+[2] This means that you should be able to send their personal data in a commonly readable format (e.g. a spreadsheet) either to them or to a third party they designate. This may seem unfair from a business standpoint in that you may have to turn over your customers' data to a competitor. But from privacy standpoint, the idea is that people own their data, not you.
+
+again, as with [1], it should be a one click solution
+
+[3] If you're processing their data for the purposes of direct marketing, you have to stop processing it immediately for that purpose. Otherwise, you may be able to challenge their objection if you can demonstrate "compelling legitimate grounds."
+
+Total resonable, I dont belive that I would do something like that, but if i do, it should just be a boolean attached to the users DB entry
+
+[4] Most of the productivity tools used by businesses are now available with end-to-end encryption built in, including email, messaging, notes, and cloud storage. The GDPR requires organizations to use encryption or pseudeonymization whenever feasible.
+
+'use encryption or pseudeonymization whenever feasible' seems like a fun thing to implament

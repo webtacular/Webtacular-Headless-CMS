@@ -96,7 +96,7 @@ let objectResourceManager = (resource:string, aditionalResources:ResourceInterfa
 **/
 let arrayResourceManager = (resource:string, aditionalResources:Array<string>, app:any):void => {
     //Go trough each resource in the array and call the func function
-    (aditionalResources as Array<string>).forEach((extraResources:string) =>
+    (aditionalResources === undefined ? [] : aditionalResources as Array<string>).forEach((extraResources:string) =>
         app.all(`/${resource}/${extraResources}`, (req:any, res:any) => methodManager(req, res, resource))); 
 }
 

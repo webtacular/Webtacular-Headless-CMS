@@ -25,7 +25,11 @@
         "SIGNUP_NO_USERNAME": "You did not enter your username",
         "SIGNUP_INVALID_USERNAME": "You have entered an invalid username",
         "SIGNUP_IP_TIMEOUT": "You need to wait {0}ms to create a new account with this ip",
-        "SIGNUP_MAX_ACC_IP": "This IP has been used too manytimes for new accounts, if this is a public IP, or an error, please email the admin"
+        "SIGNUP_MAX_ACC_IP": "This IP has been used too manytimes for new accounts, if this is a public IP, or an error, please email the admin",
+        "MISSING_USER_ID": "You did not supply /:id",
+        "USER_NOT_FOUND": "User not found",
+        "MISSING_TOKEN": "You did not supply a token or the token is invalid",
+        "INVALID_TOKEN": "You have supplied an invalid token"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -39,6 +43,10 @@
         "SIGNUP_NO_USERNAME": "SIGNUP_NO_USERNAME",
         "SIGNUP_INVALID_USERNAME": "SIGNUP_INVALID_USERNAME",
         "SIGNUP_IP_TIMEOUT": "SIGNUP_IP_TIMEOUT",
-        "SIGNUP_MAX_ACC_IP": "SIGNUP_MAX_ACC_IP"
+        "SIGNUP_MAX_ACC_IP": "SIGNUP_MAX_ACC_IP",
+        "MISSING_USER_ID": "MISSING_USER_ID",
+        "USER_NOT_FOUND": "USER_NOT_FOUND",
+        "MISSING_TOKEN": "MISSING_TOKEN",
+        "INVALID_TOKEN": "INVALID_TOKEN"
     }
 }

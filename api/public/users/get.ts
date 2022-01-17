@@ -1,25 +1,67 @@
-import { getMongoDBclient } from "../../internal/database";
-import { UserInterface } from "../interfaces";
+import { getMongoDBclient } from "../../internal/databases";
 import { ObjectId } from 'mongodb';
+import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../response_handler";
+import {checkForToken} from "../../internal/token";
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
-    const toInsert = {
-        _id: new ObjectId(), 
-        someField: 'hello',
-        someOtherField: 'world'
-      };
+    // Start checking for tokens in the background
+    let tokenInfo = checkForToken(req, res, false);
 
+    // If the userID is not defined, return a 401
+    if(!(resources[1] as any)?.id) 
+        return httpErrorHandler(400, res, returnLocal(locals.KEYS.MISSING_USER_ID, locals.language));
 
-    let result:any = await getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).insertOne(toInsert, (err:any, result:any) => {
-        if (err) throw err;
-        console.log(result);
+    getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOne({ _id: new ObjectId((resources[1] as any).id) }, async(err:any, result:any) => {
+        // If the DB throws an error, pass it to the error handler
+        if (err)
+            return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+
+        // If we cant find the user, return a 404
+        if (result === null || result === undefined)
+            return httpErrorHandler(404, res, returnLocal(locals.KEYS.USER_NOT_FOUND, locals.language));
+
+        // Make sure we completed the token check
+        await tokenInfo;
+
+        //
+        //Basic information about the user
+        //
+        let respData:any = {
+            _id: result?._id.toString(),
+            user_name: result?.user_name,
+            language: result?.language,
+            profile_picture: result?.profile_picture,
+        };
+
+        //
+        // If the use is an admin, return the admin data
+        //
+        if(req.auth.admin === true) Object.assign(respData, { 
+            email: result?.email,
+            previous_info: {
+                user_name: result?.previous_info?.user_name,
+                email: result?.previous_info?.email,
+                password: result?.previous_info?.password,
+            },
+            security_info: result?.security_info,
+            tokens: result?.tokens
+        });
+
+        //
+        // if the user is authorized, return more of the users data
+        //
+        else if(req.auth.userID === result._id.toString()) Object.assign(respData, { 
+            email: result?.email,
+            previous_info: {
+                user_name: result?.previous_info?.user_name,
+                email: result?.previous_info?.email,
+            },
+            tokens: result?.tokens
+        });
+
+        //finaly, return the data
+        return httpSuccessHandler(200, res, respData, {
+            'Content-Type': 'application/json',
+        });
     });
-
-    result = await getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOne(toInsert, (err:any, result:any) => {
-        if (err) throw err;
-        console.log(result);
-    });
-    
-    res.status(200).send(toInsert);
-    res.end();
 }

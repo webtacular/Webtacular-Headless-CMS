@@ -81,8 +81,8 @@ export const httpCodes: { [key:number]: string } = {
  * @param res any - the response object
  * @param message string - the message to send to the client, optuonal
  */
-export function httpErrorHandler(statusCode:number, res:any, message?:string):void {
-    httpRespone(statusCode, res, false, message);
+export function httpErrorHandler(statusCode:number, res:any, message?:string, headers?:any):void {
+    httpRespone(statusCode, res, false, message, headers);
 }
 
 /**
@@ -92,11 +92,14 @@ export function httpErrorHandler(statusCode:number, res:any, message?:string):vo
  * @param res any - the response object
  * @param message string - the message to send to the client, optuonal
  */
-export function httpSuccessHandler(statusCode:number, res:any, message?:string):void {
-    httpRespone(statusCode, res, true, message);
+export function httpSuccessHandler(statusCode:number, res:any, message?:string, headers?:any):void {
+    httpRespone(statusCode, res, true, message, headers);
 }
 
-function httpRespone(statusCode:number, res:any, success:boolean, message?:string) {
+function httpRespone(statusCode:number, res:any, success:boolean, message?:string, headers?:any):void {
+    // if any headers are provided, add them to the response
+    if(headers) res.set(headers);
+
     // Check if the error code is valid
     if (statusCode in httpCodes !== true) statusCode = 500;
 

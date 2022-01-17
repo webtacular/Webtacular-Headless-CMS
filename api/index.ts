@@ -37,7 +37,7 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { addMongoDB, addRedisDB } from './internal/database';
+import { addMongoDB, addRedisDB } from './internal/databases';
 import { AuthCollection } from './public/interfaces';
 
 // Global variables set by the settings file
@@ -48,7 +48,8 @@ declare global {
     var __AVAILABLE_LANGUAGES__: string[];
     var __SALT_ROUNDS__: number;
 
-    var __AUTH_COLLECTIONS__:AuthCollection;
+    var __AUTH_COLLECTIONS__:any;
+    var __SECURITY_OPTIONS__:any;
 }
 
 (async() => {
@@ -64,18 +65,23 @@ declare global {
             await addMongoDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
             global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
 
-            addRedisDB(settings.api.redis.dev_uri, settings.api.redis.dev_name);
+            await addRedisDB(settings.api.redis.dev_uri, settings.api.redis.dev_name);
             global.__DEF_REDIS_DB__ = settings.api.redis.dev_name;
             break;
     }
 
     global.__SALT_ROUNDS__ = settings.api.security.salt_rounds;
 
-    global.__AUTH_COLLECTIONS__ = {
+    global.__AUTH_COLLECTIONS__ = { //TODO: Add specific interfaces for these
         ip_collection: 'ip',
         user_collection: 'users',
+    }
+
+    global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these
         accounts_per_ip: 5,
         new_account_timeout: 0,
+        token_lenght: 20,
+        token_expiration: 60 * 60 * 24 * 7,
     }
 
     app.listen(port, (error:any) => {
@@ -99,6 +105,13 @@ route('users', app, {
     PUT: [':id'],
     DELETE: [':id']
 });
+
+route('session', app, { 
+    GET: [':id'],
+    PUT: [':id'],
+    DELETE: [':id']
+});
+
 
 //Cataches all other routes and sends a 404 error
 app.all('/*', (req:any, res:any) =>

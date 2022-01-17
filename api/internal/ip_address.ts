@@ -3,7 +3,7 @@ import ipaddr from 'ipaddr.js';
 import {ObjectId} from 'mongodb';
 import {IpInterface} from '../public/interfaces';
 import {mongoErrorHandler} from '../public/response_handler';
-import {getMongoDBclient} from './database';
+import {getMongoDBclient} from './databases';
 
 /**
  * Gets the ip from a express request object, parses it and than returns it as B64

@@ -1,10 +1,11 @@
-import { getMongoDBclient } from "../../internal/database";
+import { getMongoDBclient } from "../../internal/databases";
 import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../response_handler";
 import { UserInterface, UserInterfaceTemplate } from "../interfaces";
 import { userRegex, EMAIL_REGEXP } from "../../internal/regex";
 import { hashPassword } from "../../internal/passwords";
 import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_address";
 import { ObjectId } from "mongodb";
+import { generateToken } from "../../internal/token";
 
 let throw406 = (key:string, res:any, replace:any = {}):void => {
     return httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));
@@ -57,18 +58,21 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
         //If the user is trying to create multiple accounts with the same IP,
         //We can impose a time out.
-        if(global.__AUTH_COLLECTIONS__.new_account_timeout > last_accessed && ip_history.settings.bypass_timeout !== true) 
-            return throw406(locals.KEYS.SIGNUP_IP_TIMEOUT, res, { 0:(global.__AUTH_COLLECTIONS__.new_account_timeout - last_accessed) });
+        if(global.__SECURITY_OPTIONS__.new_account_timeout > last_accessed && ip_history.settings.bypass_timeout !== true) 
+            return throw406(locals.KEYS.SIGNUP_IP_TIMEOUT, res, { 0:(global.__SECURITY_OPTIONS__.new_account_timeout - last_accessed) });
 
         //If the user is trying to create a bounch of accounts with one IP, we can
         //Cap the ammount of accounts he can make
-        if(global.__AUTH_COLLECTIONS__.accounts_per_ip > 0 && ip_history.settings.bypass_acc_limit !== true)
-            if(ip_history.count >= global.__AUTH_COLLECTIONS__.accounts_per_ip)
+        if(global.__SECURITY_OPTIONS__.accounts_per_ip > 0 && ip_history.settings.bypass_acc_limit !== true)
+            if(ip_history.count >= global.__SECURITY_OPTIONS__.accounts_per_ip)
                 return throw406(locals.KEYS.SIGNUP_MAX_ACC_IP, res);
 
         //If the IP passes checks, let the user trough
         pass_ip_func = () => logSameIP(ip_history, user_id, res);
     }
+
+    let token = generateToken(user_id, global.__SECURITY_OPTIONS__.token_expiration),
+        expiration = Date.now() + global.__SECURITY_OPTIONS__.token_expiration;
     
     Object.assign(user, { 
         _id: new ObjectId(user_id),
@@ -79,19 +83,48 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
         security_info: {
             signup_ip: getIP(req),
-        }
+            last_login: Date.now(),
+            last_email: Date.now(),
+            account_creation: Date.now(),
+            account_locked: false,
+            email_verified: false,
+            attempts: 0,
+        },
+
+        tokens: [{
+            ip,
+            token,
+            expiration,
+            creation: Date.now(),
+        }]
     });
 
     //Push the data to mongoDB
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user as any, (err:any, result:any) => {
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__SECURITY_OPTIONS__.user_collection, res).insertOne(user as any, (err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
-        else {
-            //We only want to log IP's if the account was created succesfully
-            //eg something could fail, we log the IP, but it dosent belong to anyone
-            pass_ip_func();
 
-            //Inform the user that their account has been succesfully created
-            return httpSuccessHandler(201, res, returnLocal(locals.KEYS.USER_SUCCESSFULLY_ADDED, req.language.language));
-        }
+        //We only want to log IP's if the account was created succesfully
+        //eg something could fail, we log the IP, but it dosent belong to anyone
+        pass_ip_func();
+
+        //TODO: Send a email confirmation to the user
+        
+        //Tell the client to set some cookies
+        res.cookie('token', token, {
+            maxAge: expiration,
+            secure: true,
+        });
+
+        res.cookie('user_id', user_id, {
+            secure: true,
+        });
+
+        //Inform the user that their account has been succesfully created
+        return httpSuccessHandler(201, res, JSON.stringify({
+            user_id: user_id,
+            token: token,
+        }), {
+            'Content-Type': 'application/json',
+        });  
     });
 }

@@ -19,6 +19,7 @@ export interface ResourceInterface {
 }
 
 export let isResourceInterface = (obj: any):boolean => { 
+    if(obj === undefined) return false;
     return Object.keys(obj as ResourceInterface).some((method:string) => ['GET', 'POST', 'DELETE', 'PUT'].includes(method));
 }
 
@@ -45,6 +46,8 @@ export interface UserInterface {
     password: string;
     language?: string;
 
+    profile_picture?: string;
+
     previous_info: {
         user_name: {
             previous: string;
@@ -67,14 +70,16 @@ export interface UserInterface {
         email_verified: boolean;
         last_email: number;
         account_creation: number;
-        account_lock: boolean;
-        
-        trusted_devices?: {
+        account_locked: boolean;
+
+        scopes: string[];
+
+        tokens?: {
             ip: string;
             creation: number;
             expiration: number;
-            user_agent: string;
-            trusted_token: string;
+            user_agent?: string;
+            token: string;
         }[];
 
         login_attempts?:{
@@ -95,6 +100,8 @@ export let UserInterfaceTemplate = (): UserInterface => {
         password: '',
         language: 'EN',
         
+        profile_picture: '',
+
         previous_info: {
             user_name: [],
             email: [],
@@ -104,13 +111,14 @@ export let UserInterfaceTemplate = (): UserInterface => {
         security_info: {
             last_login: Date.now(),
             signup_ip: '',
-            account_lock: false,
+            account_locked: false,
             attempts: 0,
             last_email: Date.now(),
             account_creation: Date.now(),
             email_verified: false,
-            trusted_devices: [],
+            tokens: [],
             login_attempts: [],
+            scopes: [],
         }
     };
 }
@@ -118,6 +126,4 @@ export let UserInterfaceTemplate = (): UserInterface => {
 export interface AuthCollection {
     ip_collection: string;
     user_collection: string;
-    accounts_per_ip: number;
-    new_account_timeout: number;
 }

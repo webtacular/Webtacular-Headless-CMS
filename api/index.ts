@@ -37,12 +37,14 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { addMongoDB } from './internal/database';
+import { addMongoDB, addRedisDB } from './internal/database';
 import { AuthCollection } from './public/interfaces';
 
 // Global variables set by the settings file
 declare global {
-    var __DEF_DATABASE__: string;
+    var __DEF_MONGO_DB__: string;
+    var __DEF_REDIS_DB__: string;
+
     var __AVAILABLE_LANGUAGES__: string[];
     var __SALT_ROUNDS__: number;
 
@@ -53,12 +55,17 @@ declare global {
     switch(settings.api.production) {
         case true:
             await addMongoDB(settings.api.mongodb.prod_uri, settings.api.mongodb.prod_db, settings.api.mongodb.prod_collection);
-            global.__DEF_DATABASE__ = settings.api.mongodb.dev_db;
+            global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
             break;
 
         case false:
+            process.stdout.write('!!! Using development databases !!!\n');
+
             await addMongoDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
-            global.__DEF_DATABASE__ = settings.api.mongodb.dev_db;
+            global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
+
+            addRedisDB(settings.api.redis.dev_uri, settings.api.redis.dev_name);
+            global.__DEF_REDIS_DB__ = settings.api.redis.dev_name;
             break;
     }
 
@@ -78,19 +85,13 @@ declare global {
 })();
 
 
-// ooooooooo.                                                                                  
-// `888   `Y88.                                                                                
+// ooooooooo.
+// `888   `Y88.
 //  888   .d88'  .ooooo.   .oooo.o  .ooooo.  oooo  oooo  oooo d8b  .ooooo.   .ooooo.   .oooo.o 
 //  888ooo88P'  d88' `88b d88(  "8 d88' `88b `888  `888  `888""8P d88' `"Y8 d88' `88b d88(  "8 
 //  888`88b.    888ooo888 `"Y88b.  888   888  888   888   888     888       888ooo888 `"Y88b.  
 //  888  `88b.  888    .o o.  )88b 888   888  888   888   888     888   .o8 888    .o o.  )88b 
 // o888o  o888o `Y8bod8P' 8""888P' `Y8bod8P'  `V88V"V8P' d888b    `Y8bod8P' `Y8bod8P' 8""888P' 
-
-//link URI
-route('link', app, { 
-    POST: [':id'],
-    GET: [':id'],
-});
 
 //Users resource
 route('users', app, { 

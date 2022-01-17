@@ -10,12 +10,12 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
       };
 
 
-    let result:any = await getMongoDBclient(global.__DEF_DATABASE__, undefined, res).insertOne(toInsert, (err:any, result:any) => {
+    let result:any = await getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).insertOne(toInsert, (err:any, result:any) => {
         if (err) throw err;
         console.log(result);
     });
 
-    result = await getMongoDBclient(global.__DEF_DATABASE__, undefined, res).findOne(toInsert, (err:any, result:any) => {
+    result = await getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOne(toInsert, (err:any, result:any) => {
         if (err) throw err;
         console.log(result);
     });

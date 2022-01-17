@@ -1,5 +1,15 @@
 import { Collection, MongoClient, MongoClientOptions } from 'mongodb';
 import { httpErrorHandler, locals, returnLocal } from '../public/response_handler';
+import { createClient } from 'redis';
+
+//  __  __                         _____  ____  
+// |  \/  |                       |  __ \|  _ \ 
+// | \  / | ___  _ __   __ _  ___ | |  | | |_) |
+// | |\/| |/ _ \| '_ \ / _` |/ _ \| |  | |  _ < 
+// | |  | | (_) | | | | (_| | (_) | |__| | |_) |
+// |_|  |_|\___/|_| |_|\__, |\___/|_____/|____/ 
+//                      __/ |                   
+//                     |___/                    
 
 // Variable that stores our MongoDB Databases.
 export let mongo_databases:{ [key: string]: { cs:string, collection:string, client:MongoClient } } = {};
@@ -29,6 +39,7 @@ export async function addMongoDB(cs:string, db:string, collection:string):Promis
         client
     };
 
+    // Return the client
     return client;
 }
 
@@ -57,4 +68,54 @@ export function getMongoDBclient(db:string, collection?:string, res?:any):Collec
 
     // Return the collection
     return (mongo_databases[db].client.db(db).collection<{[key: string | number]: any}>(collection));
+}
+
+//  _____          _ _     _____  ____  
+// |  __ \        | (_)   |  __ \|  _ \ 
+// | |__) |___  __| |_ ___| |  | | |_) |
+// |  _  // _ \/ _` | / __| |  | |  _ < 
+// | | \ \  __/ (_| | \__ \ |__| | |_) |
+// |_|  \_\___|\__,_|_|___/_____/|____/ 
+
+export let redis_databases:{ [key: string]: { cs:string, client:any } } = {};
+
+/**
+ * This function is used to connect to a Redis database.
+ * 
+ * @param cs string - the conection uri of the redis server
+ * @param name string - the name you want to give to the database
+ * @returns redis.RedisClient - a redis client
+ */
+export function addRedisDB(cs:string, name:string):any {
+    // Connect to the redis server
+    const client = createClient({ url: cs });
+    
+    // on error, just log it for now
+    // TODO: handle this better
+    client.on('error', err => {
+        console.log(err);
+    });
+
+    // Add the database to the list of databases
+    redis_databases[name] = {
+        cs,
+        client
+    };
+    
+    // Return the client
+    return client;
+}
+
+export function getRedisDBclient(name:string, res?:any):any {
+    // If the database doesn't exist, throw an error
+    if(!redis_databases[name]) {
+        // If the response object is defined, send an error to the client
+        if(res) httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
+
+        // Otherwise, throw an error
+        else throw new Error(`Redis database ${name} not found`);
+    }
+
+    // Return the client
+    return redis_databases[name].client;
 }

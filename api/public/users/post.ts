@@ -45,29 +45,29 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         ip = getIP(req);
 
     //Check if we have seen this IP before
-    let ip_history = await checkIPlogs(ip, user_id, res),
-        pass_func:any = () => {};
+    let ip_history = await checkIPlogs(ip, res),
+        pass_ip_func:any = () => {};
 
     //If this is an IP we've never seen, create a new entry in the DB
     if(ip_history === null)
-        pass_func = () => logNewIP(ip, user_id, res);
+        pass_ip_func = () => logNewIP(ip, user_id, res);
 
     else {
         let last_accessed = Date.now() - ip_history.last_accessed;
 
         //If the user is trying to create multiple accounts with the same IP,
         //We can impose a time out.
-        if(global.__AUTH_COLLECTIONS__.new_account_timeout > last_accessed) 
+        if(global.__AUTH_COLLECTIONS__.new_account_timeout > last_accessed && ip_history.settings.bypass_timeout !== true) 
             return throw406(locals.KEYS.SIGNUP_IP_TIMEOUT, res, { 0:(global.__AUTH_COLLECTIONS__.new_account_timeout - last_accessed) });
 
         //If the user is trying to create a bounch of accounts with one IP, we can
         //Cap the ammount of accounts he can make
-        if(global.__AUTH_COLLECTIONS__.accounts_per_ip > 0)
-            if(ip_history.accounts.length >= global.__AUTH_COLLECTIONS__.accounts_per_ip)
+        if(global.__AUTH_COLLECTIONS__.accounts_per_ip > 0 && ip_history.settings.bypass_acc_limit !== true)
+            if(ip_history.count >= global.__AUTH_COLLECTIONS__.accounts_per_ip)
                 return throw406(locals.KEYS.SIGNUP_MAX_ACC_IP, res);
 
         //If the IP passes checks, let the user trough
-        pass_func = () => logSameIP(ip_history, user_id, res);
+        pass_ip_func = () => logSameIP(ip_history, user_id, res);
     }
     
     Object.assign(user, { 
@@ -83,12 +83,12 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     });
 
     //Push the data to mongoDB
-    getMongoDBclient(global.__DEF_DATABASE__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user as any, (err:any, result:any) => {
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user as any, (err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
         else {
             //We only want to log IP's if the account was created succesfully
             //eg something could fail, we log the IP, but it dosent belong to anyone
-            pass_func();
+            pass_ip_func();
 
             //Inform the user that their account has been succesfully created
             return httpSuccessHandler(201, res, returnLocal(locals.KEYS.USER_SUCCESSFULLY_ADDED, req.language.language));

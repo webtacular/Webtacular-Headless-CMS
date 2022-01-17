@@ -28,7 +28,12 @@ export let isResourceInterface = (obj: any):boolean => {
 export interface IpInterface {
     _id?: ObjectId | string;
     ip: string;
+    count: number;
     last_accessed: number;
+    settings: {
+        bypass_timeout: boolean;
+        bypass_acc_limit: boolean;
+    }
     accounts: { user_id:string, timestamp:number }[];
 }
 

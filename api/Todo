@@ -1,6 +1,8 @@
 TODO: Improve the start sequence of the api, add proper error handling for the settings json.
 TODO: Once we get stable, we need to add proper testing
 
+TODO: Add Google captcha middleware!!!!!!!!!!!!!!!!!
+
 TODO: Make sure we are GDPR complient
 
 [1] People generally have the right to ask you to delete all the personal data you have about them, and you have to honor their request within about a month. There are a five grounds on which you can deny the request, such as the exercise of freedom of speech or compliance with a legal obligation. You must also try to verify the identity of the person making the request.

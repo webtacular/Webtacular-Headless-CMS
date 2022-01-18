@@ -1,6 +1,6 @@
 import { getMongoDBclient } from "../../internal/db_service";
 import { ObjectId } from 'mongodb';
-import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../response_handler";
+import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
 import { checkForToken } from "../../internal/token_service";
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {

@@ -1,6 +1,6 @@
 import {randomBytes} from "crypto";
 import { getRedisDBclient } from "./db_service";
-import { httpErrorHandler, locals, returnLocal } from "../public/response_handler";
+import { httpErrorHandler, locals, returnLocal } from "./response_handler";
 
 /**
  * This function is used add a new authentication token to the database.

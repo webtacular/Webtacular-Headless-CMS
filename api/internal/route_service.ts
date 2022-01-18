@@ -10,23 +10,24 @@ import { httpErrorHandler } from './response_handler';
  *  - name/delete.ts
  *  - name/put.ts
  * 
- * @param route string - The route to be forwarded to the correct module
+ * @param path string - The path to the directory containing the resources
+ * @param route string - the resource endpoint that the user will send requests to
  * @param app any - Express app
  * @param aditionalResources Array<string> | ResourceInterface - Array that contains either a non-method specific resource array or an ResourceInterface object that contains method specific resource arrays
 **/
-export default (resource:string, app:any, aditionalResources?:Array<string> | ResourceInterface) => {
-    app.all(`/${resource}`, (req:any, res:any) => methodManager(req, res, resource)); 
+export default (path:string, resource:string, app:any, aditionalResources?:Array<string> | ResourceInterface) => {
+    app.all(`/${resource}`, (req:any, res:any) => methodManager(path, req, res)); 
 
     //checks if the aditionalResources is an array or an object,
     //We have to do this because the user can pass in an array or an object.
     switch(isResourceInterface(aditionalResources)){
         case true:
             //if it is an object, it will call the objectResourceManager
-            return objectResourceManager(resource, aditionalResources as ResourceInterface, app);
+            return objectResourceManager(path, resource, aditionalResources as ResourceInterface, app);
 
         case false:
             //if it is an array, it will call the arrayResourceManager
-            return arrayResourceManager(resource, aditionalResources as Array<string> | [], app);
+            return arrayResourceManager(path, resource, aditionalResources as Array<string> | [], app);
     }
 }
 
@@ -52,7 +53,7 @@ export default (resource:string, app:any, aditionalResources?:Array<string> | Re
 @param aditionalResources ResourceInterface - Object that contains the method specific resource endpoints
 @param app any - Express app
 **/
-let objectResourceManager = (resource:string, aditionalResources:ResourceInterface, app:any):void => {
+let objectResourceManager = (path:string, resource:string, aditionalResources:ResourceInterface, app:any):void => {
     //Maps the resource to the correct method with a simple function
     let func = (method:string, resource:string, callback:RouterCallback) => {
         switch(method){
@@ -71,7 +72,7 @@ let objectResourceManager = (resource:string, aditionalResources:ResourceInterfa
 
         //Go trough each resource in the array and call the func function
         extraResourcesArray.forEach((extraResource:string) =>
-            func(method, `/${resource}/${extraResource}`, (req:any, res:any) => methodManager(req, res, resource)));
+            func(method, `/${resource}/${extraResource}`, (req:any, res:any) => methodManager(path, req, res)));
     });
 }
 
@@ -94,19 +95,19 @@ let objectResourceManager = (resource:string, aditionalResources:ResourceInterfa
 @param aditionalResources Array<string> - Array that contains the non-method specific resource endpoints
 @param app any - Express app
 **/
-let arrayResourceManager = (resource:string, aditionalResources:Array<string>, app:any):void => {
+let arrayResourceManager = (path:string, resource:string, aditionalResources:Array<string>, app:any):void => {
     //Go trough each resource in the array and call the func function
     (aditionalResources === undefined ? [] : aditionalResources as Array<string>).forEach((extraResources:string) =>
-        app.all(`/${resource}/${extraResources}`, (req:any, res:any) => methodManager(req, res, resource))); 
+        app.all(`/${resource}/${extraResources}`, (req:any, res:any) => methodManager(path, req, res))); 
 }
 
-let methodManager = (req:any, res:any, resource:string):void => {
+let methodManager = (path:string, req:any, res:any):void => {
     try { 
         //get the resource path from the request
         let resources:Array<string> = [req.url.split('/').slice(1), req.params];
 
         //and call the method specific function function
-        require(`./${resource}/${req.method}`).default(req, res, resources);
+        require(`${path}/${req.method}`).default(req, res, resources);
     } catch (err) { //TODO: Better error repoting
         console.log(err)
         //if the method specific function doesn't exist, return a 501 Not Implemented error

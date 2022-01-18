@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { httpErrorHandler } from '../public/response_handler';
+import { httpErrorHandler } from './response_handler';
 
 /**
  * 
@@ -36,6 +36,12 @@ export async function comparePassword(password:string, hash:string):Promise<bool
     return bcrypt.compare(password, hash);
 }
 
+/**
+ * This function is used to get the byte size of a string
+ * 
+ * @param input string - the input to check the size of
+ * @returns 
+ */
 export function byteSize(input:string):number {
     return Buffer.byteLength(input, 'utf8');
 }

@@ -1,5 +1,5 @@
 import { Collection, MongoClient, MongoClientOptions } from 'mongodb';
-import { httpErrorHandler, locals, returnLocal } from '../public/response_handler';
+import { httpErrorHandler, locals, returnLocal } from './response_handler';
 import { createClient } from 'redis';
 
 //  __  __                         _____  ____  

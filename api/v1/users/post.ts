@@ -1,6 +1,6 @@
 import { getMongoDBclient } from "../../internal/db_service";
-import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../response_handler";
-import { UserInterface, UserInterfaceTemplate } from "../interfaces";
+import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
+import { UserInterface, UserInterfaceTemplate } from "../../internal/interfaces";
 import { userRegex, EMAIL_REGEXP } from "../../internal/regex_service";
 import { hashPassword } from "../../internal/password_service";
 import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_service";

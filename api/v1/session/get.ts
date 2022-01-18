@@ -1,18 +1,37 @@
-import {ObjectId} from "mongodb";
-import {getMongoDBclient} from "../../internal/db_service";
-import {getIP} from "../../internal/ip_service";
-import {comparePassword} from "../../internal/password_service";
-import {EMAIL_REGEXP, userRegex} from "../../internal/regex_service";
-import {checkForToken, generateToken} from "../../internal/token_service";
-import {httpErrorHandler, httpSuccessHandler, locals, mongoErrorHandler, returnLocal} from "../response_handler";
+import { ObjectId } from "mongodb";
+import { getMongoDBclient } from "../../internal/db_service";
+import { getIP } from "../../internal/ip_service";
+import { comparePassword } from "../../internal/password_service";
+import { EMAIL_REGEXP, userRegex } from "../../internal/regex_service";
+import { checkForToken, generateToken } from "../../internal/token_service";
+import { httpErrorHandler, httpSuccessHandler, locals, mongoErrorHandler, returnLocal } from "../../internal/response_handler";
+
+//TODO: Fix this.
+//I threw this together quickly and it's not very good.
+//I needed something that would work for now.
+
+//[1] I need to add acutal checks for new login locations,
+//  Has the user used this IP before?
+
+//[2] Check if the user requesting this data is an admin,
+//  Implament a better token system, while keeping all the functionality
+
+//[3] Limti the number of login attempts,
+//  If the user has exceeded the max number of login attempts,
+//  Lock the account and send out an email to unlock the account.
+
+//[4] Limit the ammount of active tokens for a user
+//  If the user has exceeded the max number of active tokens,
+//  we can ask the user to deauth some current tokens, or the one last used.
 
 let throw406 = (key:string, res:any, replace:any = {}):void =>
     httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));
     
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
-    // Start checking for tokens in the background
-    let tokenInfo = await checkForToken(req, res, false),
-        json = req.body;
+    // check for the token data
+    await checkForToken(req, res, false);
+
+    let json = req.body;
 
     // If the user is already logged in, return a 409: conflict //
     if(req.auth.authorized === true)
@@ -47,7 +66,6 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         // check password //
         if(await comparePassword(json.password, result.password) !== true)
             return failHandler(res, req, result);
-
         
         else succsessHandler(res, req, result);
     });
@@ -79,7 +97,7 @@ let succsessHandler = (res:any, req:any, result:any) => {
                 login_attempts,
             },
             tokens: [
-                ...result.security_info.tokens || [],
+                ...result.tokens || [],
                 {
                     ip: getIP(req),
                     token,
@@ -122,6 +140,7 @@ let succsessHandler = (res:any, req:any, result:any) => {
 // | | | (_| |_| |_| |
 // |_|  \__,_|_____|_|
 
+//FIXME: this is stupid.
 let failHandler = (res:any, req:any, result:any) => {
     let login_attempts:Array<string> = [];
 

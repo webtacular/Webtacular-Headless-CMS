@@ -4,8 +4,8 @@ const express:any = require('express'),
     settings = require('../settings.json'),
     cookieParser = require('cookie-parser');
 
-import { httpErrorHandler, localMiddleware, locals } from './public/response_handler';
-import { default as route, strictRest } from './public/router';
+import { httpErrorHandler, localMiddleware, locals } from './internal/response_handler';
+import { default as route, strictRest } from './internal/route_service';
 
 const port:number = 3000,
     maxBodySize:number = 250;
@@ -42,7 +42,7 @@ app.use(function (error:any, req:any, res:any, next:any){
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
 import { addMongoDB, addRedisDB } from './internal/db_service';
-import { AuthCollection } from './public/interfaces';
+import { AuthCollection } from './internal/interfaces';
 
 // Global variables set by the settings file
 declare global {
@@ -106,13 +106,14 @@ declare global {
 // o888o  o888o `Y8bod8P' 8""888P' `Y8bod8P'  `V88V"V8P' d888b    `Y8bod8P' `Y8bod8P' 8""888P' 
 
 //Users resource
-route('users', app, { 
+
+route(`${__dirname}/v1/users`,'v1/users', app, { 
     GET: [':id'],
     PUT: [':id'],
     DELETE: [':id']
 });
 
-route('session', app, { 
+route(`${__dirname}/v1/session`, 'v1/session', app, { 
     GET: [':id'],
     DELETE: [':id']
 });

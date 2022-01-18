@@ -1,8 +1,7 @@
-import {rejects} from 'assert';
 import ipaddr from 'ipaddr.js';
 import {ObjectId} from 'mongodb';
-import {IpInterface} from '../public/interfaces';
-import {mongoErrorHandler} from '../public/response_handler';
+import {IpInterface} from './interfaces';
+import {mongoErrorHandler} from './response_handler';
 import {getMongoDBclient} from './db_service';
 
 /**

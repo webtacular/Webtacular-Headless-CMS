@@ -1,5 +1,5 @@
 import {checkForToken, generateToken} from "../../internal/token_service";
-import {httpErrorHandler, locals, returnLocal} from "../response_handler";
+import {httpErrorHandler, locals, returnLocal} from "../../internal/response_handler";
 
 export default (req:any, res:any, resources:string[]):void => {
     // Start checking for tokens in the background

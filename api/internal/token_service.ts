@@ -1,5 +1,5 @@
 import {randomBytes} from "crypto";
-import { getRedisDBclient } from "./databases";
+import { getRedisDBclient } from "./db_service";
 import { httpErrorHandler, locals, returnLocal } from "../public/response_handler";
 
 /**
@@ -63,8 +63,8 @@ export async function revokeToken(token:string) {
 }
 
 //TODO: make an acutal check for admin tokens
-export async function checkForToken(req:any, res:any, strict:boolean = true):Promise<void> {
-    // Authenticate the request for normal users
+export async function checkForToken(req:any, res:any, strict:boolean = true):Promise<any> {
+    // Authenticate the request for normal users //
     let user_check = async(token:string) => {
         // Get the userID from the token
         const userID = await validateToken(token);
@@ -73,10 +73,8 @@ export async function checkForToken(req:any, res:any, strict:boolean = true):Pro
         if(!userID && strict === true)
             return httpErrorHandler(401, res, returnLocal(locals.KEYS.MISSING_TOKEN));
 
-        else if (!token) {
-            req.auth = { userID: '', token: '', authorized: false };
-            return;
-        }
+        else if (!token) 
+            return req.auth = { userID: '', token: '', authorized: false };
 
         // Set the userID in the request
         req.auth = {
@@ -87,7 +85,7 @@ export async function checkForToken(req:any, res:any, strict:boolean = true):Pro
         }
     }; // END //
 
-    // Authenticate the request for admin users
+    // Authenticate the request for admin users //
     let admin_check = async(token:string) => {
         // Get the userID from the token
         const userID = await validateToken(token);
@@ -102,16 +100,14 @@ export async function checkForToken(req:any, res:any, strict:boolean = true):Pro
     } // END //
 
     // Get the token from the request
-    const token = req.headers.authorization;
+    const token = req.headers.authorization === undefined ? req.cookies.token : req.headers.authorization;
 
     // If the token is not defined, return a 401
     if(!token && strict === true) 
         return httpErrorHandler(401, res, returnLocal(locals.KEYS.MISSING_TOKEN));
 
-    else if (!token) {
-        req.auth = { userID: '', token: '', authorized: false };
-        return;
-    }
+    else if (!token)
+        return req.auth = { userID: '', token: '', authorized: false };
 
     // check which type of user is trying to authenticate
     let token_split = token.split(' ');

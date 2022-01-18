@@ -1,7 +1,8 @@
 const express:any = require('express'),
     { json } = require('body-parser'),
     app:any = express(),
-    settings = require('../settings.json');
+    settings = require('../settings.json'),
+    cookieParser = require('cookie-parser');
 
 import { httpErrorHandler, localMiddleware, locals } from './public/response_handler';
 import { default as route, strictRest } from './public/router';
@@ -21,6 +22,9 @@ app.disable("x-powered-by");
 //Exppres middleware that checks if the request contains a language header
 app.use(localMiddleware(locals.supported_languages));
 
+//Express middleware that parses cookies
+app.use(cookieParser());
+
 //Express middleware that handles json body parsing errors
 app.use(function (error:any, req:any, res:any, next:any){
     return httpErrorHandler(error.statusCode, res, `${error.message}${(() => {
@@ -37,7 +41,7 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { addMongoDB, addRedisDB } from './internal/databases';
+import { addMongoDB, addRedisDB } from './internal/db_service';
 import { AuthCollection } from './public/interfaces';
 
 // Global variables set by the settings file
@@ -80,8 +84,10 @@ declare global {
     global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these
         accounts_per_ip: 5,
         new_account_timeout: 0,
+        max_login_attempts: 5,
+        max_login_history: 15,
         token_lenght: 20,
-        token_expiration: 60 * 60 * 24 * 7,
+        token_expiration: 2678400, // 31 days in unix time
     }
 
     app.listen(port, (error:any) => {
@@ -108,7 +114,6 @@ route('users', app, {
 
 route('session', app, { 
     GET: [':id'],
-    PUT: [':id'],
     DELETE: [':id']
 });
 

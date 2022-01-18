@@ -63,6 +63,10 @@ export interface UserInterface {
         }[];
     };
 
+    permissions: {
+        groups: string[];
+    }
+
     security_info: {
         signup_ip: string;
         attempts: number;
@@ -71,8 +75,6 @@ export interface UserInterface {
         last_email: number;
         account_creation: number;
         account_locked: boolean;
-
-        scopes: string[];
 
         tokens?: {
             ip: string;
@@ -85,10 +87,21 @@ export interface UserInterface {
         login_attempts?:{
             ip: string;
             timestamp: number;
-            user_agent: string;
+            user_agent?: string;
             succsess: boolean;
         }[];
     };
+
+    blog_info: {
+        blogs?: {
+            blog_id: ObjectId;
+            owner: boolean;
+        }[];
+        comments?: {
+            comment_id: ObjectId;
+            blog_id: ObjectId;
+        }[];
+    }
 };
 
 //this is wraped in a function so that we can just call it
@@ -108,6 +121,10 @@ export let UserInterfaceTemplate = (): UserInterface => {
             password: [],
         },
 
+        permissions: {
+            groups: [ 'user' ]
+        },
+
         security_info: {
             last_login: Date.now(),
             signup_ip: '',
@@ -118,7 +135,11 @@ export let UserInterfaceTemplate = (): UserInterface => {
             email_verified: false,
             tokens: [],
             login_attempts: [],
-            scopes: [],
+        },
+
+        blog_info: {
+            blogs: [],
+            comments: [],
         }
     };
 }

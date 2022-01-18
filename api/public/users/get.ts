@@ -1,7 +1,7 @@
-import { getMongoDBclient } from "../../internal/databases";
+import { getMongoDBclient } from "../../internal/db_service";
 import { ObjectId } from 'mongodb';
 import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../response_handler";
-import {checkForToken} from "../../internal/token";
+import { checkForToken } from "../../internal/token_service";
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
     // Start checking for tokens in the background
@@ -23,19 +23,21 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         // Make sure we completed the token check
         await tokenInfo;
 
-        //
-        //Basic information about the user
-        //
+        //----------------------------------//
+        // Basic information about the user //
+        //----------------------------------//
         let respData:any = {
             _id: result?._id.toString(),
             user_name: result?.user_name,
             language: result?.language,
             profile_picture: result?.profile_picture,
+
+            blog_info: result?.blog_info,
         };
 
-        //
-        // If the use is an admin, return the admin data
-        //
+        //-----------------------------------------------//
+        // If the use is an admin, return the admin data //
+        //-----------------------------------------------//
         if(req.auth.admin === true) Object.assign(respData, { 
             email: result?.email,
             previous_info: {
@@ -47,14 +49,20 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
             tokens: result?.tokens
         });
 
-        //
-        // if the user is authorized, return more of the users data
-        //
+        //----------------------------------------------------------//
+        // if the user is authorized, return more of the users data //
+        //----------------------------------------------------------//
         else if(req.auth.userID === result._id.toString()) Object.assign(respData, { 
             email: result?.email,
             previous_info: {
                 user_name: result?.previous_info?.user_name,
                 email: result?.previous_info?.email,
+            },
+            security_info: {
+                signup_ip: result?.security_info?.signup_ip,
+                account_creation: result?.security_info?.account_creation,
+                last_login: result?.security_info?.last_login,
+                email_verified: result?.security_info?.email_verified,
             },
             tokens: result?.tokens
         });

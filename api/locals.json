@@ -29,7 +29,9 @@
         "MISSING_USER_ID": "You did not supply /:id",
         "USER_NOT_FOUND": "User not found",
         "MISSING_TOKEN": "You did not supply a token or the token is invalid",
-        "INVALID_TOKEN": "You have supplied an invalid token"
+        "INVALID_TOKEN": "You have supplied an invalid token",
+        "ALREADY_AUTHORIZED": "You are already logged in",
+        "INVALID_PASSWORD": "You have entered an invalid password, you have {0} attempts left"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -47,6 +49,8 @@
         "MISSING_USER_ID": "MISSING_USER_ID",
         "USER_NOT_FOUND": "USER_NOT_FOUND",
         "MISSING_TOKEN": "MISSING_TOKEN",
-        "INVALID_TOKEN": "INVALID_TOKEN"
+        "INVALID_TOKEN": "INVALID_TOKEN",
+        "ALREADY_AUTHORIZED": "ALREADY_AUTHORIZED",
+        "INVALID_PASSWORD": "INVALID_PASSWORD"
     }
 }

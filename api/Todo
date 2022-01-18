@@ -1,7 +1,9 @@
 TODO: Improve the start sequence of the api, add proper error handling for the settings json.
 TODO: Once we get stable, we need to add proper testing
-
 TODO: Add Google captcha middleware!!!!!!!!!!!!!!!!!
+TODO: I dont like the token implamentation at all. I will completely refactor it while keeping the same function 
+TODO: Make the failed login send out an code to email after too many incorect login attempts
+TODO: Send email out on registration
 
 TODO: Make sure we are GDPR complient
 

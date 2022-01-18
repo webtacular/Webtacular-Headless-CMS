@@ -1,15 +1,14 @@
-import { getMongoDBclient } from "../../internal/databases";
+import { getMongoDBclient } from "../../internal/db_service";
 import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../response_handler";
 import { UserInterface, UserInterfaceTemplate } from "../interfaces";
-import { userRegex, EMAIL_REGEXP } from "../../internal/regex";
-import { hashPassword } from "../../internal/passwords";
-import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_address";
+import { userRegex, EMAIL_REGEXP } from "../../internal/regex_service";
+import { hashPassword } from "../../internal/password_service";
+import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_service";
 import { ObjectId } from "mongodb";
-import { generateToken } from "../../internal/token";
+import { generateToken } from "../../internal/token_service";
 
-let throw406 = (key:string, res:any, replace:any = {}):void => {
-    return httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));
-}
+let throw406 = (key:string, res:any, replace:any = {}):void =>
+    httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
     let user:UserInterface = UserInterfaceTemplate(),
@@ -78,7 +77,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         _id: new ObjectId(user_id),
 
         user_name: json.user_name,
-        email: json.email,
+        email: json.email.toLowerCase(),
         password: await password,
 
         security_info: {
@@ -110,7 +109,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         //TODO: Send a email confirmation to the user
         
         //Tell the client to set some cookies
-        res.cookie('token', token, {
+        res.cookie('token', `user ${token}`, {
             maxAge: expiration,
             secure: true,
         });

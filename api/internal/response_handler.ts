@@ -104,7 +104,7 @@ function httpRespone(statusCode:number, res:any, success:boolean, message?:strin
     if (statusCode in httpCodes !== true) statusCode = 500;
 
     // respond with the error code and message and close the connection
-    res.status(statusCode).send(JSON.stringify({
+    return res.status(statusCode).send(JSON.stringify({
         success,
         status_code: statusCode,
         status_message: httpCodes[statusCode],

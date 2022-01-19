@@ -32,7 +32,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     await checkForToken(req, res, false);
 
     let json = req.body;
-
+    
     // If the user is already logged in, return a 409: conflict //
     if(req.auth.authorized === true)
         return httpErrorHandler(409, res, returnLocal(locals.KEYS.ALREADY_AUTHORIZED, locals.language));
@@ -103,6 +103,7 @@ let succsessHandler = (res:any, req:any, result:any) => {
                     token,
                     expiration,
                     creation: Date.now(),
+                    valid: true,
                 }
             ]
         }
@@ -113,7 +114,7 @@ let succsessHandler = (res:any, req:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
 
         //Tell the client to set some cookies
-        res.cookie('token', `user ${token}`, {
+        res.cookie('token', token, {
             maxAge: expiration,
             secure: true,
         });

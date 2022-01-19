@@ -1,6 +1,8 @@
 import { isResourceInterface, ResourceInterface, RouterCallback} from './interfaces';
 import { httpErrorHandler } from './response_handler';
 
+//TODO: Add proper path validation
+
 /**
  * This function takes in a path to a directory and maps each file to a specific method for that resource.
  * 

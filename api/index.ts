@@ -79,6 +79,7 @@ declare global {
     global.__AUTH_COLLECTIONS__ = { //TODO: Add specific interfaces for these
         ip_collection: 'ip',
         user_collection: 'users',
+        token_collection: 'tokens'
     }
 
     global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these
@@ -115,9 +116,14 @@ route(`${__dirname}/v1/users`,'v1/users', app, {
 
 route(`${__dirname}/v1/session`, 'v1/session', app, { 
     GET: [':id'],
-    DELETE: [':id']
+    DELETE: [':token']
 });
 
+route(`${__dirname}/v1/blog`, 'v1/blog', app, { 
+    GET: [':id'],
+    PUT: [':id'],
+    DELETE: [':id']
+});
 
 //Cataches all other routes and sends a 404 error
 app.all('/*', (req:any, res:any) =>

@@ -28,8 +28,9 @@
         "SIGNUP_MAX_ACC_IP": "This IP has been used too manytimes for new accounts, if this is a public IP, or an error, please email the admin",
         "MISSING_USER_ID": "You did not supply /:id",
         "USER_NOT_FOUND": "User not found",
-        "MISSING_TOKEN": "You did not supply a token or the token is invalid",
+        "MISSING_TOKEN": "You did not supply a token",
         "INVALID_TOKEN": "You have supplied an invalid token",
+        "EXPIRED_TOKEN": "Your token has expired",
         "ALREADY_AUTHORIZED": "You are already logged in",
         "INVALID_PASSWORD": "You have entered an invalid password, you have {0} attempts left"
     },
@@ -50,6 +51,7 @@
         "USER_NOT_FOUND": "USER_NOT_FOUND",
         "MISSING_TOKEN": "MISSING_TOKEN",
         "INVALID_TOKEN": "INVALID_TOKEN",
+        "EXPIRED_TOKEN": "EXPIRED_TOKEN",
         "ALREADY_AUTHORIZED": "ALREADY_AUTHORIZED",
         "INVALID_PASSWORD": "INVALID_PASSWORD"
     }

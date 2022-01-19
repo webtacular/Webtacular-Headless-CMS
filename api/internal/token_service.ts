@@ -1,6 +1,12 @@
 import {randomBytes} from "crypto";
-import { getRedisDBclient } from "./db_service";
-import { httpErrorHandler, locals, returnLocal } from "./response_handler";
+import {ObjectId} from 'mongodb';
+import {IpInterface, TokenInterface} from './interfaces';
+import {httpErrorHandler, locals, mongoErrorHandler, returnLocal} from './response_handler';
+import {getMongoDBclient} from './db_service';
+
+// As for anyone worrying about the admin variable, this dosent actualy give any premisions,
+// its just there to tell the server that this is potentially an admin
+// and it will do further checking to make sure that the user is an admin upon request
 
 /**
  * This function is used add a new authentication token to the database.
@@ -9,121 +15,194 @@ import { httpErrorHandler, locals, returnLocal } from "./response_handler";
  * @param ttl number - the time to live of the token in ms, optional
  * @returns token string - the generated token
  */
-export function generateToken(userID:string, ttl?:number):string {
-    // Generate a random token
+export function generateToken(userID:string, ttl:number = global.__SECURITY_OPTIONS__.token_expiration, admin:boolean = false):TokenInterface {
+    // Generate a cryptographically random enough token
     let token = randomBytes(global.__SECURITY_OPTIONS__.token_lenght).toString('hex');
+
+    // Object to be inserted in the database
+    let toBeInserted:TokenInterface = {
+        token: token,
+        user_id: userID,
+        timestamp: Date.now(),
+        expiration: Date.now() + ttl,
+        admin
+    }
 
     // Since we generate a token with a non asychronous function,
     // we can return it right away, and not wait for the database to be connected
     // to add it to the database.
-    (async() => {
-        // Get the database client
-        const client = await getRedisDBclient(global.__DEF_REDIS_DB__);
 
-        // If a ttl is not provided, use the default
-        if(!ttl) ttl = global.__SECURITY_OPTIONS__.token_expiration;
-
-        // Set the token in the database
-        client.set(token, userID, 'EX', ttl);
-        
-        // disconnect the client
-        client.quit();
-    })();
-
-    // Return the token
-    return token;
-}
-
-export async function validateToken(token:string):Promise<string | boolean> {
     // Get the database client
-    const client = await getRedisDBclient(global.__DEF_REDIS_DB__);
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
+        if(err) console.log(err);
+        //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
+    });
 
-    // Get the userID from the token
-    const userID = client.get(token);
-
-    // If the userID is not defined, return false
-    if(!userID) return false;
-
-    // disconnect the client
-    client.quit();
-
-    // Return the userID
-    return userID;
+    // Return the token data
+    return toBeInserted;
 }
 
-export async function revokeToken(token:string) {
-    // Get the database client
-    const client = await getRedisDBclient(global.__DEF_REDIS_DB__);
+/**
+ * This function is used to check if a token is valid.
+ * 
+ * @param token string - the token to check
+ * @returns userID string - the userID of the user that the token belongs to, undefined if the token is invalid
+*/
+export async function validateToken(token:string):Promise<TokenInterface> {
+    // Object to be found in the database
+    let mongoDBfindOBJ:any = {
+        token,
+    }
 
-    // Delete the token
-    client.del(token);
+    // Cretae a promise to return the token data
+    return new Promise((resolve:any, reject:any) => {
 
-    // disconnect the client
-    client.quit();
+        // Get the database client and make the request
+        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOne(mongoDBfindOBJ, (err:any, result:any) => {
+
+            //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
+            if(err) console.log(err);
+
+            let emptyToken:TokenInterface = {
+                _id: '',
+                token: '',
+                user_id: '',
+                timestamp: 0,
+                expiration: 0,
+                admin: false,
+                expired: true,
+                authorized: false
+            }
+            
+            // If no token was found, return an empty object
+            if(result === null)
+                resolve(emptyToken);
+
+            // If the token was found, but is expired, return an empty object
+            else if(result.expiration < Date.now())
+                resolve(emptyToken);
+
+            // if the token was found, return the token data
+            resolve(Object.assign(result, { expired: false, authorized: true }) as TokenInterface);
+        });
+    });
 }
 
-//TODO: make an acutal check for admin tokens
-export async function checkForToken(req:any, res:any, strict:boolean = true):Promise<any> {
-    // Authenticate the request for normal users //
-    let user_check = async(token:string) => {
-        // Get the userID from the token
-        const userID = await validateToken(token);
+/**
+ * This function is used to remove a token from the database.
+ * 
+ * @param token string - the token to remove
+ */
+export async function revokeToken(token:string):Promise<boolean> {
+    // Object to be found in the database and removed
+    let mongoDBfindOBJ:any = {
+        _id: new ObjectId(token),
+    }
 
-        // If the userID is not defined, return a 401
-        if(!userID && strict === true)
-            return httpErrorHandler(401, res, returnLocal(locals.KEYS.MISSING_TOKEN));
+    // Cretae a promise to return the token data
+    return new Promise((resolve:any, reject:any) => {
 
-        else if (!token) 
-            return req.auth = { userID: '', token: '', authorized: false };
+        // Get the database client and make the request
+        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, (err:any, result:any) => {
 
-        // Set the userID in the request
-        req.auth = {
-            userID: userID,
-            token: token,
-            authorized: true,
-            admin: false
-        }
-    }; // END //
+            //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
+            if(err) console.log(err);
+            
+            // If no token was removed, return false
+            if(result === null) resolve(false);
 
-    // Authenticate the request for admin users //
-    let admin_check = async(token:string) => {
-        // Get the userID from the token
-        const userID = await validateToken(token);
+            // if the token was removed, return true
+            resolve(true);
+        });
+    });
+}
 
-         // Set the userID in the request
-         req.auth = {
-            userID: userID,
-            token: token,
-            authorized: true,
-            admin: true
-        }
-    } // END //
+/**
+ * This function is used to check if the client provided a valid authentication token within the header or cookie of the request.
+ * 
+ * @param req any - the request object
+ * @param res any - the response object
+ * @param strict boolean - if true, a 401 unauthorized response will be sent if the token is invalid or not found, if false, the will be allowed to continue
+ */
+export async function checkForToken(req:any, res:any, strict:boolean = true):Promise<boolean> {
 
-    // Get the token from the request
+    // returns a boolean while also executing a function
+    let returnBool = (func:any, bool:boolean) => {
+        func();
+        return bool;
+    };
+
+    // Get the token from the header or cookie, inline if statment, 
+    // if the auth header is undefined, check the cookie
+    // else use the auth header
     const token = req.headers.authorization === undefined ? req.cookies.token : req.headers.authorization;
 
-    // If the token is not defined, return a 401
-    if(!token && strict === true) 
-        return httpErrorHandler(401, res, returnLocal(locals.KEYS.MISSING_TOKEN));
 
-    else if (!token)
-        return req.auth = { userID: '', token: '', authorized: false };
+    //-------[ NO TOKEN FOUND ]-------//
+    // If the token is undefined, return false
+    if(token === undefined && strict === true)
+        return returnBool(httpErrorHandler(401, res, returnLocal(locals.KEYS.MISSING_TOKEN)), false);
+    
+    // I could just pass the empty token to the validateToken function, but I dont waste a db request that I know will be false
+    else if(token === undefined)
+        return returnBool(() => req.auth = { _id: '', user_id: '', timestamp: 0, admin: false, expired: true, authorized: false }, false);
+    //--------------------------------//
 
-    // check which type of user is trying to authenticate
-    let token_split = token.split(' ');
 
-    if(token_split[0] === 'admin') // admin user
-        return admin_check(token_split[1]);
+    //--------[ TOKEN FOUND ]--------//
+    // Now that we have a token, validate it
+    let tokenData = await validateToken(token);
 
-    if(token_split[0] === 'user') // normal user
-        return user_check(token_split[1]);
+    // If the token is invalid, return false
+    if(tokenData.user_id === undefined && strict === true)
+        return returnBool(httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_TOKEN)), false);
 
-    // If the token dosent match any of the above, return a 401
-    if(strict === true) 
-        return httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_TOKEN));
+    else if(tokenData.user_id === undefined)
+        return returnBool(() => { req.auth = tokenData }, false);
 
-    else {
-        req.auth = { userID: '', token: '', authorized: false };
-        return;
+    // If the token is expired, return false
+    if(tokenData.expired === true && strict === true)
+        return returnBool(httpErrorHandler(401, res, returnLocal(locals.KEYS.EXPIRED_TOKEN)), false);
+
+    else if(tokenData.expired === true)
+        return returnBool(() => { req.auth = tokenData }, false);
+
+
+    // If the user is not an admin, return true
+    if(tokenData.admin !== true)
+        return returnBool(() => { req.auth = tokenData }, true);
+    //-------------------------------//
+
+
+    //--------[ ADMIN REQUEST ]--------//
+    // If the user is an admin, do further checks
+
+    // Object to be found in the database
+    let mongoDBfindOBJ:any = {
+        _id: new ObjectId(tokenData.user_id),
     }
+
+    // Cretae a promise to return the token data
+    return new Promise((resolve:any, reject:any) => {
+
+        // Get the database client and make the request
+        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, (err:any, result:any) => {
+            
+            // if an error occured, pass it to the error handler
+            if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+            
+            if(result?.permissions?.admin === true || result?.permissions?.owner === true) 
+                return resolve(() => { req.auth = tokenData }, true);
+
+            // If the user is not found or the token is invalid, return false and revoke the token
+            
+            //Revoke the token
+            if(tokenData?._id !== undefined)
+                revokeToken(tokenData._id.toString());
+
+            if(strict === true) return resolve(returnBool(httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_TOKEN)), false));
+
+            else return returnBool(() => { req.auth = { _id: '', user_id: '', timestamp: 0, admin: false, expired: true, authorized: false } }, false);        
+        });
+    });
 }

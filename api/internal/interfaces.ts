@@ -23,9 +23,11 @@ export let isResourceInterface = (obj: any):boolean => {
     return Object.keys(obj as ResourceInterface).some((method:string) => ['GET', 'POST', 'DELETE', 'PUT'].includes(method));
 }
 
-//
-// Database interfaces
-//
+//---------------------//
+// Database interfaces //
+//---------------------//
+
+// interface for IP logging
 export interface IpInterface {
     _id?: ObjectId | string;
     ip: string;
@@ -38,6 +40,7 @@ export interface IpInterface {
     accounts: { user_id:string, timestamp:number }[];
 }
 
+// Interface of the user object
 export interface UserInterface {
     _id?: ObjectId | string;
 
@@ -65,6 +68,8 @@ export interface UserInterface {
 
     permissions: {
         groups: string[];
+        admin?: boolean;
+        owner?: boolean;
     }
 
     security_info: {
@@ -82,6 +87,7 @@ export interface UserInterface {
             expiration: number;
             user_agent?: string;
             token: string;
+            valid: boolean;
         }[];
 
         login_attempts?:{
@@ -103,6 +109,26 @@ export interface UserInterface {
         }[];
     }
 };
+
+export interface TokenInterface {
+    _id?: ObjectId | string;
+    user_id: ObjectId | string;
+    token: string;
+    timestamp: number;
+    expiration: number;
+    admin: boolean;
+    expired?: boolean;
+    authorized?: boolean;
+}
+
+//------------------//
+// other interfaces //
+//------------------//
+
+export interface AuthCollection {
+    ip_collection: string;
+    user_collection: string;
+}
 
 //this is wraped in a function so that we can just call it
 //and edit the object without having to clone it.
@@ -142,9 +168,4 @@ export let UserInterfaceTemplate = (): UserInterface => {
             comments: [],
         }
     };
-}
-
-export interface AuthCollection {
-    ip_collection: string;
-    user_collection: string;
 }

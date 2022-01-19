@@ -11,7 +11,7 @@ let throw406 = (key:string, res:any, replace:any = {}):void =>
     httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
-    let user:UserInterface = UserInterfaceTemplate(),
+    let user:any = UserInterfaceTemplate(),
         json = req.body;
 
     //---Username---//
@@ -95,11 +95,12 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
             token,
             expiration,
             creation: Date.now(),
+            valid: true,
         }]
     });
 
     //Push the data to mongoDB
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__SECURITY_OPTIONS__.user_collection, res).insertOne(user as any, (err:any, result:any) => {
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user, (err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
 
         //We only want to log IP's if the account was created succesfully
@@ -109,7 +110,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         //TODO: Send a email confirmation to the user
         
         //Tell the client to set some cookies
-        res.cookie('token', `user ${token}`, {
+        res.cookie('token', token, {
             maxAge: expiration,
             secure: true,
         });

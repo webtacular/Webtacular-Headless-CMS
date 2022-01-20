@@ -86,9 +86,13 @@ declare global {
         max_login_attempts: 5,
         max_login_history: 15,
         password_salt_rounds: 12,
+
+        //Tokens
         token_salt_rounds: 10,
         token_lenght: 20,
         token_expiration: 2678400, // 31 days in unix time
+        token_cache_expiration: 300000, // 5 min in ms
+        cache_tokens: false,
     }
 
     app.listen(port, (error:any) => {

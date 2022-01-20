@@ -1,15 +1,25 @@
 {
     "api": {
         "production": false,
-
+        "security": {
+            "salt_rounds": 10,
+            "login": {
+                "attempts_reset_password": 10,
+                "attempts_confirmation_email": 5
+            }
+        },
         "mongodb": {
-            "dev_uri": "mongodb+srv://",
+            "dev_uri": "mongodb+srv://test:test@devdb.rxkbh.mongodb.net/test",
             "dev_db": "test",
             "dev_collection": "dev", 
 
-            "prod_uri": "mongodb+srv://",
+            "prod_uri": "mongodb+srv://test:test@devdb.rxkbh.mongodb.net/test",
             "prod_db": "test",
             "prod_collection": "dev"
+        },
+        "redis": {
+            "dev_uri": "rediss://default:zngVNbGrupz6zbi4@tud-wistem-do-user-10635779-0.b.db.ondigitalocean.com:25061",
+            "dev_name": "redis_dev_cache"
         }
     }
 }

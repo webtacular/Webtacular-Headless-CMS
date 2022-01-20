@@ -77,62 +77,62 @@ export function getMongoDBclient(db:string, collection?:string, res?:any):Collec
 // | | \ \  __/ (_| | \__ \ |__| | |_) |
 // |_|  \_\___|\__,_|_|___/_____/|____/ 
 
-export let redis_databases:{ [key: string]: { cs:string, client:any, client_func:any } } = {};
-// TODO: add a task scheduler to automatically reconnect to redis
-// Or just use a different DB, no clue what I want to do yet, since I've got all my functions
-// set up in a way that I can easily swith the DBs types.
+// export let redis_databases:{ [key: string]: { cs:string, client:any, client_func:any } } = {};
+// // TODO: add a task scheduler to automatically reconnect to redis
+// // Or just use a different DB, no clue what I want to do yet, since I've got all my functions
+// // set up in a way that I can easily swith the DBs types.
 
-/**
- * This function is used to connect to a Redis database.
- * 
- * @param cs string - the conection uri of the redis server
- * @param name string - the name you want to give to the database
- * @returns redis.RedisClient - a redis client
- */
-export async function addRedisDB(cs:string, name:string):Promise<any> {
-    // Connect to the redis server
-    const client = createClient({ url: cs });
+// /**
+//  * This function is used to connect to a Redis database.
+//  * 
+//  * @param cs string - the conection uri of the redis server
+//  * @param name string - the name you want to give to the database
+//  * @returns redis.RedisClient - a redis client
+//  */
+// export async function addRedisDB(cs:string, name:string):Promise<any> {
+//     // Connect to the redis server
+//     const client = createClient({ url: cs });
     
-    // on error, just log it for now
-    // TODO: handle this better
-    client.on('error', err => {
-        console.log(err);
-    });
+//     // on error, just log it for now
+//     // TODO: handle this better
+//     client.on('error', err => {
+//         console.log(err);
+//     });
 
-    let client_func = async() => await client.connect();
+//     let client_func = async() => await client.connect();
 
-    // Add the database to the list of databases
-    redis_databases[name] = {
-        cs,
-        client,
-        client_func,
-    };
+//     // Add the database to the list of databases
+//     redis_databases[name] = {
+//         cs,
+//         client,
+//         client_func,
+//     };
     
-    // Return the client
-    return client;
-}
+//     // Return the client
+//     return client;
+// }
 
 
-/**
- * This function is used to get a Redis database client.
- * 
- * @param name string - the name of the database to get
- * @param res any - the response object, optional
- * @returns any - the client
- */
-export async function getRedisDBclient(name:string, res?:any):Promise<any> {
-    // If the database doesn't exist, throw an error
-    if(!redis_databases[name]) {
-        // If the response object is defined, send an error to the client
-        //TODO: Add a better error message key
-        if(res) httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
+// /**
+//  * This function is used to get a Redis database client.
+//  * 
+//  * @param name string - the name of the database to get
+//  * @param res any - the response object, optional
+//  * @returns any - the client
+//  */
+// export async function getRedisDBclient(name:string, res?:any):Promise<any> {
+//     // If the database doesn't exist, throw an error
+//     if(!redis_databases[name]) {
+//         // If the response object is defined, send an error to the client
+//         //TODO: Add a better error message key
+//         if(res) httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
 
-        // Otherwise, throw an error
-        else throw new Error(`Redis database ${name} not found`);
-    }
+//         // Otherwise, throw an error
+//         else throw new Error(`Redis database ${name} not found`);
+//     }
 
-    await redis_databases[name].client.connect();
+//     await redis_databases[name].client.connect();
 
-    // Return the client
-    return redis_databases[name].client;
-}
+//     // Return the client
+//     return redis_databases[name].client;
+// }

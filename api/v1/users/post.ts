@@ -2,7 +2,7 @@ import { getMongoDBclient } from "../../internal/db_service";
 import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
 import { UserInterface, UserInterfaceTemplate } from "../../internal/interfaces";
 import { userRegex, EMAIL_REGEXP } from "../../internal/regex_service";
-import { hashPassword } from "../../internal/password_service";
+import { hashString } from "../../internal/hashing_service";
 import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_service";
 import { ObjectId } from "mongodb";
 import { generateToken } from "../../internal/token_service";
@@ -40,7 +40,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
     //We will start hashing the password while we do some checks on the
     //Users IP
-    let password = hashPassword(json.password, res),
+    let password = hashString(json.password, global.__SECURITY_OPTIONS__.password_salt_rounds, res),
         user_id = new ObjectId().toString(),
         ip = getIP(req);
 
@@ -88,29 +88,22 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
             account_locked: false,
             email_verified: false,
             attempts: 0,
-        },
-
-        tokens: [{
-            ip,
-            token,
-            expiration,
-            creation: Date.now(),
-            valid: true,
-        }]
+        }
     });
 
     //Push the data to mongoDB
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user, (err:any, result:any) => {
-        if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user, async (err:any, result:any) => {
+        if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
         //We only want to log IP's if the account was created succesfully
         //eg something could fail, we log the IP, but it dosent belong to anyone
         pass_ip_func();
 
         //TODO: Send a email confirmation to the user
-        
+        let combined_token = (await token).combined;
+
         //Tell the client to set some cookies
-        res.cookie('token', token, {
+        res.cookie('token', { token: combined_token }, {
             maxAge: expiration,
             secure: true,
         });
@@ -120,11 +113,9 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         });
 
         //Inform the user that their account has been succesfully created
-        return httpSuccessHandler(201, res, JSON.stringify({
+        return httpSuccessHandler(201, res, {
             user_id: user_id,
-            token: token,
-        }), {
-            'Content-Type': 'application/json',
+            token: combined_token,
         });  
     });
 }

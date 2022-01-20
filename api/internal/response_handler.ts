@@ -81,7 +81,7 @@ export const httpCodes: { [key:number]: string } = {
  * @param res any - the response object
  * @param message string - the message to send to the client, optuonal
  */
-export function httpErrorHandler(statusCode:number, res:any, message?:string, headers?:any):void {
+export function httpErrorHandler(statusCode:number, res:any, message?:any, headers?:any):void {
     httpRespone(statusCode, res, false, message, headers);
 }
 
@@ -92,13 +92,18 @@ export function httpErrorHandler(statusCode:number, res:any, message?:string, he
  * @param res any - the response object
  * @param message string - the message to send to the client, optuonal
  */
-export function httpSuccessHandler(statusCode:number, res:any, message?:string, headers?:any):void {
+export function httpSuccessHandler(statusCode:number, res:any, message?:any, headers?:any):void {
     httpRespone(statusCode, res, true, message, headers);
 }
 
-function httpRespone(statusCode:number, res:any, success:boolean, message?:string, headers?:any):void {
+function httpRespone(statusCode:number, res:any, success:boolean, message?:any, headers?:any):void {
     // if any headers are provided, add them to the response
     if(headers) res.set(headers);
+
+    // we only respond with json
+    res.set({
+        'Content-Type': 'application/json',
+    });
 
     // Check if the error code is valid
     if (statusCode in httpCodes !== true) statusCode = 500;
@@ -142,7 +147,16 @@ export const mongoErrorCodes: { [key:number]: { error:string, code:number } } = 
  * @param res any - the response object
  * @param message string - the message to send to the client, optuonal
  */
-export function mongoErrorHandler(errorCode:number, res:any, message?:string):void {
+export function mongoErrorHandler(errorCode:number, res:any, message?:string, headers?:any):void {
+    
+    // if any headers are provided, add them to the response
+    if(headers) res.set(headers);
+
+    // we only respond with json
+    res.set({
+        'Content-Type': 'application/json',
+    });
+
     // Check if the error code is valid
     if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR, res.language));
 

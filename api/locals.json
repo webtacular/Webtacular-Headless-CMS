@@ -30,7 +30,9 @@
         "USER_NOT_FOUND": "User not found",
         "MISSING_TOKEN": "You did not supply a token",
         "INVALID_TOKEN": "You have supplied an invalid token",
-        "EXPIRED_TOKEN": "Your token has expired",
+        "EXPIRED_TOKEN": "This token has expired",
+        "TOKEN_REVOKED": "This token has been revoked",
+        "INVALID_USER_ID": "You have supplied an invalid user id",
         "ALREADY_AUTHORIZED": "You are already logged in",
         "INVALID_PASSWORD": "You have entered an invalid password, you have {0} attempts left"
     },
@@ -53,6 +55,8 @@
         "INVALID_TOKEN": "INVALID_TOKEN",
         "EXPIRED_TOKEN": "EXPIRED_TOKEN",
         "ALREADY_AUTHORIZED": "ALREADY_AUTHORIZED",
-        "INVALID_PASSWORD": "INVALID_PASSWORD"
+        "INVALID_PASSWORD": "INVALID_PASSWORD",
+        "INVALID_USER_ID": "INVALID_USER_ID",
+        "TOKEN_REVOKED": "TOKEN_REVOKED"
     }
 }

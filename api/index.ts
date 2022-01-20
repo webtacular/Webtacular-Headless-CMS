@@ -41,7 +41,7 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { addMongoDB, addRedisDB } from './internal/db_service';
+import { addMongoDB } from './internal/db_service';
 import { AuthCollection } from './internal/interfaces';
 
 // Global variables set by the settings file
@@ -69,12 +69,10 @@ declare global {
             await addMongoDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
             global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
 
-            await addRedisDB(settings.api.redis.dev_uri, settings.api.redis.dev_name);
-            global.__DEF_REDIS_DB__ = settings.api.redis.dev_name;
+            // await addRedisDB(settings.api.redis.dev_uri, settings.api.redis.dev_name);
+            // global.__DEF_REDIS_DB__ = settings.api.redis.dev_name;
             break;
     }
-
-    global.__SALT_ROUNDS__ = settings.api.security.salt_rounds;
 
     global.__AUTH_COLLECTIONS__ = { //TODO: Add specific interfaces for these
         ip_collection: 'ip',
@@ -87,6 +85,8 @@ declare global {
         new_account_timeout: 0,
         max_login_attempts: 5,
         max_login_history: 15,
+        password_salt_rounds: 12,
+        token_salt_rounds: 10,
         token_lenght: 20,
         token_expiration: 2678400, // 31 days in unix time
     }
@@ -116,7 +116,7 @@ route(`${__dirname}/v1/users`,'v1/users', app, {
 
 route(`${__dirname}/v1/session`, 'v1/session', app, { 
     GET: [':id'],
-    DELETE: [':token']
+    DELETE: [':token', 'user/:id']
 });
 
 route(`${__dirname}/v1/blog`, 'v1/blog', app, { 
@@ -127,5 +127,4 @@ route(`${__dirname}/v1/blog`, 'v1/blog', app, {
 
 //Cataches all other routes and sends a 404 error
 app.all('/*', (req:any, res:any) =>
-    httpErrorHandler(404, res)
-);
+    httpErrorHandler(404, res));

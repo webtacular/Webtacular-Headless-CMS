@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { getMongoDBclient } from "../../internal/db_service";
 import { getIP } from "../../internal/ip_service";
-import { comparePassword } from "../../internal/password_service";
+import { compareHash } from "../../internal/hashing_service";
 import { EMAIL_REGEXP, userRegex } from "../../internal/regex_service";
 import { checkForToken, generateToken } from "../../internal/token_service";
 import { httpErrorHandler, httpSuccessHandler, locals, mongoErrorHandler, returnLocal } from "../../internal/response_handler";
@@ -32,7 +32,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     await checkForToken(req, res, false);
 
     let json = req.body;
-    
+
     // If the user is already logged in, return a 409: conflict //
     if(req.auth.authorized === true)
         return httpErrorHandler(409, res, returnLocal(locals.KEYS.ALREADY_AUTHORIZED, locals.language));
@@ -53,9 +53,9 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         return throw406(locals.KEYS.SIGNUP_INVALID_PASSWORD, res);
     //---Password---//
 
-    getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOne({ email: json.email.toLowerCase() }, async(err:any, result:any) => {
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne({ email: json.email.toLowerCase() }, async(err:any, result:any) => {
         // If the DB throws an error, pass it to the error handler
-        if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+        if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
         // If we cant find the user, return a 404
         if (result === null || result === undefined)
@@ -64,7 +64,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         //TODO: Check if the user is locked out
 
         // check password //
-        if(await comparePassword(json.password, result.password) !== true)
+        if(await compareHash(json.password, result.password) !== true)
             return failHandler(res, req, result);
         
         else succsessHandler(res, req, result);
@@ -82,12 +82,12 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 let succsessHandler = (res:any, req:any, result:any) => {
     let login_attempts:Array<string> = [];
 
-    result.security_info.login_attempts.forEach((elem:any, i:number) => {
+    result?.security_info.login_attempts?.forEach((elem:any, i:number) => {
         if(i <= global.__SECURITY_OPTIONS__.max_login_history)
             login_attempts = [...login_attempts, elem];
     });
 
-    let token = generateToken(result._id.toString()),
+    let token = generateToken(result._id.toString(), global.__SECURITY_OPTIONS__.token_expiration),
         expiration = Date.now() + global.__SECURITY_OPTIONS__.token_expiration,
         user = {
             security_info: {
@@ -95,23 +95,13 @@ let succsessHandler = (res:any, req:any, result:any) => {
                 account_locked: false,
                 last_login: Date.now(),
                 login_attempts,
-            },
-            tokens: [
-                ...result.tokens || [],
-                {
-                    ip: getIP(req),
-                    token,
-                    expiration,
-                    creation: Date.now(),
-                    valid: true,
-                }
-            ]
+            }
         }
 
     getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOneAndUpdate({ 
         _id: new ObjectId(result._id) 
-    }, { $set: user } as any, (err:any, result:any) => {
-        if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+    }, { $set: user } as any, async(err:any, result:any) => {
+        if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
         //Tell the client to set some cookies
         res.cookie('token', token, {
@@ -124,10 +114,10 @@ let succsessHandler = (res:any, req:any, result:any) => {
         });
 
         //Inform the user that they have been logged in successfully
-        return httpSuccessHandler(202, res, JSON.stringify({
+        return httpSuccessHandler(202, res, {
             user_id: result._id,
-            token: token,
-        }), {
+            token: (await token)?.combined,
+        }, {
             'Content-Type': 'application/json',
         });  
     }); 
@@ -163,7 +153,7 @@ let failHandler = (res:any, req:any, result:any) => {
     { _id: new ObjectId(result._id)  }, 
     { $set: user }, 
     (err:any, new_result:any) => {
-        if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+        if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
         
         return httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_PASSWORD, locals.language, { 
             0: global.__SECURITY_OPTIONS__.max_login_attempts - attempts

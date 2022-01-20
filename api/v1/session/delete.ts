@@ -1,4 +1,4 @@
-import { checkForToken, validateToken } from "../../internal/token_service";
+import { checkForToken, revokeToken, validateToken } from "../../internal/token_service";
 import { httpErrorHandler, locals, mongoErrorHandler, returnLocal } from "../../internal/response_handler";
 import { getMongoDBclient } from "../../internal/db_service";
 import { ObjectId } from "mongodb";
@@ -20,8 +20,8 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     let tokenInfo:TokenInterface = await validateToken((resources[1] as any)?.token);
 
     // If the userID is not defined, return a 401
-    if(!tokenInfo.user_id)
-        return httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_TOKEN, locals.language));
+    if(tokenInfo.authorized !== true)
+        return httpErrorHandler(404, res, returnLocal(locals.KEYS.INVALID_TOKEN, locals.language));
 
     // The object to find in the database
     let mongoDBfindOBJ:any = {
@@ -29,10 +29,15 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     }
 
     // Get the client and make the request
-    getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
         // If there is an error, pass it to the error handler
-        if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+        if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
-        console.log(result);
+        // If the user does not exist, return a 404
+        if(!result)
+            return httpErrorHandler(404, res, returnLocal(locals.KEYS.USER_NOT_FOUND, locals.language));
+
+        revokeToken((resources[1] as any)?.token);
+        return httpErrorHandler(200, res, returnLocal(locals.KEYS.TOKEN_REVOKED, locals.language));
     });
 }

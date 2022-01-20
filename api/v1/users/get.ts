@@ -11,15 +11,18 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     if(!(resources[1] as any)?.id) 
         return httpErrorHandler(400, res, returnLocal(locals.KEYS.MISSING_USER_ID, locals.language));
 
+    if(ObjectId.isValid((resources[1] as any)?.id) !== true)
+        return httpErrorHandler(400, res, returnLocal(locals.KEYS.INVALID_USER_ID, locals.language));
+
     // The object to find in the database
     let mongoDBfindOBJ:any = {
         _id: new ObjectId((resources[1] as any)?.id)
     }
 
-    getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
         // If the DB throws an error, pass it to the error handler
         if (err)
-            return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
+            return mongoErrorHandler(err.code, res, err.keyPattern);
 
         // If we cant find the user, return a 404
         if (result === null || result === undefined)
@@ -43,7 +46,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         //-----------------------------------------------//
         // If the use is an admin, return the admin data //
         //-----------------------------------------------//
-        if(req.auth.admin === true) Object.assign(respData, { 
+        if(req?.auth?.admin === true) Object.assign(respData, { 
             email: result?.email,
             previous_info: {
                 user_name: result?.previous_info?.user_name,
@@ -57,7 +60,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         //----------------------------------------------------------//
         // if the user is authorized, return more of the users data //
         //----------------------------------------------------------//
-        else if(req.auth.userID === result._id.toString()) Object.assign(respData, { 
+        else if(req?.auth?.user_id === result._id.toString()) Object.assign(respData, { 
             email: result?.email,
             previous_info: {
                 user_name: result?.previous_info?.user_name,
@@ -73,8 +76,6 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         });
 
         //finaly, return the data
-        return httpSuccessHandler(200, res, respData, {
-            'Content-Type': 'application/json',
-        });
+        return httpSuccessHandler(200, res, respData);
     });
 }

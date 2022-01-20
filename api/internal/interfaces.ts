@@ -81,15 +81,6 @@ export interface UserInterface {
         account_creation: number;
         account_locked: boolean;
 
-        tokens?: {
-            ip: string;
-            creation: number;
-            expiration: number;
-            user_agent?: string;
-            token: string;
-            valid: boolean;
-        }[];
-
         login_attempts?:{
             ip: string;
             timestamp: number;
@@ -111,12 +102,16 @@ export interface UserInterface {
 };
 
 export interface TokenInterface {
-    _id?: ObjectId | string;
+    _id: ObjectId;
     user_id: ObjectId | string;
     token: string;
     timestamp: number;
     expiration: number;
     admin: boolean;
+
+    // Used for the token validation //
+    // these are not stored in the DB //
+    combined?: string;
     expired?: boolean;
     authorized?: boolean;
 }
@@ -159,7 +154,6 @@ export let UserInterfaceTemplate = (): UserInterface => {
             last_email: Date.now(),
             account_creation: Date.now(),
             email_verified: false,
-            tokens: [],
             login_attempts: [],
         },
 

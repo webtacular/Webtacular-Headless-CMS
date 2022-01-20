@@ -5,7 +5,7 @@ import { httpErrorHandler, locals, mongoErrorHandler, returnLocal } from './resp
 import { getMongoDBclient } from './db_service';
 import { compareHash, hashString } from "./hashing_service";
 import { Cache } from 'memory-cache';
-import { getTimeInSeconds } from "./general_services";
+import { getTimeInSeconds } from "./general_service";
 
 // this is the cache for the token service
 export let token_cache:any = new Cache();
@@ -31,9 +31,6 @@ export async function generateToken(userID:string, ttl:number = global.__SECURIT
     
     // Generate a cryptographically random enough token
     let raw_token = randomBytes(global.__SECURITY_OPTIONS__.token_lenght).toString('hex');
-
-    // convert the seconds to milliseconds as thats what the memory-cache uses
-    ttl = ttl * 1000;
 
     // hash the token
     let token = await hashString(raw_token, global.__SECURITY_OPTIONS__.token_salt_rounds),
@@ -80,7 +77,7 @@ export async function generateToken(userID:string, ttl:number = global.__SECURIT
 
     // if cacheing is enabled, push the token to cache
     if(global.__SECURITY_OPTIONS__.cache_tokens === true) 
-        token_cache.put(toBeInserted._id.toString(), toCache, global.__SECURITY_OPTIONS__.token_cache_expiration);
+        token_cache.put(toBeInserted._id.toString(), toCache, global.__SECURITY_OPTIONS__.token_cache_expiration * 1000);
 
 
     // Return the token data
@@ -200,7 +197,7 @@ export async function revokeToken(token_id:ObjectId):Promise<boolean> {
  * @param tokenInfo TokenInterface - the token to be refreshed, must contain the combined token
  */
 export function refreshToken(tokenInfo:TokenInterface):void {
-    console.log(tokenInfo);
+
     // if the admin turned off token caching, dont do anything
     if(global.__SECURITY_OPTIONS__.cache_tokens !== true)   
         return;
@@ -221,7 +218,7 @@ export function refreshToken(tokenInfo:TokenInterface):void {
     }
 
     // push the token to cache
-    token_cache.put(tokenInfo._id.toString(), toCache, global.__SECURITY_OPTIONS__.token_cache_expiration);
+    token_cache.put(tokenInfo._id.toString(), toCache, global.__SECURITY_OPTIONS__.token_cache_expiration * 1000);
 }
 
 /**

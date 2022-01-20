@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { IpInterface } from './interfaces';
 import { mongoErrorHandler } from './response_handler';
 import { getMongoDBclient } from './db_service';
-import {getTimeInSeconds} from './general_services';
+import { getTimeInSeconds } from './general_service';
 
 /**
  * Gets the ip from a express request object, parses it and than returns it as B64

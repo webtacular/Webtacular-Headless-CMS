@@ -5,7 +5,7 @@ import { compareHash } from "../../internal/hashing_service";
 import { EMAIL_REGEXP, userRegex } from "../../internal/regex_service";
 import { checkForToken, generateToken } from "../../internal/token_service";
 import { httpErrorHandler, httpSuccessHandler, locals, mongoErrorHandler, returnLocal } from "../../internal/response_handler";
-import {getTimeInSeconds} from "../../internal/general_services";
+import {getTimeInSeconds} from "../../internal/general_service";
 
 //TODO: Fix this.
 //I threw this together quickly and it's not very good.

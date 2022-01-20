@@ -91,7 +91,7 @@ declare global {
         token_salt_rounds: 10,
         token_lenght: 20,
         token_expiration: 2678400, // 31 days in seconds
-        token_cache_expiration: 300, // 5 min in seconds
+        token_cache_expiration: 600, // 10 min in seconds
         cache_tokens: true,
     }
 

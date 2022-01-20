@@ -6,7 +6,7 @@ import { hashString } from "../../internal/hashing_service";
 import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_service";
 import { ObjectId } from "mongodb";
 import { generateToken } from "../../internal/token_service";
-import {getTimeInSeconds} from "../../internal/general_services";
+import {getTimeInSeconds} from "../../internal/general_service";
 
 let throw406 = (key:string, res:any, replace:any = {}):void =>
     httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));

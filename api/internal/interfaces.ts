@@ -147,12 +147,12 @@ export let UserInterfaceTemplate = (): UserInterface => {
         },
 
         security_info: {
-            last_login: Date.now(),
+            last_login: Date.now() / 1000,
             signup_ip: '',
             account_locked: false,
             attempts: 0,
-            last_email: Date.now(),
-            account_creation: Date.now(),
+            last_email: Date.now() / 1000,
+            account_creation: Date.now() / 1000,
             email_verified: false,
             login_attempts: [],
         },

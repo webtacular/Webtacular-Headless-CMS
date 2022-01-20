@@ -1,8 +1,9 @@
 import ipaddr from 'ipaddr.js';
-import {ObjectId} from 'mongodb';
-import {IpInterface} from './interfaces';
-import {mongoErrorHandler} from './response_handler';
-import {getMongoDBclient} from './db_service';
+import { ObjectId } from 'mongodb';
+import { IpInterface } from './interfaces';
+import { mongoErrorHandler } from './response_handler';
+import { getMongoDBclient } from './db_service';
+import {getTimeInSeconds} from './general_services';
 
 /**
  * Gets the ip from a express request object, parses it and than returns it as B64
@@ -17,9 +18,9 @@ export function getIP(req:any):string {
 }
 
 export async function checkIPlogs(ip:string, res:any):Promise<IpInterface> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve:any) => {
         getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).findOne({ ip } as any, (err:any, result:any) => {
-            if (err) return reject(mongoErrorHandler(err.code, res));
+            if (err) return resolve(mongoErrorHandler(err.code, res));
             resolve(result as IpInterface)
         }); 
     });
@@ -28,7 +29,7 @@ export async function checkIPlogs(ip:string, res:any):Promise<IpInterface> {
 export async function logNewIP(ip:string, user_id:string, res:any) {
     let ipOBJ:IpInterface = {
         _id: new ObjectId(),
-        last_accessed: Date.now(),
+        last_accessed: getTimeInSeconds(),
         count: 1,
         ip,
         settings: {
@@ -38,7 +39,7 @@ export async function logNewIP(ip:string, user_id:string, res:any) {
         accounts: [
             {
                 user_id: user_id,
-                timestamp: Date.now()
+                timestamp: getTimeInSeconds()
             }
         ]
     }
@@ -50,12 +51,12 @@ export async function logNewIP(ip:string, user_id:string, res:any) {
 
 export async function logSameIP(ip_history:any, user_id:string, res:any) {
     Object.assign(ip_history, {
-        last_accessed: Date.now(),
+        last_accessed: getTimeInSeconds(),
         count: ++ip_history.count,
         accounts: [...ip_history.accounts,
             {
                 user_id: user_id,
-                timestamp: Date.now()
+                timestamp: getTimeInSeconds()
             }
         ]
     });

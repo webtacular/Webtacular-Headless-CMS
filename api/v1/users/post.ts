@@ -1,11 +1,12 @@
 import { getMongoDBclient } from "../../internal/db_service";
 import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
-import { UserInterface, UserInterfaceTemplate } from "../../internal/interfaces";
+import { TokenInterface, UserInterface, UserInterfaceTemplate } from "../../internal/interfaces";
 import { userRegex, EMAIL_REGEXP } from "../../internal/regex_service";
 import { hashString } from "../../internal/hashing_service";
 import { checkIPlogs, getIP, logNewIP, logSameIP } from "../../internal/ip_service";
 import { ObjectId } from "mongodb";
 import { generateToken } from "../../internal/token_service";
+import {getTimeInSeconds} from "../../internal/general_services";
 
 let throw406 = (key:string, res:any, replace:any = {}):void =>
     httpErrorHandler(406, res, returnLocal(key, res.language.language, replace));
@@ -53,7 +54,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         pass_ip_func = () => logNewIP(ip, user_id, res);
 
     else {
-        let last_accessed = Date.now() - ip_history.last_accessed;
+        let last_accessed = getTimeInSeconds() - ip_history.last_accessed;
 
         //If the user is trying to create multiple accounts with the same IP,
         //We can impose a time out.
@@ -70,8 +71,9 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         pass_ip_func = () => logSameIP(ip_history, user_id, res);
     }
 
-    let token = generateToken(user_id, global.__SECURITY_OPTIONS__.token_expiration),
-        expiration = Date.now() + global.__SECURITY_OPTIONS__.token_expiration;
+    let token:Promise<TokenInterface> = generateToken(user_id, global.__SECURITY_OPTIONS__.token_expiration),
+        timestamp:number = getTimeInSeconds(),
+        expiration:number = timestamp + global.__SECURITY_OPTIONS__.token_expiration;
     
     Object.assign(user, { 
         _id: new ObjectId(user_id),
@@ -82,9 +84,9 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
         security_info: {
             signup_ip: getIP(req),
-            last_login: Date.now(),
-            last_email: Date.now(),
-            account_creation: Date.now(),
+            last_login: timestamp,
+            last_email: timestamp,
+            account_creation: timestamp,
             account_locked: false,
             email_verified: false,
             attempts: 0,

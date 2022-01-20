@@ -90,9 +90,9 @@ declare global {
         //Tokens
         token_salt_rounds: 10,
         token_lenght: 20,
-        token_expiration: 2678400, // 31 days in unix time
-        token_cache_expiration: 300000, // 5 min in ms
-        cache_tokens: false,
+        token_expiration: 2678400, // 31 days in seconds
+        token_cache_expiration: 300, // 5 min in seconds
+        cache_tokens: true,
     }
 
     app.listen(port, (error:any) => {

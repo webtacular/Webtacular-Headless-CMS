@@ -5,6 +5,7 @@ import { compareHash } from "../../internal/hashing_service";
 import { EMAIL_REGEXP, userRegex } from "../../internal/regex_service";
 import { checkForToken, generateToken } from "../../internal/token_service";
 import { httpErrorHandler, httpSuccessHandler, locals, mongoErrorHandler, returnLocal } from "../../internal/response_handler";
+import {getTimeInSeconds} from "../../internal/general_services";
 
 //TODO: Fix this.
 //I threw this together quickly and it's not very good.
@@ -88,12 +89,12 @@ let succsessHandler = (res:any, req:any, result:any) => {
     });
 
     let token = generateToken(result._id.toString(), global.__SECURITY_OPTIONS__.token_expiration),
-        expiration = Date.now() + global.__SECURITY_OPTIONS__.token_expiration,
+        expiration = getTimeInSeconds() + global.__SECURITY_OPTIONS__.token_expiration,
         user = {
             security_info: {
                 attempts: 0,
                 account_locked: false,
-                last_login: Date.now(),
+                last_login: getTimeInSeconds(),
                 login_attempts,
             }
         }

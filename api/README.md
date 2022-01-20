@@ -15,3 +15,5 @@ with cacheing enabled, we shave of 60-70 ms of the request time! down from 70-80
 TODO: Look into a Cpp + node Bcrypt libary 
 
 for the user, you have to set the 'email' to be a UNIQUE key
+
+ALL Date.now() has to be followed by / 1000 to turn it into secconds

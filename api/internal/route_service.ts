@@ -1,4 +1,4 @@
-import { isResourceInterface, ResourceInterface, RouterCallback} from './interfaces';
+import { isResourceInterface, ResourceInterface, RouterCallback } from './interfaces';
 import { httpErrorHandler } from './response_handler';
 
 //TODO: Add proper path validation
@@ -33,17 +33,6 @@ export default (path:string, resource:string, app:any, aditionalResources?:Array
     }
 }
 
-
-//   .oooooo.    .o8           o8o                         .   
-//  d8P'  `Y8b  "888           `"'                       .o8   
-// 888      888  888oooo.     oooo  .ooooo.   .ooooo.  .o888oo 
-// 888      888  d88' `88b    `888 d88' `88b d88' `"Y8   888   
-// 888      888  888   888     888 888ooo888 888         888   
-// `88b    d88'  888   888     888 888    .o 888   .o8   888 . 
-//  `Y8bood8P'   `Y8bod8P'     888 `Y8bod8P' `Y8bod8P'   "888" 
-//                             888                             
-//                         .o. 88P                             
-//                         `Y888P                              
 /** 
 * This fuction takes in an object, which the user can use to create method specific resource endpoints
 *
@@ -79,13 +68,6 @@ let objectResourceManager = (path:string, resource:string, aditionalResources:Re
 }
 
 
-//  .oooo.   oooo d8b oooo d8b  .oooo.   oooo    ooo 
-// `P  )88b  `888""8P `888""8P `P  )88b   `88.  .8'  
-//  .oP"888   888      888      .oP"888    `88..8'   
-// d8(  888   888      888     d8(  888     `888'    
-// `Y888""8o d888b    d888b    `Y888""8o     .8'     
-//                                       .o..P'      
-//                                       `Y8P'       
 /** 
 * This fuction takes in an String array, which the user can use to create non-method specific resources enpoints
 *
@@ -103,6 +85,7 @@ let arrayResourceManager = (path:string, resource:string, aditionalResources:Arr
         app.all(`/${resource}/${extraResources}`, (req:any, res:any) => methodManager(path, req, res))); 
 }
 
+//this function is responsible for calling the correct method based on the request method
 let methodManager = (path:string, req:any, res:any):void => {
     try { 
         //get the resource path from the request
@@ -110,18 +93,16 @@ let methodManager = (path:string, req:any, res:any):void => {
 
         //and call the method specific function function
         require(`${path}/${req.method}`).default(req, res, resources);
+
     } catch (err) { //TODO: Better error repoting
+        //log any errors for now
         console.log(err)
+
         //if the method specific function doesn't exist, return a 501 Not Implemented error
         return httpErrorHandler(501, res);
     }
 }
 
-// ooo. .oo.  .oo.   oooo oooo    ooo 
-// `888P"Y88bP"Y88b   `88. `88.  .8'  
-//  888   888   888    `88..]88..8'   
-//  888   888   888     `888'`888'    
-// o888o o888o o888o     `8'  `8'     
 /**
  * Express middle ware that only allows CRUD methods to access resources
  * GET POST PUT DELETE

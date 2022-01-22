@@ -23,3 +23,16 @@ Total resonable, I dont belive that I would do something like that, but if i do,
 [4] Most of the productivity tools used by businesses are now available with end-to-end encryption built in, including email, messaging, notes, and cloud storage. The GDPR requires organizations to use encryption or pseudeonymization whenever feasible.
 
 'use encryption or pseudeonymization whenever feasible' seems like a fun thing to implament
+
+Overall goal of this project is to do as much from scratch as possible, using as little NPM packages as possible 
+//----------[ curent list ]----------//
+
+express
+mongodb
+
+vv Want to try to write it my self vv
+
+memory-cache
+ipaddr.js
+cookie-parser
+body-parser

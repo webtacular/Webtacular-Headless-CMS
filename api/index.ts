@@ -77,7 +77,8 @@ declare global {
     global.__AUTH_COLLECTIONS__ = { //TODO: Add specific interfaces for these
         ip_collection: 'ip',
         user_collection: 'users',
-        token_collection: 'tokens'
+        token_collection: 'tokens',
+        blog_collection: 'blogs',
     }
 
     global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these
@@ -91,7 +92,7 @@ declare global {
         token_salt_rounds: 10,
         token_lenght: 20,
         token_expiration: 2678400, // 31 days in seconds
-        token_cache_expiration: 600, // 10 min in seconds
+        token_cache_expiration: 600 * 6, // 60 min in seconds
         cache_tokens: true,
     }
 
@@ -112,18 +113,18 @@ declare global {
 
 //Users resource
 
-route(`${__dirname}/v1/users`,'v1/users', app, { 
+route(`${__dirname}/v1_core/users`,'v1/users', app, { 
     GET: [':id'],
     PUT: [':id'],
     DELETE: [':id']
 });
 
-route(`${__dirname}/v1/session`, 'v1/session', app, { 
+route(`${__dirname}/v1_core/session`, 'v1/session', app, { 
     GET: [':id'],
     DELETE: [':token', 'user/:id']
 });
 
-route(`${__dirname}/v1/blog`, 'v1/blog', app, { 
+route(`${__dirname}/v1_core/blog`, 'v1/blog', app, { 
     GET: [':id'],
     PUT: [':id'],
     DELETE: [':id']

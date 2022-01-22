@@ -1,6 +1,5 @@
 import { ObjectId } from "mongodb";
 import { getMongoDBclient } from "../../internal/db_service";
-import { getIP } from "../../internal/ip_service";
 import { compareHash } from "../../internal/hashing_service";
 import { EMAIL_REGEXP, userRegex } from "../../internal/regex_service";
 import { checkForToken, generateToken } from "../../internal/token_service";

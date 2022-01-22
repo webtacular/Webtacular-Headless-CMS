@@ -30,6 +30,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
     // Get the client and make the request
     getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+        
         // If there is an error, pass it to the error handler
         if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
@@ -37,7 +38,9 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         if(!result)
             return httpErrorHandler(404, res, returnLocal(locals.KEYS.USER_NOT_FOUND, locals.language));
 
+        // revoke the token
         revokeToken((resources[1] as any)?.token);
+
         return httpErrorHandler(200, res, returnLocal(locals.KEYS.TOKEN_REVOKED, locals.language));
     });
 }

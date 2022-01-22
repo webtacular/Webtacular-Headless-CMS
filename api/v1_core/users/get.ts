@@ -77,5 +77,16 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
         //finaly, return the data
         return httpSuccessHandler(200, res, respData);
+
+        //what the actual fuck is this
+
+        //this is fucking stupid and retarded
+
+        //im going to fucking die
+
+        
+        //
+
+
     });
 }

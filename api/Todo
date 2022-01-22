@@ -36,3 +36,8 @@ memory-cache
 ipaddr.js
 cookie-parser
 body-parser
+
+//----------[ Setup guide ]----------//
+
+[1] Create your account, it will have 0 perms.
+[2] Copy that account ID, and in the configuration.json, set the owner id to your ID

@@ -89,7 +89,7 @@ let arrayResourceManager = (path:string, resource:string, aditionalResources:Arr
 let methodManager = (path:string, req:any, res:any):void => {
     try { 
         //get the resource path from the request
-        let resources:Array<string> = [req.url.split('/').slice(1), req.params];
+        let resources:Array<string> = [req.url.split('/').slice(1), req.params, req.query];
 
         //and call the method specific function function
         require(`${path}/${req.method}`).default(req, res, resources);

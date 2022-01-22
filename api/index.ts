@@ -113,7 +113,13 @@ declare global {
 
 //Users resource
 
-route(`${__dirname}/v1_core/users`,'v1/users', app, { 
+route(`${__dirname}/v1_core/user`,'v1/user', app, { 
+    GET: [':id'],
+    PUT: [':id'],
+    DELETE: [':id']
+});
+
+route(`${__dirname}/v1_core/role`,'v1/role', app, { 
     GET: [':id'],
     PUT: [':id'],
     DELETE: [':id']
@@ -121,10 +127,16 @@ route(`${__dirname}/v1_core/users`,'v1/users', app, {
 
 route(`${__dirname}/v1_core/session`, 'v1/session', app, { 
     GET: [':id'],
-    DELETE: [':token', 'user/:id']
+    DELETE: [':token', 'user/:id'] // temp
 });
 
-route(`${__dirname}/v1_core/blog`, 'v1/blog', app, { 
+route(`${__dirname}/v1_core/content`, 'v1/content', app, { 
+    GET: [':id'],
+    PUT: [':id'],
+    DELETE: [':id']
+});
+
+route(`${__dirname}/v1_core/role`, 'v1/role', app, { 
     GET: [':id'],
     PUT: [':id'],
     DELETE: [':id']

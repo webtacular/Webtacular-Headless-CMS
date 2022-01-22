@@ -34,7 +34,8 @@
         "TOKEN_REVOKED": "This token has been revoked",
         "INVALID_USER_ID": "You have supplied an invalid user id",
         "ALREADY_AUTHORIZED": "You are already logged in",
-        "INVALID_PASSWORD": "You have entered an invalid password, you have {0} attempts left"
+        "INVALID_PASSWORD": "You have entered an invalid password, you have {0} attempts left",
+        "MISSING_CONTENT_TYPE": "You did not supply a content type (&type=X)"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -57,6 +58,7 @@
         "ALREADY_AUTHORIZED": "ALREADY_AUTHORIZED",
         "INVALID_PASSWORD": "INVALID_PASSWORD",
         "INVALID_USER_ID": "INVALID_USER_ID",
-        "TOKEN_REVOKED": "TOKEN_REVOKED"
+        "TOKEN_REVOKED": "TOKEN_REVOKED",
+        "MISSING_CONTENT_TYPE": "MISSING_CONTENT_TYPE"
     }
 }

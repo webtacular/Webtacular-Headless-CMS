@@ -67,8 +67,7 @@ export interface UserInterface {
     };
 
     permissions: {
-        groups: string[];
-        admin?: boolean;
+        roles: string[];
         owner?: boolean;
     }
 
@@ -143,7 +142,7 @@ export let UserInterfaceTemplate = (): UserInterface => {
         },
 
         permissions: {
-            groups: [ 'user' ]
+            roles: [ 'user' ]
         },
 
         security_info: {

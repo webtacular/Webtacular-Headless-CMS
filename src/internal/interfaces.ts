@@ -167,4 +167,11 @@ export interface RoleInterface {
     name: string;
     color: string;
     permissions: string[];
+    users: ObjectId[];
+}
+
+export interface ErrorInterface {
+    local_key?: string;
+    where?: string;
+    message?: string;
 }

@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { UserInterface } from '../../internal/interfaces';
 import { httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
 import { checkForToken } from "../../internal/token_service";
-import { getUser } from '../../internal/user_service';
+import { user } from '../../internal/user_service';
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
@@ -20,12 +20,12 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
     
     // if the token is valid, try to get the user
-    let user:UserInterface | boolean | void = await getUser(new ObjectId((resources[1] as any).id), res)
+    let user_data: boolean | UserInterface = await user.get(new ObjectId((resources[1] as any).id), res)
 
     // if the user is not found, the getUser function will return false
     // all we have to do is return, the error handeling is done by passing the res object to the getUser function
-    if(user === false) return;
-    else user = user as UserInterface;
+    if(user_data === false) return;
+    else user_data = user_data as UserInterface;
 
     // Make sure we completed the token check
     await tokenInfo;
@@ -35,12 +35,12 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     // Basic information about the user //
     //----------------------------------//
     let respData:any = {
-        _id: user?._id.toString(),
-        user_name: user?.user_name,
-        language: user?.language,
-        profile_picture: user?.profile_picture,
+        _id: user_data?._id?.toString(),
+        user_name: user_data?.user_name,
+        language: user_data?.language,
+        profile_picture: user_data?.profile_picture,
 
-        blog_info: user?.blog_info,
+        blog_info: user_data?.blog_info,
     };
 
     //-----------------------------------------------//
@@ -49,29 +49,29 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
     //TODO: Verify using roles.
     if(req?.auth?.owner === true) Object.assign(respData, { 
-        email: user?.email,
+        email: user_data?.email,
         previous_info: {
-            user_name: user?.previous_info?.user_name,
-            email: user?.previous_info?.email,
-            password: user?.previous_info?.password,
+            user_name: user_data?.previous_info?.user_name,
+            email: user_data?.previous_info?.email,
+            password: user_data?.previous_info?.password,
         },
-        security_info: user?.security_info,
+        security_info: user_data?.security_info,
     });
 
     //----------------------------------------------------------//
     // if the user is authorized, return more of the users data //
     //----------------------------------------------------------//
-    else if(req?.auth?.user_id === user._id.toString()) Object.assign(respData, { 
-        email: user?.email,
+    else if(req?.auth?.user_id === user_data?._id?.toString()) Object.assign(respData, { 
+        email: user_data?.email,
         previous_info: {
-            user_name: user?.previous_info?.user_name,
-            email: user?.previous_info?.email,
+            user_name: user_data?.previous_info?.user_name,
+            email: user_data?.previous_info?.email,
         },
         security_info: {
-            signup_ip: user?.security_info?.signup_ip,
-            account_creation: user?.security_info?.account_creation,
-            last_login: user?.security_info?.last_login,
-            email_verified: user?.security_info?.email_verified,
+            signup_ip: user_data?.security_info?.signup_ip,
+            account_creation: user_data?.security_info?.account_creation,
+            last_login: user_data?.security_info?.last_login,
+            email_verified: user_data?.security_info?.email_verified,
         }
     });
 

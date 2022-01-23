@@ -43,7 +43,8 @@ app.use(function (error:any, req:any, res:any, next:any){
 
 import { mongoDB } from './internal/db_service';
 import { AuthCollection } from './internal/interfaces';
-import {load} from './internal/role_service';
+import {load, role, user} from './internal/role_service';
+import {ObjectId} from 'mongodb';
 
 // Global variables set by the settings file
 declare global {
@@ -96,6 +97,22 @@ declare global {
 
     //loads the role service
     load();
+
+    // let test = role.add({
+    //     name: 'user',
+    //     color: '#ff0000',
+    //     permissions: [
+            
+    //     ],
+    // }, true);
+
+    // console.log(test);
+
+    // test = role.remove('user');
+
+    console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
+
+
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);

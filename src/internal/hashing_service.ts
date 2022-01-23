@@ -16,10 +16,10 @@ export async function hashString(string:string, salt_rounds:number, res?:any):Pr
     if(byteSize(string) > 75) throwError('string is too long');
 
     return new Promise((resolve) => {
-        bcrypt.genSalt(salt_rounds, (error, salt:string) => {
+        bcrypt.genSalt(salt_rounds, (error:any, salt:string) => {
             if(error) throwError(error);
 
-            bcrypt.hash(string, salt, (error, hash:string) => 
+            bcrypt.hash(string, salt, (error:any, hash:string) => 
                 error ? throwError(error) : resolve(hash));
         }); 
     });

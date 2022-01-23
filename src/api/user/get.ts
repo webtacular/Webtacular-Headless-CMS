@@ -20,7 +20,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
 
     
     // if the token is valid, try to get the user
-    let user:UserInterface | boolean = await getUser(new ObjectId((resources[1] as any).id), res)
+    let user:UserInterface | boolean | void = await getUser(new ObjectId((resources[1] as any).id), res)
 
     // if the user is not found, the getUser function will return false
     // all we have to do is return, the error handeling is done by passing the res object to the getUser function

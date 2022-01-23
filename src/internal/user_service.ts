@@ -3,7 +3,7 @@ import { mongoDB } from "./db_service";
 import { UserInterface } from "./interfaces";
 import { httpErrorHandler, locals, returnLocal } from "./response_handler";
 
-export async function getUser(user_id:ObjectId, res?:any):Promise<UserInterface | boolean> {
+export async function getUser(user_id:ObjectId, res?:any):Promise<UserInterface | boolean | void> {
     // validate user_id
     if(ObjectId.isValid(user_id) !== true)
         return false;

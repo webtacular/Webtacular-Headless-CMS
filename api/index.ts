@@ -41,8 +41,9 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { addMongoDB } from './internal/db_service';
+import { mongoDB } from './internal/db_service';
 import { AuthCollection } from './internal/interfaces';
+import {load} from './internal/role_service';
 
 // Global variables set by the settings file
 declare global {
@@ -59,18 +60,15 @@ declare global {
 (async() => {
     switch(settings.api.production) {
         case true:
-            await addMongoDB(settings.api.mongodb.prod_uri, settings.api.mongodb.prod_db, settings.api.mongodb.prod_collection);
+            await mongoDB.addDB(settings.api.mongodb.prod_uri, settings.api.mongodb.prod_db, settings.api.mongodb.prod_collection);
             global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
             break;
 
         case false:
             process.stdout.write('!!! Using development databases !!!\n');
 
-            await addMongoDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
+            await mongoDB.addDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
             global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
-
-            // await addRedisDB(settings.api.redis.dev_uri, settings.api.redis.dev_name);
-            // global.__DEF_REDIS_DB__ = settings.api.redis.dev_name;
             break;
     }
 
@@ -95,6 +93,9 @@ declare global {
         token_cache_expiration: 600 * 6, // 60 min in seconds
         cache_tokens: true,
     }
+
+    //loads the role service
+    load();
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);

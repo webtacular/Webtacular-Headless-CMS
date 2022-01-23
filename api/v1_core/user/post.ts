@@ -1,4 +1,4 @@
-import { getMongoDBclient } from "../../internal/db_service";
+import { mongoDB } from "../../internal/db_service";
 import { mongoErrorHandler, httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
 import { TokenInterface, UserInterface, UserInterfaceTemplate } from "../../internal/interfaces";
 import { userRegex, EMAIL_REGEXP } from "../../internal/regex_service";
@@ -94,7 +94,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     });
 
     //Push the data to mongoDB
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user, async (err:any, result:any) => {
+    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).insertOne(user, async (err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
         //We only want to log IP's if the account was created succesfully

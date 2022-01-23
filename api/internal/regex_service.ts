@@ -12,3 +12,9 @@ export const userRegex:regexObjects = {
     password: /^[a-zA-Z0-9_]{3,20}$/,
     language: /^[a-zA-Z]{2}$/,
 }
+
+export const roleRegex:regexObjects = {
+    role_name: /^[a-zA-Z0-9_]{3,20}$/,
+    role_color: /^#[0-9a-fA-F]{6}$/,
+    role_permissions: /^[a-zA-Z0-9_]{3,20}$/,
+}

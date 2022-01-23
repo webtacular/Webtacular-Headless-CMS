@@ -32,10 +32,11 @@ mongodb
 
 vv Want to try to write it my self vv
 
-memory-cache
-ipaddr.js
-cookie-parser
-body-parser
+node-json-db // maybe
+memory-cache // maybe
+ipaddr.js // probably
+cookie-parser // on the fence about it, probably not
+body-parser // on the fence about it, probably not
 
 //----------[ Setup guide ]----------//
 

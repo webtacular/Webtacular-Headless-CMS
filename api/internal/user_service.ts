@@ -1,7 +1,7 @@
-import {ObjectId} from "mongodb";
-import {getMongoDBclient} from "./db_service";
-import {UserInterface} from "./interfaces";
-import {httpErrorHandler, locals, returnLocal} from "./response_handler";
+import { ObjectId } from "mongodb";
+import { mongoDB } from "./db_service";
+import { UserInterface } from "./interfaces";
+import { httpErrorHandler, locals, returnLocal } from "./response_handler";
 
 export async function getUser(user_id:ObjectId, res?:any):Promise<UserInterface | boolean> {
     // validate user_id
@@ -14,7 +14,7 @@ export async function getUser(user_id:ObjectId, res?:any):Promise<UserInterface 
     }
 
     new Promise((resolve:any) => {
-        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) return console.log(err);
 

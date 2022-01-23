@@ -2,7 +2,7 @@ import ipaddr from 'ipaddr.js';
 import { ObjectId } from 'mongodb';
 import { IpInterface } from './interfaces';
 import { mongoErrorHandler } from './response_handler';
-import { getMongoDBclient } from './db_service';
+import { mongoDB } from './db_service';
 import { getTimeInSeconds } from './general_service';
 
 /**
@@ -19,7 +19,7 @@ export function getIP(req:any):string {
 
 export async function checkIPlogs(ip:string, res:any):Promise<IpInterface> {
     return new Promise((resolve:any) => {
-        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).findOne({ ip } as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).findOne({ ip } as any, (err:any, result:any) => {
             if (err) return resolve(mongoErrorHandler(err.code, res));
             resolve(result as IpInterface)
         }); 
@@ -44,7 +44,7 @@ export async function logNewIP(ip:string, user_id:string, res:any) {
         ]
     }
 
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).insertOne(ipOBJ as any, (err:any, result:any) => {
+    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).insertOne(ipOBJ as any, (err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));
     });
 }
@@ -61,7 +61,7 @@ export async function logSameIP(ip_history:any, user_id:string, res:any) {
         ]
     });
 
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).findOneAndUpdate({ 
+    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.ip_collection, res).findOneAndUpdate({ 
         _id: new ObjectId(ip_history._id) 
     }, { $set: ip_history } as any, (err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, JSON.stringify(err.keyPattern));

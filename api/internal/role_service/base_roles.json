@@ -1,0 +1,21 @@
+{
+    "roles": {
+        "user": {
+            "role_icon": "",
+            "role_color": "#53c593",
+
+            "permissions": []
+        },
+        "admin": {
+            "role_icon": "",
+            "role_color": "#53c593",
+
+            "permissions": []
+        }
+    },
+    "permissions": [],
+    "precedence": [
+        "admin",
+        "user"
+    ]
+}

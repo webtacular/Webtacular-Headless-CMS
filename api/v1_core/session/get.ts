@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getMongoDBclient } from "../../internal/db_service";
+import { mongoDB } from "../../internal/db_service";
 import { compareHash } from "../../internal/hashing_service";
 import { EMAIL_REGEXP, userRegex } from "../../internal/regex_service";
 import { checkForToken, generateToken } from "../../internal/token_service";
@@ -53,7 +53,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
         return throw406(locals.KEYS.SIGNUP_INVALID_PASSWORD, res);
     //---Password---//
 
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne({ email: json.email.toLowerCase() }, async(err:any, result:any) => {
+    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne({ email: json.email.toLowerCase() }, async(err:any, result:any) => {
         // If the DB throws an error, pass it to the error handler
         if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
 
@@ -98,7 +98,7 @@ let succsessHandler = (res:any, req:any, result:any) => {
             }
         }
 
-    getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOneAndUpdate({ 
+    mongoDB.getClient(global.__DEF_MONGO_DB__, undefined, res).findOneAndUpdate({ 
         _id: new ObjectId(result._id) 
     }, { $set: user } as any, async(err:any, result:any) => {
         if (err) return mongoErrorHandler(err.code, res, err.keyPattern);
@@ -149,7 +149,7 @@ let failHandler = (res:any, req:any, result:any) => {
         }
     }
     
-    getMongoDBclient(global.__DEF_MONGO_DB__, undefined, res).findOneAndUpdate(
+    mongoDB.getClient(global.__DEF_MONGO_DB__, undefined, res).findOneAndUpdate(
     { _id: new ObjectId(result._id)  }, 
     { $set: user }, 
     (err:any, new_result:any) => {

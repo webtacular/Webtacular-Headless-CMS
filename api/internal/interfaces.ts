@@ -162,3 +162,9 @@ export let UserInterfaceTemplate = (): UserInterface => {
         }
     };
 }
+
+export interface RoleInterface {
+    name: string;
+    color: string;
+    permissions: string[];
+}

@@ -1,6 +1,6 @@
 import { checkForToken, revokeToken, validateToken } from "../../internal/token_service";
 import { httpErrorHandler, locals, mongoErrorHandler, returnLocal } from "../../internal/response_handler";
-import { getMongoDBclient } from "../../internal/db_service";
+import { mongoDB } from "../../internal/db_service";
 import { ObjectId } from "mongodb";
 import { TokenInterface } from "../../internal/interfaces";
 
@@ -29,7 +29,7 @@ export default async (req:any, res:any, resources:string[]):Promise<void> => {
     }
 
     // Get the client and make the request
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection, res).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
         
         // If there is an error, pass it to the error handler
         if (err) return mongoErrorHandler(err.code, res, err.keyPattern);

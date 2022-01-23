@@ -1,8 +1,8 @@
 import { ObjectId } from 'mongodb';
-import {UserInterface} from '../../internal/interfaces';
+import { UserInterface } from '../../internal/interfaces';
 import { httpErrorHandler, httpSuccessHandler, returnLocal, locals } from "../../internal/response_handler";
 import { checkForToken } from "../../internal/token_service";
-import {getUser} from '../../internal/user_service';
+import { getUser } from '../../internal/user_service';
 
 export default async (req:any, res:any, resources:string[]):Promise<void> => {
 

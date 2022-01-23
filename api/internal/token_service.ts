@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { ObjectId } from 'mongodb';
 import { TokenInterface } from './interfaces';
 import { httpErrorHandler, locals, mongoErrorHandler, returnLocal } from './response_handler';
-import { getMongoDBclient } from './db_service';
+import { mongoDB } from './db_service';
 import { compareHash, hashString } from "./hashing_service";
 import { Cache } from 'memory-cache';
 import { getTimeInSeconds } from "./general_service";
@@ -51,7 +51,7 @@ export async function generateToken(userID:string, ttl:number = global.__SECURIT
     // to add it to the database.
 
     // Get the database client
-    getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
+    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
         if(err) console.log(err);
         //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
     }); 
@@ -108,7 +108,7 @@ export async function validateToken(token:string):Promise<TokenInterface> {
     return new Promise((resolve:any) => {
 
         // Get the database client and make the request
-        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
 
             //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
             if(err) console.log(err);
@@ -173,7 +173,7 @@ export async function revokeToken(token_id:ObjectId):Promise<boolean> {
     return new Promise((resolve:any) => {
 
         // Get the database client and make the request
-        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, async(err:any, result:any) => {
 
             //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
             if(err) console.log(err);
@@ -309,7 +309,7 @@ export async function checkForToken(req:any, res:any, strict:boolean = true, ski
     return new Promise((resolve:any) => {
 
         // Get the database client and make the request
-        getMongoDBclient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOne(mongoDBfindOBJ, (err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOne(mongoDBfindOBJ, (err:any, result:any) => {
             
             // if an error occured, pass it to the error handler
             if (err) return resolve(mongoErrorHandler(err.code, res, err.keyPattern));

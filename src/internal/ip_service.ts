@@ -26,6 +26,8 @@ export async function checkIPlogs(ip:string, res:any):Promise<IpInterface> {
     });
 }
 
+//TODO: logNew and logSame should be merged into one function
+
 export async function logNewIP(ip:string, user_id:string, res:any) {
     let ipOBJ:IpInterface = {
         _id: new ObjectId(),

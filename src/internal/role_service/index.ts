@@ -36,13 +36,11 @@ export function load() {
     // Get the precedence data
     roles = db.getData('/roles');
 
-    addRole({
-        name: 'admin',
-        color: '#ff0000',
-        permissions: []
-    });
-    
 }
 
-import addRole from "./src/createRole";
+import createRole from "./src/createRole";
+
+export default {
+    createRole,
+};
 

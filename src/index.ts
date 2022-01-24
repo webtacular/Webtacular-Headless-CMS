@@ -43,7 +43,7 @@ app.use(function (error:any, req:any, res:any, next:any){
 
 import { mongoDB } from './internal/db_service';
 import { AuthCollection } from './internal/interfaces';
-import {load, role, user} from './internal/role_service';
+import {load, perm, role, user} from './internal/role_service';
 import {ObjectId} from 'mongodb';
 
 // Global variables set by the settings file
@@ -95,8 +95,8 @@ declare global {
         cache_tokens: true,
     }
 
-    //loads the role service
-    load();
+    // //loads the role service
+    // load();
 
     // let test = role.add({
     //     name: 'user',
@@ -104,14 +104,23 @@ declare global {
     //     permissions: [
             
     //     ],
+    //     users: []
     // }, true);
 
-    // console.log(test);
+    // user.add(new ObjectId('61e9a16ac82a7ded5811144e'), 'user', true)
 
-    // test = role.remove('user');
+    // console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
 
-    console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
+    // console.log(await user.get(new ObjectId('61e9a16ac82a7ded5811144e')));
 
+    // user.remove(new ObjectId('61e9a16ac82a7ded5811144e'),  'user', true);
+    // // console.log(test);
+   
+
+    // // test = role.remove('user');
+
+    // //console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
+    // //console.log(await perm.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'create_blog', true));
 
 
     app.listen(port, (error:any) => {

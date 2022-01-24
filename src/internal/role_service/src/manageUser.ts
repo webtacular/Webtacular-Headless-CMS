@@ -73,7 +73,7 @@ export async function has(user: UserInterface | ObjectId, role:string, returnErr
     // Loop through the roles that the user has
     for(let user_role of data as RoleInterface[]) {
         // If the user has the role, set the has_role to true
-        if(user_role.name.toLowerCase() === role)
+        if(user_role?.name?.toLowerCase() === role)
             has_role = true;
     }
 

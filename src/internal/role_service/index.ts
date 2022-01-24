@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { ErrorInterface, RoleInterface, UserInterface } from "../interfaces";
 import { get as get_role, add as add_role, remove as remove_role, removeID, addID } from "./src/manageRole";
 import { get as get_user, has as user_has, add as user_add, remove as user_remove } from "./src/manageUser";
+import { get as get_perm, has as perm_has } from "./src/managePerms";
 
 export let loaded:boolean = false,
     db_name:string = 'role_db',
@@ -75,7 +76,7 @@ export const role:RoleExportInterface = {
     removeID: (role_name: string, id: ObjectId, returnErrorKey?: boolean): boolean | ErrorInterface => removeID(role_name, id, returnErrorKey),
 }
 
-//--------------------------------//
+//---------------------------------//
 
 
 //--------[  User exports ]--------//
@@ -93,3 +94,20 @@ export const user:UserExportInterface = {
     add: (user: ObjectId, role:string, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> => user_add(user, role, returnErrorKey),
     remove: (user: ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => user_remove(user, role, returnErrorKey),
 }
+
+//---------------------------------//
+
+
+//--------[  perm exports ]--------//
+
+interface PermExportInterface {
+    has(user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface>;
+    get(role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean;
+}
+
+export const perm:PermExportInterface = {
+    has: (user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => perm_has(user, role, returnErrorKey),
+    get: (role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean => get_perm(role, returnErrorKey),
+}
+
+//---------------------------------//

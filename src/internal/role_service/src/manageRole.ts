@@ -171,7 +171,7 @@ function modifyID(role_name:string, user_id:ObjectId, action:string, returnError
     switch(action) {
         case 'add':
             // update the role in the database
-            localDB.getDB(db_name).push(`/roles/${role_name}`, role, true);
+            role.users = [...role.users, user_id];
             break;
 
         case 'remove':

@@ -1,1 +1,1 @@
-{"permissions":["admin"],"precedence":{},"roles":{"admin":{"name":"admin","color":"#ff0000","permissions":[]},"user":{"name":"user","color":"#ff0000","permissions":[]}}}
+{"permissions":[],"precedence":{},"roles":{"user":{"name":"user","color":"#ff0000","permissions":[],"users":[]}}}

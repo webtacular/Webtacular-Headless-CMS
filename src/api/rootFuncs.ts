@@ -1,8 +1,8 @@
-import { user as user_manager } from '../internal/user_service';
-import { user as user_roles } from '../internal/role_service';
+import { user as user_manager } from '../core/user_service';
+import { user as user_roles } from '../core/role_service';
 
-import { checkForToken } from '../internal/token_service';
-import { UserInterface } from '../internal/interfaces';
+import { checkForToken } from '../core/token_service';
+import { UserInterface } from '../core/interfaces';
 import { ObjectId } from 'mongodb';
 
 let user = async (args:any, req:any) => {

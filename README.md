@@ -36,9 +36,9 @@ for the user, you have to set the 'email' to be a UNIQUE key
 | Goal |  |
 | ------------- |:-------------:|
 | Oauth 2.0 | ❌  |
-| left bar | ❌  |
+| Plugin system | ❌** |
 | Antivirus file scan | ❌ |
-| GraphQL | ✅|
+| GraphQL | ✅* |
 | Backup system | ❌ |
 | Role based permission | ✅ |
 | Document level permission | ✅ |
@@ -52,5 +52,14 @@ for the user, you have to set the 'email' to be a UNIQUE key
 | Documentation | ❌ |
 | Content Scheduling | ❌ |
 | Img encoding | ❌ |
+| Automatic setup | ❌ |
 
 *Parital
+** Parital, Techincally all services are available for plugins to use, but there isint an actual plugin mangager right now.
+
+## Dependencies?
+
+I want this project to be as independant as possible, I dont want to depend on any other packages.
+This is a learning exercise, so excuse me if I rewrite a lot of modules.
+
+If you see a dependency that you can write from scratch, contribute it!

@@ -4,8 +4,8 @@ export const express:any = require('express'),
     settings = require('../settings.json'),
     cookieParser = require('cookie-parser');
 
-import { httpErrorHandler, localMiddleware, locals } from './internal/response_handler';
-import { default as route, strictRest } from './internal/route_service';
+import { httpErrorHandler, localMiddleware, locals } from './core/response_handler';
+import { default as route, strictRest } from './core/route_service';
 import './graphQL/graphql';
 
 const port:number = 3000,
@@ -42,9 +42,9 @@ app.use(function (error:any, req:any, res:any, next:any){
 // oo     .d8P   888 . d8(  888   888       888 . 
 // 8""88888P'    "888" `Y888""8o d888b      "888" 
 
-import { mongoDB } from './internal/db_service';
-import { AuthCollection } from './internal/interfaces';
-import {load, perm, role, user} from './internal/role_service';
+import { mongoDB } from './core/db_service';
+import { AuthCollection } from './core/interfaces';
+import {load, perm, role, user} from './core/role_service';
 import {ObjectId} from 'mongodb';
 
 // Global variables set by the settings file

@@ -1,6 +1,6 @@
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
-import { LocalDatabasesInterface } from '../';
+import { LocalDatabasesInterface } from '..';
 
 // Variable that stores our Local Databases.
 export let local_databases:LocalDatabasesInterface = {};

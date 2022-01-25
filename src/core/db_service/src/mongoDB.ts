@@ -1,6 +1,6 @@
 import { Collection, MongoClient, MongoClientOptions } from 'mongodb';
 import { httpErrorHandler, locals, returnLocal } from '../../response_handler';
-import { MongoDatabasesInterface } from '../';
+import { MongoDatabasesInterface } from '..';
 
 // Variable that stores our MongoDB Databases.
 export let mongo_databases:MongoDatabasesInterface = {};

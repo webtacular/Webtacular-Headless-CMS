@@ -1,3 +1,11 @@
+
+![GHCMS](https://raw.githubusercontent.com/GrzegorzManiak/GHCMS/master/GHcms.png)
+
+[![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) 
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/GrzegorzManiak/GHCMS)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/GrzegorzManiak/GHCMS)
+![GitHub contributors](https://img.shields.io/github/contributors/GrzegorzManiak/GHCMS)
+
 # This is my attempt at learning Content managment systems.
 
 Gregs
@@ -21,3 +29,28 @@ we use the _id to find the token in the db, and we compare the token to the hash
 with cacheing enabled, we shave of 60-70 ms of the request time! down from 70-80ms to 15-25 ms
 
 for the user, you have to set the 'email' to be a UNIQUE key
+
+
+## Goals
+
+| Goal |  |
+| ------------- |:-------------:|
+| Oauth 2.0 | ❌  |
+| left bar | ❌  |
+| Antivirus file scan | ❌ |
+| GraphQL | ✅|
+| Backup system | ❌ |
+| Role based permission | ✅ |
+| Document level permission | ✅ |
+| Localization | ✅ |
+| Importing | ❌ |
+| Exporting | ❌ |
+| Asset fingerprinting | ❌ |
+| Static file delivery | ❌ |
+| CLI | ❌ |
+| User Managment | ✅* |
+| Documentation | ❌ |
+| Content Scheduling | ❌ |
+| Img encoding | ❌ |
+
+*Parital

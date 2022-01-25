@@ -2,6 +2,7 @@
 
 import { ObjectId } from "mongodb";
 import { ErrorInterface, UserInterface } from "../interfaces";
+import './gql/graphQL';
 
 interface UserFunctions {
     get: (id:ObjectId, returnErrorKey?:boolean, res?:any) => Promise<UserInterface | boolean | ErrorInterface>;

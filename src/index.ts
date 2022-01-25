@@ -1,21 +1,14 @@
 export const express:any = require('express'),
-    { json } = require('body-parser'),
     app:any = express(),
     settings = require('../settings.json'),
     cookieParser = require('cookie-parser');
 
 import { httpErrorHandler, localMiddleware, locals } from './core/response_handler';
-import { default as route, strictRest } from './core/route_service';
-import './graphQL/graphql';
+import { mongoDB } from './core/db_service';
+import { lockGraphSQL } from './api/graphql';
+import './api/graphql';
 
-const port:number = 3000,
-    maxBodySize:number = 2500;
-
-//Express middleware that only allows POST, PUT, DELETE and GET requests
-app.use(strictRest);
-
-//Express middleware that parses the body of the request
-app.use('/', json({ limit: maxBodySize }));
+const port:number = 3000;
 
 //Express setting that disables the X-Powered-By header
 app.disable("x-powered-by");
@@ -25,27 +18,6 @@ app.use(localMiddleware(locals.supported_languages));
 
 //Express middleware that parses cookies
 app.use(cookieParser());
-
-//Express middleware that handles json body parsing errors
-app.use(function (error:any, req:any, res:any, next:any){
-    return httpErrorHandler(error.statusCode, res, `${error.message}${(() => {
-        if(error.statusCode === 413) return `, max body size: ${maxBodySize} bytes`;
-        else return '';
-    })()}`);
-});
-
-//  .oooooo..o     .                          .   
-// d8P'    `Y8   .o8                        .o8   
-// Y88bo.      .o888oo  .oooo.   oooo d8b .o888oo 
-//  `"Y8888o.    888   `P  )88b  `888""8P   888   
-//      `"Y88b   888    .oP"888   888       888   
-// oo     .d8P   888 . d8(  888   888       888 . 
-// 8""88888P'    "888" `Y888""8o d888b      "888" 
-
-import { mongoDB } from './core/db_service';
-import { AuthCollection } from './core/interfaces';
-import {load, perm, role, user} from './core/role_service';
-import {ObjectId} from 'mongodb';
 
 // Global variables set by the settings file
 declare global {
@@ -59,6 +31,8 @@ declare global {
     var __SECURITY_OPTIONS__:any;
 }
 
+lockGraphSQL();
+    
 (async() => {
     switch(settings.api.production) {
         case true:
@@ -96,79 +70,11 @@ declare global {
         cache_tokens: true,
     }
 
-    // //loads the role service
-    // load();
-
-    // let test = role.add({
-    //     name: 'user',
-    //     color: '#ff0000',
-    //     permissions: [
-            
-    //     ],
-    //     users: []
-    // }, true);
-
-    user.add(new ObjectId('61e9a16ac82a7ded5811144e'), 'admin')
-
-    // console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
-
-    // console.log(await user.get(new ObjectId('61e9a16ac82a7ded5811144e')));
-
-    // user.remove(new ObjectId('61e9a16ac82a7ded5811144e'),  'user', true);
-    // // console.log(test);
-   
-
-    // // test = role.remove('user');
-
-    // //console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
-    // //console.log(await perm.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'create_blog', true));
-
-
     app.listen(port, (error:any) => {
         if (error) console.error(error);
         else console.log(`Server listening on port: ${port}`);
     });
 })();
-
-
-// ooooooooo.
-// `888   `Y88.
-//  888   .d88'  .ooooo.   .oooo.o  .ooooo.  oooo  oooo  oooo d8b  .ooooo.   .ooooo.   .oooo.o 
-//  888ooo88P'  d88' `88b d88(  "8 d88' `88b `888  `888  `888""8P d88' `"Y8 d88' `88b d88(  "8 
-//  888`88b.    888ooo888 `"Y88b.  888   888  888   888   888     888       888ooo888 `"Y88b.  
-//  888  `88b.  888    .o o.  )88b 888   888  888   888   888     888   .o8 888    .o o.  )88b 
-// o888o  o888o `Y8bod8P' 8""888P' `Y8bod8P'  `V88V"V8P' d888b    `Y8bod8P' `Y8bod8P' 8""888P' 
-
-//Users resource
-
-route(`${__dirname}/api/user`,'v1/user', app, { 
-    GET: [':id'],
-    PUT: [':id'],
-    DELETE: [':id']
-});
-
-route(`${__dirname}/api/role`,'v1/role', app, { 
-    GET: [':id'],
-    PUT: [':id'],
-    DELETE: [':id']
-});
-
-route(`${__dirname}/api/session`, 'v1/session', app, { 
-    GET: [':id'],
-    DELETE: [':token', 'user/:id'] // temp
-});
-
-route(`${__dirname}/api/content`, 'v1/content', app, { 
-    GET: [':id'],
-    PUT: [':id'],
-    DELETE: [':id']
-});
-
-route(`${__dirname}/api/role`, 'v1/role', app, { 
-    GET: [':id'],
-    PUT: [':id'],
-    DELETE: [':id']
-});
 
 //Cataches all other routes and sends a 404 error
 app.all('/*', (req:any, res:any) =>

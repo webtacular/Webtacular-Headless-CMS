@@ -5,6 +5,7 @@
     "dependencies": {
         "@graphql-tools/graphql-file-loader": "^7.3.3",
         "@graphql-tools/load": "^7.5.1",
+        "@graphql-tools/stitch": "^8.4.3",
         "@types/node": "^16.11.19",
         "bcrypt": "^5.0.0",
         "body-parser": "^1.19.1",

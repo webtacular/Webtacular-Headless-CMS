@@ -1,16 +1,21 @@
 import bcrypt from 'bcrypt';
-import { httpErrorHandler } from './response_handler';
+import {ErrorInterface} from './interfaces';
 
 /**
  * 
  * @param string string - the string to hash
- * @param res any - the response object, optional
+ * @param salt_rounds number - the number of rounds to use for hashing
+ * @param returnErrorKey boolean - if true, returns an error object, if false, returns a boolean
  * @returns Promise<string> - a promise that resolves to the hashed string
  */
-export async function hashString(string:string, salt_rounds:number, res?:any):Promise<string> {
-    let throwError = (error:any):void => {
-        if(res) httpErrorHandler(500, res, error.message);
-        else throw error;
+export async function hashString(string:string, salt_rounds:number, returnErrorKey?:boolean):Promise<string | ErrorInterface> {
+    let throwError = (error:any):ErrorInterface | string => {
+        if(returnErrorKey === true) return {
+            local_key: 'HASH_ERROR',
+            message: error.message
+        } as ErrorInterface;
+
+        else return '';
     }
 
     if(byteSize(string) > 75) throwError('string is too long');

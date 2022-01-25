@@ -74,49 +74,6 @@ export const httpCodes: { [key:number]: string } = {
     511 : "NETWORK_AUTHENTICATION_REQUIRED",
 }
 
-/**
- * This function is used to respond to an http request with an error code and message
- * 
- * @param statusCode number - HTTP error code, if not provided or invalid, defaults to 500
- * @param res any - the response object
- * @param message string - the message to send to the client, optuonal
- */
-export function httpErrorHandler(statusCode:number, res:any, message?:any, headers?:any):void {
-    httpRespone(statusCode, res, false, message, headers);
-}
-
-/**
- * This function is used to respond to an http request with an success code and message
- * 
- * @param statusCode number - HTTP error code, if not provided or invalid, defaults to 500
- * @param res any - the response object
- * @param message string - the message to send to the client, optuonal
- */
-export function httpSuccessHandler(statusCode:number, res:any, message?:any, headers?:any):void {
-    httpRespone(statusCode, res, true, message, headers);
-}
-
-function httpRespone(statusCode:number, res:any, success:boolean, message?:any, headers?:any):void {
-    // if any headers are provided, add them to the response
-    if(headers) res.set(headers);
-
-    // we only respond with json
-    res.set({
-        'Content-Type': 'application/json',
-    });
-
-    // Check if the error code is valid
-    if (statusCode in httpCodes !== true) statusCode = 500;
-
-    // respond with the error code and message and close the connection
-    return res.status(statusCode).send(JSON.stringify({
-        success,
-        status_code: statusCode,
-        status_message: httpCodes[statusCode],
-        message: message || ''
-    })).end();
-}
-
 // ooo        ooooo                                            oooooooooo.   oooooooooo.  
 // `88.       .888'                                            `888'   `Y8b  `888'   `Y8b 
 //  888b     d'888   .ooooo.  ooo. .oo.    .oooooooo  .ooooo.   888      888  888     888 
@@ -148,25 +105,27 @@ export const mongoErrorCodes: { [key:number]: { error:string, code:number } } = 
  * @param message string - the message to send to the client, optuonal
  */
 export function mongoErrorHandler(errorCode:number, res:any, message?:string, headers?:any):void {
-    
+    return;
+
+    //TODO: Deprecate this function
     // if any headers are provided, add them to the response
-    if(headers) res.set(headers);
+    // if(headers) res.set(headers);
 
-    // we only respond with json
-    res.set({
-        'Content-Type': 'application/json',
-    });
+    // // we only respond with json
+    // res.set({
+    //     'Content-Type': 'application/json',
+    // });
 
-    // Check if the error code is valid
-    if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR, res.language));
+    // // Check if the error code is valid
+    // if (errorCode in mongoErrorCodes !== true) return httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR, res.language));
 
-    // respond with the error code and message and close the connection
-    res.status(mongoErrorCodes[errorCode].code).send(JSON.stringify({
-        success: false,
-        status_code: mongoErrorCodes[errorCode].code,
-        status_message: mongoErrorCodes[errorCode].error,
-        message: message || ''
-    })).end();
+    // // respond with the error code and message and close the connection
+    // res.status(mongoErrorCodes[errorCode].code).send(JSON.stringify({
+    //     success: false,
+    //     status_code: mongoErrorCodes[errorCode].code,
+    //     status_message: mongoErrorCodes[errorCode].error,
+    //     message: message || ''
+    // })).end();
 }
 
 // ooooo          .oooooo.     .oooooo.         .o.       ooooo         .oooooo..o 

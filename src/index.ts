@@ -3,7 +3,7 @@ export const express:any = require('express'),
     settings = require('../settings.json'),
     cookieParser = require('cookie-parser');
 
-import { httpErrorHandler, localMiddleware, locals } from './core/response_handler';
+import { localMiddleware, locals } from './core/response_handler';
 import { mongoDB } from './core/db_service';
 import { lockGraphSQL } from './api/graphql';
 import './api/graphql';
@@ -77,5 +77,4 @@ lockGraphSQL();
 })();
 
 //Cataches all other routes and sends a 404 error
-app.all('/*', (req:any, res:any) =>
-    httpErrorHandler(404, res));
+app.all('/*', (req:any, res:any) => {});

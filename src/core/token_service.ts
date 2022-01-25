@@ -40,7 +40,7 @@ export async function generateToken(userID:string, ttl:number = global.__SECURIT
     // Object to be inserted in the database
     let toBeInserted:TokenInterface = {
         _id: new ObjectId(),
-        token: token,
+        token: token as string,
         user_id: userID,
         timestamp: timestamp,
         expiration: timestamp + ttl,

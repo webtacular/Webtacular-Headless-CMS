@@ -1,6 +1,7 @@
 import { Collection, MongoClient, MongoClientOptions } from 'mongodb';
-import { httpErrorHandler, locals, returnLocal } from '../../response_handler';
+import { locals, returnLocal } from '../../response_handler';
 import { MongoDatabasesInterface } from '..';
+import {ErrorInterface} from '../../interfaces';
 
 // Variable that stores our MongoDB Databases.
 export let mongo_databases:MongoDatabasesInterface = {};
@@ -39,16 +40,19 @@ export async function addDB(cs:string, db:string, collection:string):Promise<Mon
  * 
  * @param db string - the name of the database to get the collection from
  * @param collection string - the name of the collection to get, optional, uses the default collection if not provided
- * @param res any - the response object, optional
+ * @param returnErrorKey boolean - if true, returns an error object, if false, returns a boolean
  * 
  * @returns Collection - the collection object
 **/
-export function getClient(db:string, collection?:string, res?:any):Collection<{[key: string | number]: any}> {
+export function getClient(db:string, collection?:string, returnErrorKey?:boolean):Collection<{[key: string | number]: any}> | ErrorInterface {
     
     // If the database doesn't exist, throw an error
     if(!mongo_databases[db]) {
         // If the response object is defined, send an error to the client
-        if(res) httpErrorHandler(500, res, returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR));
+        if(returnErrorKey === true) return {
+            local_key: 'DATABASE_UNKNOWN_ERROR',
+            message: returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR)
+        } as ErrorInterface;
 
         // Otherwise, throw an error
         else throw new Error(`MongoDB database ${db} not found`);

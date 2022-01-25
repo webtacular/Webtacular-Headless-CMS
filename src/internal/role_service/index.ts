@@ -83,14 +83,14 @@ export const role:RoleExportInterface = {
 
 interface UserExportInterface {
     get(user: UserInterface | ObjectId, returnErrorKey?: boolean):Promise<RoleInterface[] | ErrorInterface | boolean>;
-    has(user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface>;
+    has(user: UserInterface | ObjectId, role:string[], returnErrorKey?: boolean):Promise<string[] | ErrorInterface>;
     add(user: ObjectId, role:string, returnErrorKey?:boolean):Promise<boolean | ErrorInterface>;
     remove(user: ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface>;
 }
 
 export const user:UserExportInterface = {
     get: (user: UserInterface | ObjectId, returnErrorKey?: boolean):Promise<RoleInterface[] | ErrorInterface | boolean> => get_user(user, returnErrorKey),
-    has: (user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => user_has(user, role, returnErrorKey),
+    has: (user: UserInterface | ObjectId, role:[], returnErrorKey?: boolean):Promise<string[] | ErrorInterface> => user_has(user, role, returnErrorKey),
     add: (user: ObjectId, role:string, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> => user_add(user, role, returnErrorKey),
     remove: (user: ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => user_remove(user, role, returnErrorKey),
 }

@@ -1,4 +1,4 @@
-const express:any = require('express'),
+export const express:any = require('express'),
     { json } = require('body-parser'),
     app:any = express(),
     settings = require('../settings.json'),
@@ -6,9 +6,10 @@ const express:any = require('express'),
 
 import { httpErrorHandler, localMiddleware, locals } from './internal/response_handler';
 import { default as route, strictRest } from './internal/route_service';
+import './graphQL/graphql';
 
 const port:number = 3000,
-    maxBodySize:number = 250;
+    maxBodySize:number = 2500;
 
 //Express middleware that only allows POST, PUT, DELETE and GET requests
 app.use(strictRest);
@@ -107,7 +108,7 @@ declare global {
     //     users: []
     // }, true);
 
-    // user.add(new ObjectId('61e9a16ac82a7ded5811144e'), 'user', true)
+    user.add(new ObjectId('61e9a16ac82a7ded5811144e'), 'admin')
 
     // console.log(await user.has(new ObjectId('61e9a16ac82a7ded5811144e'), 'user'));
 

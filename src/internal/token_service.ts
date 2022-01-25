@@ -1,11 +1,12 @@
 import { randomBytes } from "crypto";
 import { ObjectId } from 'mongodb';
-import { TokenInterface } from './interfaces';
-import { httpErrorHandler, locals, mongoErrorHandler, returnLocal } from './response_handler';
+import { ErrorInterface, TokenInterface } from './interfaces';
+import { locals, returnLocal } from './response_handler';
 import { mongoDB } from './db_service';
 import { compareHash, hashString } from "./hashing_service";
 import { Cache } from 'memory-cache';
 import { getTimeInSeconds } from "./general_service";
+import { user } from "./role_service";
 
 // this is the cache for the token service
 export let token_cache:any = new Cache();
@@ -225,32 +226,38 @@ export function refreshToken(tokenInfo:TokenInterface):void {
  * This function is used to check if the client provided a valid authentication token within the header or cookie of the request.
  * 
  * @param req any - the request object
- * @param res any - the response object
- * @param strict boolean - if true, a 401 unauthorized response will be sent if the token is invalid or not found, if false, the will be allowed to continue
+ * @param returnErrorKey boolean - if true, errors will be returned as error objects, if false, errors will not be returned
  */
-export async function checkForToken(req:any, res:any, strict:boolean = true, skipCache:boolean = false):Promise<boolean> {
+//TODO: Get rid of the response object, it is not needed, GraphQL will send the response
+export async function checkForToken(req:any, returnErrorKey:boolean = true, skipCache:boolean = false):Promise<ErrorInterface | void> {
+
     // this ensures that the there is data in the req.auth object
     req.auth = emptyTokenObject();
 
+    // make sure its the correct type
+    req.auth = req.auth as TokenInterface;
+
     // returns a boolean while also executing a function
-    let returnBool = (func:any, bool:boolean) => {
+    let exec = (func:any) => {
         func();
-        return bool;
+        req.auth = req.auth as TokenInterface;
     };
 
     // Get the token from the header or cookie, inline if statment, 
     // if the auth header is undefined, check the cookie
     // else use the auth header
-    const token = req.headers.authorization === undefined ? req.cookies.token : req.headers.authorization;
+    const token = req?.headers?.authorization === undefined ? req?.cookies?.token : req?.headers?.authorization;
 
     //-------[ NO TOKEN FOUND ]-------//
     // If the token is undefined, return false
-    if(token === undefined && strict === true)
-        return returnBool(() => httpErrorHandler(401, res, returnLocal(locals.KEYS.MISSING_TOKEN)), false);
-    
-    // I could just pass the empty token to the validateToken function, but I dont waste a db request that I know will be false
-    else if(token === undefined)
-        return false;
+    if(token === undefined) {
+        if(returnErrorKey === true) return {
+            local_key: 'MISSING_TOKEN',
+            message: returnLocal(locals.KEYS.MISSING_TOKEN)
+        }
+
+        else return;
+    }
     //--------------------------------//
 
 
@@ -263,7 +270,7 @@ export async function checkForToken(req:any, res:any, strict:boolean = true, ski
 
         // if the token is found in the cache, return the token data unless the user is an admin
         if(tokenCache !== undefined && tokenCache !== null && tokenCache?.admin !== true)
-            return returnBool(() => { Object.assign(req.auth, tokenCache) }, true);
+            return exec(() => { Object.assign(req.auth, tokenCache) });
 
         // and if the token is not found in the cache, proceed to check the database and cache it
     }
@@ -278,54 +285,48 @@ export async function checkForToken(req:any, res:any, strict:boolean = true, ski
     req.auth = tokenData;
 
     // If the token is invalid, return false
-    if(tokenData.authorized !== true && strict === true)
-        return returnBool(() => httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_TOKEN)), false);
+    if(tokenData.authorized !== true){
+        if(returnErrorKey === true) return {
+            local_key: 'INVALID_TOKEN',
+            message: returnLocal(locals.KEYS.INVALID_TOKEN)
+        }
 
-    else if(tokenData.user_id === undefined)
-        return false;
+        else return;
+    }
 
     // If the token is expired, return false
-    if(tokenData.expired === true && strict === true)
-        return returnBool(() => httpErrorHandler(401, res, returnLocal(locals.KEYS.EXPIRED_TOKEN)), false);
+    if(tokenData.expired === true){
+        if(returnErrorKey === true) return {
+            local_key: 'EXPIRED_TOKEN',
+            message: returnLocal(locals.KEYS.EXPIRED_TOKEN)
+        }
 
-    else if(tokenData.expired === true)
-        return false;
+        else return;
+    }
 
     // If the user is not an admin, return true
     if(tokenData.admin !== true)
-        return true
+        return;
     //-------------------------------//
 
 
     //--------[ ADMIN REQUEST ]--------//
     // If the user is an admin, do further checks
 
-    // Object to be found in the database
-    let mongoDBfindOBJ:any = {
-        _id: new ObjectId(tokenData.user_id),
-    }
-
     // Cretae a promise to return the token data
-    return new Promise((resolve:any) => {
+    return new Promise(async(resolve:any) => {
+        // check if the user actually has those roles
+        if(await user.has(new ObjectId(tokenData.user_id), ['admin', 'owner']) === true)
+            return resolve();
 
-        // Get the database client and make the request
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOne(mongoDBfindOBJ, (err:any, result:any) => {
-            
-            // if an error occured, pass it to the error handler
-            if (err) return resolve(mongoErrorHandler(err.code, res, err.keyPattern));
+        // If the user is not found or the token is invalid, return false and revoke the token
+        revokeToken(tokenData._id);
 
-
-            // if the user is an admin, return true
-            if(result?.permissions?.admin === true || result?.permissions?.owner === true)
-                return resolve(true);
-            
-
-            // If the user is not found or the token is invalid, return false and revoke the token
-            revokeToken(tokenData._id);
-
-            if(strict === true) return resolve(returnBool(() => httpErrorHandler(401, res, returnLocal(locals.KEYS.INVALID_TOKEN)), false));
-
-            else return resolve(returnBool(() => { req.auth = emptyTokenObject() }, false));        
+        if(returnErrorKey === true) return resolve({
+            local_key: 'INVALID_TOKEN',
+            message: returnLocal(locals.KEYS.INVALID_TOKEN)
         });
+
+        else return resolve();    
     });
 }

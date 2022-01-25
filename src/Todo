@@ -41,3 +41,7 @@ body-parser // on the fence about it, probably not
 
 [1] Create your account, it will have 0 perms.
 [2] Copy that account ID, and in the configuration.json, set the owner id to your ID
+
+
+// look into GraphQL
+// Maybe the blogs can work like a git repo

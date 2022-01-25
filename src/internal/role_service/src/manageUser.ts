@@ -54,34 +54,44 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
  * 
  * @returns boolean | ErrorInterface - true if the user has the role, false if not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
 */
-export async function has(user: UserInterface | ObjectId, role:string, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
-    // make sure the role is in lowercase
-    role = role.toLowerCase();
+export async function has(user: UserInterface | ObjectId, roles:string[], returnErrorKey?:boolean):Promise<string[] | ErrorInterface> {
+    let data;
 
     // Get the roles that the user has
-    let data = await get(user),
-        has_role:boolean = false;
+    if(user instanceof ObjectId)
+        data = await get(user);
+    else data = user;
+
+    // place the roles that the user has into this array
+    let has_roles:string[] = [];
 
     // if the user dosent exist, return an error
     if(data === false) {
         if(returnErrorKey === true)
             return { local_key: 'USER_NOT_FOUND' };
 
-        return false;
+        return [];
     }
+
+   // make sure the data is in the correct type
+   else data = data as UserInterface;
 
     // Loop through the roles that the user has
-    for(let user_role of data as RoleInterface[]) {
-        // If the user has the role, set the has_role to true
-        if(user_role?.name?.toLowerCase() === role)
-            has_role = true;
-    }
+    data?.permissions?.roles?.forEach(user_role => {
+        roles?.forEach(role => {
+
+            // If the user has the role, set the has_role to true
+            if(user_role.toLowerCase() === role.toLowerCase())
+                has_roles = [...has_roles, role];
+        });
+    });
+
 
     // Return the has_role
-    if(returnErrorKey === true && has_role !== true)
+    if(returnErrorKey === true && has_roles === [])
         return { local_key: 'USER_HAS_NO_ROLE' };
 
-    return has_role;
+    return has_roles;
 }
 
 /**
@@ -132,7 +142,7 @@ async function edit_data(user: ObjectId, role:string, action:string, returnError
     // check if the user already has the role
     switch(action) {
         case 'add':
-            if(await has(user_data, role) === true)
+            if(await has(user_data, [role]) === true)
                 return true;
 
             // Add the role to the user
@@ -143,7 +153,7 @@ async function edit_data(user: ObjectId, role:string, action:string, returnError
             break;
 
         case 'remove':
-            if(await has(user_data, role) === false)
+            if(await has(user_data, [role]) === false)
                 return true;
 
             // Remove the role from the user

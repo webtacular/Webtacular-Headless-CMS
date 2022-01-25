@@ -33,7 +33,6 @@ export async function has(user: UserInterface | ObjectId, permission:string, ret
 
         // if the role is not found, continue
         if(role_data instanceof Array)
-
             // check if the permission is in the role
             if(role_data.includes(permission))
                 permission_found = true;

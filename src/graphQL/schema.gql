@@ -1,0 +1,59 @@
+type Query {
+    user(id: String!): User
+    authorization: String
+}
+
+#-----------------[ USER ]-----------------#
+
+# Root user object
+type User {
+    _id: String
+
+    user_name: String
+    language: String
+    profile_picture: String
+
+    permissions: User_Permissions
+    security_info: User_Security
+    blog_info: User_Blog_Info
+}
+
+
+type User_Permissions {
+    roles: [String]
+    owner: Boolean
+}
+
+type User_Security {
+    last_login: Int
+    signup_ip: String
+    account_locked: Boolean
+    attempts: Int
+    last_email: Int
+    account_creation: Int
+    email_verified: Boolean
+    login_attempts: [User_Login_Attempts]
+}
+
+type User_Login_Attempts {
+    ip: String
+    timestamp: Int
+    succsess: Boolean
+}
+
+type User_Blog_Info {
+    blogs: [User_Blogs]
+    comments: [User_Comments]
+}
+
+type User_Blogs {
+    blog_id: String
+    owner: Boolean
+    blog_name: String
+}
+
+type User_Comments {
+    comment_id: String
+    blog_id: String
+}
+#-----------------[ END ]-----------------#

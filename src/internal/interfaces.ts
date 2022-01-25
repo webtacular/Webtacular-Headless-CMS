@@ -67,7 +67,7 @@ export interface UserInterface {
     };
 
     permissions: {
-        roles: string[];
+        roles: Array<string>;
         owner?: boolean;
     }
 
@@ -92,6 +92,7 @@ export interface UserInterface {
         blogs?: {
             blog_id: ObjectId;
             owner: boolean;
+            blog_name: string;
         }[];
         comments?: {
             comment_id: ObjectId;
@@ -142,7 +143,8 @@ export let UserInterfaceTemplate = (): UserInterface => {
         },
 
         permissions: {
-            roles: [ 'user' ]
+            roles: [ 'user' ],
+            owner: false,
         },
 
         security_info: {
@@ -175,3 +177,5 @@ export interface ErrorInterface {
     where?: string;
     message?: string;
 }
+
+//TODO: GraphQL error interface, we just need to make sure we have a message field and thats it

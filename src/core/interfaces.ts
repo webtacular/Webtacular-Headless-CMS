@@ -173,9 +173,9 @@ export interface RoleInterface {
 }
 
 export interface ErrorInterface {
-    local_key?: string;
+    local_key: string;
     where?: string;
-    message?: string;
+    message: string;
 }
 
 //TODO: GraphQL error interface, we just need to make sure we have a message field and thats it

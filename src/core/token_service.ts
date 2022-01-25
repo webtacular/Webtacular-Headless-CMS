@@ -316,7 +316,7 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
     // Cretae a promise to return the token data
     return new Promise(async(resolve:any) => {
         // check if the user actually has those roles
-        if(await user.has(new ObjectId(tokenData.user_id), ['admin', 'owner']) === true)
+        if((await user.has(new ObjectId(tokenData.user_id), ['admin', 'owner']) as string[])?.length === 2)
             return resolve();
 
         // If the user is not found or the token is invalid, return false and revoke the token

@@ -2,6 +2,7 @@ import {ObjectId} from "mongodb";
 import { permissions } from "..";
 import { ErrorInterface, RoleInterface } from "../../interfaces";
 import { roleRegex } from "../../regex_service";
+import {locals, returnLocal} from "../../response_handler";
 
 export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterface => {
     // validate the name
@@ -21,7 +22,10 @@ export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterfa
     }
 
     let pass:boolean = false,
-        error_obj:ErrorInterface = {};
+        error_obj:ErrorInterface = {
+            local_key: '',
+            message: '',
+        };
 
     // validate the permissions 
     for(let elem of Object.keys(role?.permissions)) {
@@ -30,7 +34,8 @@ export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterfa
         if(roleRegex.role_permissions.test(elem) !== true){
             error_obj = {
                 local_key: 'INVALID_PERMISSION_NAME',
-                where: elem
+                where: elem,
+                message: returnLocal(locals.KEYS.INVALID_PERMISSION_NAME)
             };
 
             pass = false;
@@ -42,7 +47,8 @@ export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterfa
         if(permissions.includes(elem.toLowerCase()) !== true){
             error_obj = {
                 local_key: 'INVALID_PERMISSION_VALUE',
-                where: elem
+                where: elem,
+                message: returnLocal(locals.KEYS.INVALID_PERMISSION_VALUE)
             };
 
             pass = false;
@@ -56,7 +62,8 @@ export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterfa
         if(ObjectId.isValid(elem) !== true){
             error_obj = {
                 local_key: 'INVALID_USER_ID',
-                where: elem.toString()
+                where: elem.toString(),
+                message: returnLocal(locals.KEYS.INVALID_USER_ID)
             };
 
             pass = false;

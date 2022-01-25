@@ -3,6 +3,7 @@ import { ErrorInterface, RoleInterface, UserInterface } from "../../interfaces";
 import { addID, get as get_role, removeID } from "./manageRole";
 import { user as userDB } from "../../user_service";
 import getUser from "../../user_service/src/get";
+import {locals, returnLocal} from "../../response_handler";
 
 /**
  * fetches all roles that a user has, and if they have a role that no longer exists, it removes it.
@@ -20,7 +21,10 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
     //---------[ User not found ]---------//
     if(!user_data?.permissions?.roles) {
         if(returnErrorKey === true)
-            return { local_key: 'USER_NOT_FOUND' };
+            return { 
+                local_key: 'USER_NOT_FOUND',
+                message: returnLocal(locals.KEYS.USER_NOT_FOUND)
+            };
 
         return false;
     }
@@ -68,7 +72,10 @@ export async function has(user: UserInterface | ObjectId, roles:string[], return
     // if the user dosent exist, return an error
     if(data === false) {
         if(returnErrorKey === true)
-            return { local_key: 'USER_NOT_FOUND' };
+            return { 
+                local_key: 'USER_NOT_FOUND',
+                message: returnLocal(locals.KEYS.USER_NOT_FOUND)
+            };
 
         return [];
     }
@@ -89,7 +96,10 @@ export async function has(user: UserInterface | ObjectId, roles:string[], return
 
     // Return the has_role
     if(returnErrorKey === true && has_roles === [])
-        return { local_key: 'USER_HAS_NO_ROLE' };
+        return { 
+            local_key: 'NO_ROLE_FOUND',
+            message: returnLocal(locals.KEYS.NO_ROLE_FOUND)
+        };
 
     return has_roles;
 }
@@ -130,19 +140,23 @@ async function edit_data(user: ObjectId, role:string, action:string, returnError
     // if the user dosent exist, return an error
     if(user_data === false) {
         if(returnErrorKey === true)
-            return { local_key: 'USER_NOT_FOUND' };
+            return { 
+                local_key: 'USER_NOT_FOUND',
+                message: returnLocal(locals.KEYS.USER_NOT_FOUND)
+            };
 
         return false;
     }
     else user_data = user_data as UserInterface;
 
     // Get the roles that the user has
-    let role_array:Array<string> = [...user_data.permissions.roles];
+    let role_array:Array<string> = [...user_data.permissions.roles],
+        hasRole = (await has(user_data, [role]) as string[])?.includes(role);
 
     // check if the user already has the role
     switch(action) {
         case 'add':
-            if(await has(user_data, [role]) === true)
+            if(hasRole === true)
                 return true;
 
             // Add the role to the user
@@ -153,7 +167,7 @@ async function edit_data(user: ObjectId, role:string, action:string, returnError
             break;
 
         case 'remove':
-            if(await has(user_data, [role]) === false)
+            if(hasRole === false)
                 return true;
 
             // Remove the role from the user
@@ -168,7 +182,7 @@ async function edit_data(user: ObjectId, role:string, action:string, returnError
     let role_data:any = { permissions: { roles: role_array } };
     
     // update the user
-    let result = userDB.update(user, role_data, true);
+    let result = await userDB.update(user, role_data, true);
 
     // if the update failed, return an error
     if((result as ErrorInterface).local_key) {

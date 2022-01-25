@@ -27,7 +27,10 @@
         "INVALID_USER_ID": "You have supplied an invalid user id",
         "ALREADY_AUTHORIZED": "You are already logged in",
         "INVALID_PASSWORD": "You have entered an invalid password, you have {0} attempts left",
-        "MISSING_CONTENT_TYPE": "You did not supply a content type (&type=X)"
+        "MISSING_CONTENT_TYPE": "You did not supply a content type (&type=X)",
+        "NO_ROLE_FOUND": "No role found",
+        "INVALID_PERMISSION_NAME": "You have supplied an invalid permission name",
+        "INVALID_PERMISSION_VALUE": "You have supplied an invalid permission value"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -51,6 +54,9 @@
         "INVALID_PASSWORD": "INVALID_PASSWORD",
         "INVALID_USER_ID": "INVALID_USER_ID",
         "TOKEN_REVOKED": "TOKEN_REVOKED",
-        "MISSING_CONTENT_TYPE": "MISSING_CONTENT_TYPE"
+        "MISSING_CONTENT_TYPE": "MISSING_CONTENT_TYPE",
+        "NO_ROLE_FOUND": "NO_ROLE_FOUND",
+        "INVALID_PERMISSION_NAME": "INVALID_PERMISSION_NAME",
+        "INVALID_PERMISSION_VALUE": "INVALID_PERMISSION_VALUE"
     }
 }

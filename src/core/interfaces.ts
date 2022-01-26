@@ -67,7 +67,7 @@ export interface UserInterface {
     };
 
     permissions: {
-        roles: Array<string>;
+        roles: Array<ObjectId>;
         owner?: boolean;
     }
 
@@ -143,7 +143,7 @@ export let UserInterfaceTemplate = (): UserInterface => {
         },
 
         permissions: {
-            roles: [ 'user' ],
+            roles: [ ],
             owner: false,
         },
 

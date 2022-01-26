@@ -54,13 +54,13 @@ export async function has(user: UserInterface | ObjectId, permission:string, ret
 
 /**
  * 
- * @param role string - the name of the role to get
+ * @param role ObjectId - the ObjectId of the role to get
  * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
  * 
  * @returns boolean | ErrorInterface | Array<string> - true if the role was deleted, false if it was not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj,
  *          if 'returnErrorKey' is false, the output will be an array of permissions
  */
-export async function get(role: string, returnErrorKey?: boolean):Promise<Array<string> | ErrorInterface | boolean> {
+export async function get(role: ObjectId, returnErrorKey?: boolean):Promise<Array<string> | ErrorInterface | boolean> {
     let role_data = await get_role(role);
 
     if(!role_data) {

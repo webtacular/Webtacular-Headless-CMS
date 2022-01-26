@@ -8,7 +8,8 @@ import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
-import { perm, role } from "./core/role_service";
+import { perm, role, user as user_role } from "./core/role_service";
+import {ObjectId} from "mongodb";
 
 const settings = require('../settings.json');
 
@@ -69,12 +70,9 @@ declare global {
         else console.log(`Server listening on port: ${port}`);
     });
 
-    let msg = await role.add({
-        name: 'user',
-        permissions: [],
-        color: '#00ff00',
-        users: [],
-    }, true);
+    let msg = await user_role.add(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f1cd2524b5e8bb098a1f52'), true);
+    
+    //let msg = await user_role.remove(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f1cd2524b5e8bb098a1f52'), true);
 
     console.log(msg);
 })();

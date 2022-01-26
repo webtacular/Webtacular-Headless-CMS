@@ -4,9 +4,9 @@ import { ErrorInterface, RoleInterface } from "../../interfaces";
 import { roleRegex } from "../../regex_service";
 import { locals, returnLocal } from "../../response_handler";
 
-export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterface => {
+export default (role:RoleInterface, returnError?:boolean, ignoreNonePresent?:boolean):boolean | ErrorInterface => {
     // validate the name
-    if(roleRegex.role_name.test(role?.name) !== true){
+    if(ignoreNonePresent === false && !role?.name || roleRegex.role_name.test(role?.name) !== true){
         if(returnError === true)
             return { local_key: 'INVALID_ROLE_NAME' } as ErrorInterface;
 
@@ -14,7 +14,7 @@ export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterfa
     }
 
     // validate the color
-    if(roleRegex.role_color.test(role?.color) !== true){
+    if(ignoreNonePresent === false && !role?.color || roleRegex.role_color.test(role?.color) !== true){
         if(returnError === true) 
             return { local_key: 'INVALID_ROLE_COLOR' } as ErrorInterface;
 

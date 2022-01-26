@@ -3,11 +3,11 @@ export const app = Fastify({
     logger: false,
 });
 
-import { localMiddleware, locals } from './core/response_handler';
 import { mongoDB } from './core/db_service';
-import { server } from './core/addon_service';
+import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/graphql';
+import {scanAddonDir} from "./core/addon_service/src/scan";
 
 const settings = require('../settings.json');
 
@@ -48,11 +48,14 @@ declare global {
         cache_tokens: true,
     }
 
+    //scan and load plugins
+    scanAddonDir(__dirname + '/addons');
+
     //load the user gql schema
     user.gql();
 
     //Let the plugins do their thing
-    server.start();
+    addons.start(app);
 
     //load GQL
     lockGraphQL(app, true, '/gql'); //TODO: for now, keep this at /gql, it should be root, and on a subdomain eg. https://gql.domain.com/

@@ -8,7 +8,8 @@ const mercurius = require('mercurius')
 //------------------------------------//
 
 let schemas:any[] = [],
-    root_resolver:any = {};
+    root_resolver:any = {},
+    root_loader:any = {};
 
 /**
  * this defines custom schema + resolvers for the graphql api
@@ -17,12 +18,14 @@ let schemas:any[] = [],
  * @param file_name usually 'schema.gql'
  * @param root_resolver the root resolver for the schema
  */
-export function expandGQL(path:string, file_name:string, resolver:any) {
+export function expandGQL(path:string, file_name:string, resolver?:any):void {
     // Load the schema
-    schemas.push(require('fs').readFileSync(join(path, file_name), 'utf8'));
+    schemas.push(require('fs').readFileSync(join(path, file_name), 'utf8')); //TODO: Query can only be loaded once, so we need a way to combine it
 
-    // Load the resolvers
-    Object.assign(root_resolver, resolver);
+    // Load the resolvers and loaders
+
+    if(resolver)
+        Object.assign(root_resolver, resolver);
 }
 
 /**
@@ -30,7 +33,9 @@ export function expandGQL(path:string, file_name:string, resolver:any) {
  * after its called, no more changes can be made to the api,
  * to expand the schema you have to restart the server.
  * 
+ * @param app the fastify instance
  * @param graphiql boolean - if true, the graphiql interface will be enabled
+ * @param path the path to the graphql api
  */
 export function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:string = '/graphql') {
 
@@ -39,6 +44,7 @@ export function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:
     app.register(mercurius, {
         schema: combined,
         resolvers: root_resolver,
+        loaders: root_loader,
         graphiql,
         path
     });

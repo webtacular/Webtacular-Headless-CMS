@@ -18,3 +18,9 @@ export const roleRegex:regexObjects = {
     role_color: /^#[0-9a-fA-F]{6}$/,
     role_permissions: /^[a-zA-Z0-9_]{3,20}$/,
 }
+
+export const addonRegex:regexObjects = {
+    addon_name: /^[a-z][a-z0-9_]{3,20}$/,
+    addon_version: /^[0-9].[0-9].[0-9]$/,
+    addon_author: /^[a-zA-Z0-9_]{3,20}$/,
+}

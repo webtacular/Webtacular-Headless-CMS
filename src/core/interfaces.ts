@@ -178,4 +178,22 @@ export interface ErrorInterface {
     message: string;
 }
 
-//TODO: GraphQL error interface, we just need to make sure we have a message field and thats it
+export interface AddonInterface {
+    name: string;
+    description: string;
+    version: string;
+    author: string;
+    author_email?: string;
+
+    entry_point: string;
+
+    update?: {
+        update_url: string;
+        version_url: string;
+        changelog_url: string;
+    } | boolean;
+
+    types: string[];
+
+    import: any;
+}

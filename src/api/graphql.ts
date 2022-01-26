@@ -12,6 +12,10 @@ let schemas:any[] = [],
     root_loader:any = {};
 
 /**
+ * WARNING. When you want to add a new root key, you MUST use the following format:
+ * expand type Query {
+ * }
+ * 
  * this defines custom schema + resolvers for the graphql api
  * 
  * @param path usaly __dirname, but can be anything
@@ -38,7 +42,6 @@ export function expandGQL(path:string, file_name:string, resolver?:any):void {
  * @param path the path to the graphql api
  */
 export function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:string = '/graphql') {
-
     let combined = schemas.join('\n');
 
     app.register(mercurius, {

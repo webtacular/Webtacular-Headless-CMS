@@ -5,6 +5,8 @@ import { ErrorInterface, RoleInterface, UserInterface } from "../interfaces";
 import { get as get_role, add as add_role, remove as remove_role, removeID, addID } from "./src/manageRole";
 import { get as get_user, has as user_has, add as user_add, remove as user_remove } from "./src/manageUser";
 import { get as get_perm, has as perm_has } from "./src/managePerms";
+import { rootFuncs } from "./gql/graphQL";
+import { expandGQL } from "../../api/graphql";
 
 export let loaded:boolean = false,
     db_name:string = 'role_db',
@@ -103,11 +105,16 @@ export const user:UserExportInterface = {
 interface PermExportInterface {
     has(user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface>;
     get(role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean;
+    gql():any;
 }
 
 export const perm:PermExportInterface = {
     has: (user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => perm_has(user, role, returnErrorKey),
     get: (role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean => get_perm(role, returnErrorKey),
+    gql: ():any => expandGQL(__dirname, 'gql/schema.gql', rootFuncs)
 }
 
 //---------------------------------//
+
+
+//TODO: Change this service to use MongoDB

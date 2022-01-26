@@ -16,6 +16,8 @@ System
 
 # Random notes
 
+Once we have a stable build we will branch from master.
+
 [1]: Configureing MongoDB
 
 for the token system to work, youll need to set the 'token' parameter to be a UNIQUE key

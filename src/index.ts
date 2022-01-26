@@ -8,6 +8,7 @@ import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/graphql';
 import {scanAddonDir} from "./core/addon_service/src/scan";
+import {perm} from "./core/role_service";
 
 const settings = require('../settings.json');
 
@@ -51,8 +52,9 @@ declare global {
     //scan and load plugins
     scanAddonDir(__dirname + '/addons');
 
-    //load the user gql schema
+    //load the gql schemas
     user.gql();
+    perm.gql();
 
     //Let the plugins do their thing
     addons.start(app);

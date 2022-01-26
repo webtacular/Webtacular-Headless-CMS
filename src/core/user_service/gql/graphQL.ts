@@ -9,7 +9,7 @@ let user = async (args:any, req:any) => {
 
     // Test the ID
     if(ObjectId.isValid(args?.id) === false)
-        return; //TODO: htf do you manage errors in gql?
+        return;
 
     // Get the ID and the user data
     let id:ObjectId = new ObjectId(args?.id),

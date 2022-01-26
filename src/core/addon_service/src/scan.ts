@@ -1,7 +1,7 @@
 import { AddonInterface } from '../../interfaces';
 import { validateJSON } from './validate';
 import { join } from 'path';
-import {attatch} from '..';
+
 const fs = require('fs');
 
 export let current_addons:AddonInterface[] = [];
@@ -29,14 +29,11 @@ export let scanAddonDir = (path:string) => {
 
         // Log any errors
         if (addon instanceof Error) 
-            return console.error('[error loading addon] ', addon.message, folder_path);
+            throw console.error('[error loading addon] ', addon.message, folder_path);
 
         else addon = addon as AddonInterface;
 
         // Add the addon to the addon list
         current_addons.push(addon);
-
-        // Attatch the addon to the server
-        attatch(addon.import.main);
     });
 }

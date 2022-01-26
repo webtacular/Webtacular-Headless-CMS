@@ -194,6 +194,7 @@ export interface AddonInterface {
     } | boolean;
 
     types: string[];
+    id: ObjectId | string;
 
     import: any;
 }

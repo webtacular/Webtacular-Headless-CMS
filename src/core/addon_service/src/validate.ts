@@ -1,6 +1,8 @@
 import { AddonInterface } from "../../interfaces";
 import { addonRegex } from "../../regex_service";
 import { join } from 'path';
+import { ObjectId } from "mongodb";
+
 const fs = require('fs');
 
 let emptyObject = ():AddonInterface => {
@@ -21,6 +23,7 @@ let emptyObject = ():AddonInterface => {
 
         types: [],
         import: '',
+        id: '',
     }
 }
 
@@ -45,27 +48,30 @@ export let validateJSON = (json:string | any, path:string):AddonInterface | Erro
 
     // validate the values
     if(!addonRegex.addon_name.test(template.name))
-        return new Error("Invalid addon name, please reffer to addonRegex");
+        throw new Error("Invalid addon name, please reffer to addonRegex");
 
     if(!addonRegex.addon_version.test(template.version))
-        return new Error("Invalid addon version, please reffer to addonRegex");
+        throw new Error("Invalid addon version, please reffer to addonRegex");
 
     if(!addonRegex.addon_author.test(template.author))   
-        return new Error("Invalid addon author, please reffer to addonRegex");
+        throw new Error("Invalid addon author, please reffer to addonRegex");
+
+    if(!ObjectId.isValid(template.id))
+        throw new Error("Invalid ID, must be a valid BSON ID");
 
     // get the entry point location
     let entry_point:string = join(path, template.entry_point);
     
     // check if that file exists
     if(fs.existsSync(entry_point) !== true)
-        return new Error("Invalid addon entry point");
+        throw new Error("Invalid addon entry point");
 
     // Import the addon
     let imported = require(entry_point);
 
     // Check if the addon has a valid entry point
     if(!imported?.main)
-        return new Error("Invalid addon entry point, no exported main() function please use 'export function main() {}' ");
+        throw new Error("Invalid addon entry point, no exported main() function please use 'export function main() {}' ");
 
     // assign the import
     template.import = imported;

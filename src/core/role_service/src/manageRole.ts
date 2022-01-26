@@ -4,6 +4,7 @@ import { db_name } from "..";
 import { remove as user_remove } from "./manageUser";
 import validateRole from "./role_validation_service"
 import {ObjectId} from "mongodb";
+import {locals, returnLocal} from "../../response_handler";
 
 /**
  * adds a role to the database
@@ -69,7 +70,10 @@ export function remove(role_name:string, returnErrorKey?:boolean):boolean | Erro
     //----[ if the role does not exist ]----//
     if(role === false){
         if(returnErrorKey === true)
-            return { local_key: 'ROLE_NOT_FOUND' };
+            return { 
+                local_key: 'ROLE_NOT_FOUND',
+                message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
+            };
 
         else return false;
     }
@@ -105,7 +109,10 @@ export function update(role_name:string, role:RoleInterface, returnErrorKey?:boo
     //----[ if the role does not exist ]----//
     if(old_role === false){
         if(returnErrorKey === true)
-            return { local_key: 'ROLE_NOT_FOUND' };
+            return { 
+                local_key: 'ROLE_NOT_FOUND',
+                message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
+            };
 
         else return false;
     }
@@ -163,7 +170,10 @@ function modifyID(role_name:string, user_id:ObjectId, action:string, returnError
     //----[ if the role does not exist ]----//
     if(role === false) {
         if(returnErrorKey === true)
-            return { local_key: 'ROLE_NOT_FOUND' };
+            return { 
+                local_key: 'ROLE_NOT_FOUND',
+                message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
+            };
     
         return false;
     }

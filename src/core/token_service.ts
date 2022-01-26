@@ -228,7 +228,7 @@ export function refreshToken(tokenInfo:TokenInterface):void {
  * @param req any - the request object
  * @param returnErrorKey boolean - if true, errors will be returned as error objects, if false, errors will not be returned
  */
-//TODO: Get rid of the response object, it is not needed, GraphQL will send the response
+
 export async function checkForToken(req:any, returnErrorKey:boolean = true, skipCache:boolean = false):Promise<ErrorInterface | void> {
 
     // this ensures that the there is data in the req.auth object

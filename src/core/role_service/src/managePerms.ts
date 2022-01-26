@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { ErrorInterface, RoleInterface, UserInterface } from "../../interfaces";
 import { get as get_role } from "./manageRole";
 import getUser from "../../user_service/src/get";
+import {locals, returnLocal} from "../../response_handler";
 
 /**
  * 
@@ -21,7 +22,10 @@ export async function has(user: UserInterface | ObjectId, permission:string, ret
     //---------[ User not found ]---------//
     if(!user_data?.permissions?.roles) {
         if(returnErrorKey === true)
-            return { local_key: 'USER_NOT_FOUND' };
+            return { 
+                local_key: 'USER_NOT_FOUND',
+                message: returnLocal(locals.KEYS.USER_NOT_FOUND)
+            };
 
         return false;
     }
@@ -40,7 +44,10 @@ export async function has(user: UserInterface | ObjectId, permission:string, ret
 
     //---------[ return ]---------//
     if(permission_found === false && returnErrorKey === true)
-        return { local_key: 'PERMISSION_NOT_FOUND' };
+        return { 
+            local_key: 'PERMISSION_NOT_FOUND',
+            message: returnLocal(locals.KEYS.PERMISSION_NOT_FOUND)
+        };
 
     return permission_found;
 }
@@ -58,7 +65,10 @@ export function get(role: string, returnErrorKey?: boolean):Array<string> | Erro
 
     if(!role_data) {
         if(returnErrorKey === true)
-            return { local_key: 'ROLE_NOT_FOUND' };
+            return { 
+                local_key: 'ROLE_NOT_FOUND',
+                message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
+            };
 
         return false;
     }

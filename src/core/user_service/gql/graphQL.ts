@@ -2,7 +2,6 @@ import { user as user_manager } from '../';
 import { checkForToken } from '../../token_service';
 import { UserInterface } from '../../interfaces';
 import { ObjectId } from 'mongodb';
-import { expandGQL } from '../../../api/graphql';
 
 let user = async (args:any, req:any) => {
     // Check if the request is authenticated
@@ -51,8 +50,6 @@ let user = async (args:any, req:any) => {
     return base_response;
 }
 
-const rootFuncs = {
+export const rootFuncs = {
     user: (args:any, req:any) => user(args, req)
 }
-
-expandGQL(__dirname, 'schema.gql', rootFuncs);

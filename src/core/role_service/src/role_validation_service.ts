@@ -1,8 +1,8 @@
-import {ObjectId} from "mongodb";
+import { ObjectId } from "mongodb";
 import { permissions } from "..";
 import { ErrorInterface, RoleInterface } from "../../interfaces";
 import { roleRegex } from "../../regex_service";
-import {locals, returnLocal} from "../../response_handler";
+import { locals, returnLocal } from "../../response_handler";
 
 export default (role:RoleInterface, returnError?:boolean):boolean | ErrorInterface => {
     // validate the name

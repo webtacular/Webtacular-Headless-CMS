@@ -7,8 +7,8 @@ import { mongoDB } from './core/db_service';
 import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/graphql';
-import {scanAddonDir} from "./core/addon_service/src/scan";
-import {perm} from "./core/role_service";
+import { scanAddonDir } from "./core/addon_service/src/scan";
+import { perm, role } from "./core/role_service";
 
 const settings = require('../settings.json');
 
@@ -31,7 +31,7 @@ declare global {
         ip_collection: 'ip',
         user_collection: 'users',
         token_collection: 'tokens',
-        blog_collection: 'blogs',
+        role_collection: 'roles',
     }
 
     global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these
@@ -48,6 +48,8 @@ declare global {
         token_cache_expiration: 600 * 6, // 60 min in seconds
         cache_tokens: true,
     }
+
+    require('events').EventEmitter.defaultMaxListeners = 15;
 
     //scan and load plugins
     scanAddonDir(__dirname + '/addons');
@@ -66,6 +68,15 @@ declare global {
         if (error) console.error(error);
         else console.log(`Server listening on port: ${port}`);
     });
+
+    let msg = await role.add({
+        name: 'user',
+        permissions: [],
+        color: '#00ff00',
+        users: [],
+    }, true);
+
+    console.log(msg);
 })();
 
 //Cataches all other routes and sends a 404 error

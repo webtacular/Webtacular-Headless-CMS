@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { ErrorInterface, RoleInterface, UserInterface } from "../../interfaces";
 import { get as get_role } from "./manageRole";
 import getUser from "../../user_service/src/get";
-import {locals, returnLocal} from "../../response_handler";
+import { locals, returnLocal } from "../../response_handler";
 
 /**
  * 
@@ -60,8 +60,8 @@ export async function has(user: UserInterface | ObjectId, permission:string, ret
  * @returns boolean | ErrorInterface | Array<string> - true if the role was deleted, false if it was not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj,
  *          if 'returnErrorKey' is false, the output will be an array of permissions
  */
-export function get(role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean {
-    let role_data = get_role(role);
+export async function get(role: string, returnErrorKey?: boolean):Promise<Array<string> | ErrorInterface | boolean> {
+    let role_data = await get_role(role);
 
     if(!role_data) {
         if(returnErrorKey === true)
@@ -73,5 +73,5 @@ export function get(role: string, returnErrorKey?: boolean):Array<string> | Erro
         return false;
     }
 
-    return role_data.permissions;
+    return (role_data as RoleInterface).permissions;
 }

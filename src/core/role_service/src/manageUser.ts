@@ -3,7 +3,7 @@ import { ErrorInterface, RoleInterface, UserInterface } from "../../interfaces";
 import { addID, get as get_role, removeID } from "./manageRole";
 import { user as userDB } from "../../user_service";
 import getUser from "../../user_service/src/get";
-import {locals, returnLocal} from "../../response_handler";
+import { locals, returnLocal } from "../../response_handler";
 
 /**
  * fetches all roles that a user has, and if they have a role that no longer exists, it removes it.
@@ -36,10 +36,10 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
     for(let role of user_data.permissions.roles) {
 
         // Get the role
-        let role_data = get_role(role.toLowerCase());
+        let role_data = await get_role(role.toLowerCase());
 
         // if the role is found, push it to the roles array
-        if(role_data) roles.push(role_data);
+        if(role_data) roles.push(role_data as RoleInterface);
 
         // if the role is not found, remove it from the user
         else remove(user_data, role);

@@ -8,7 +8,7 @@ let role = async (args:any, req:any) => {
         return;
     
     // Try to get the role
-    let role_data:RoleInterface | false = role_service.get(args?.name);
+    let role_data:any | false = await role_service.get(args?.name);
 
     // If the role does not exist, return nothing
     if(role_data === false) return;

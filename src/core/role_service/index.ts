@@ -63,19 +63,19 @@ export const values:ValueInterface = {
 //--------[ Role exports ]--------//
 
 interface RoleExportInterface {
-    add(role: RoleInterface, returnErrorKey?: boolean): boolean | ErrorInterface;
-    remove(role_name: string, returnErrorKey?: boolean): boolean | ErrorInterface;
-    get(name: string): RoleInterface | false;
-    addID(role_name: string, id: ObjectId, returnErrorKey?: boolean): boolean | ErrorInterface;
-    removeID(role_name: string, id: ObjectId, returnErrorKey?: boolean): boolean | ErrorInterface;
+    add(role: RoleInterface, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
+    remove(role_name: string, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
+    get(name: string, returnErrorKey?: boolean): Promise<RoleInterface | false | ErrorInterface>;
+    addID(role_name: string, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
+    removeID(role_name: string, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
 }
 
 export const role:RoleExportInterface = {
-    add: (role: RoleInterface, returnErrorKey?: boolean): boolean | ErrorInterface => add_role(role, returnErrorKey),
-    remove: (role_name: string, returnErrorKey?: boolean): boolean | ErrorInterface => remove_role(role_name, returnErrorKey),
-    get: (name: string): RoleInterface | false => get_role(name),
-    addID: (role_name: string, id: ObjectId, returnErrorKey?: boolean): boolean | ErrorInterface => addID(role_name, id, returnErrorKey),
-    removeID: (role_name: string, id: ObjectId, returnErrorKey?: boolean): boolean | ErrorInterface => removeID(role_name, id, returnErrorKey),
+    add: (role: RoleInterface, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => add_role(role, returnErrorKey),
+    remove: (role_name: string, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => remove_role(role_name, returnErrorKey),
+    get: (name: string, returnErrorKey?: boolean): Promise<RoleInterface | false | ErrorInterface> => get_role(name, returnErrorKey),
+    addID: (role_name: string, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>=> addID(role_name, id, returnErrorKey),
+    removeID: (role_name: string, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => removeID(role_name, id, returnErrorKey),
 }
 
 //---------------------------------//
@@ -104,13 +104,13 @@ export const user:UserExportInterface = {
 
 interface PermExportInterface {
     has(user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface>;
-    get(role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean;
+    get(role: string, returnErrorKey?: boolean):Promise<Array<string> | ErrorInterface | boolean>;
     gql():any;
 }
 
 export const perm:PermExportInterface = {
     has: (user: UserInterface | ObjectId, role:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => perm_has(user, role, returnErrorKey),
-    get: (role: string, returnErrorKey?: boolean):Array<string> | ErrorInterface | boolean => get_perm(role, returnErrorKey),
+    get: (role: string, returnErrorKey?: boolean):Promise<Array<string> | ErrorInterface | boolean> => get_perm(role, returnErrorKey),
     gql: ():any => expandGQL(__dirname, 'gql/schema.gql', rootFuncs)
 }
 

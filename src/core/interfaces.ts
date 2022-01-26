@@ -166,6 +166,7 @@ export let UserInterfaceTemplate = (): UserInterface => {
 }
 
 export interface RoleInterface {
+    _id?: ObjectId | string;
     name: string;
     color: string;
     permissions: string[];

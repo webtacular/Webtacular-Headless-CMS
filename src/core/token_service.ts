@@ -321,13 +321,8 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
         // Check if the user holds those roles
         let userRoles = await user.has(new ObjectId(tokenData.user_id), [new ObjectId('61f1cd2524b5e8bb098a1f52')], true);
 
-        // if the user dosent exits or an error occurs, return an error
-        if(userRoles instanceof ObjectId !== true)
-            return userRoles as ErrorInterface;
-
-        // make sure the data is in the correct type
-        else userRoles = userRoles as ObjectId[];
-
+        if((userRoles as { [key: string]: boolean })['61f1cd2524b5e8bb098a1f52'] === true)
+            return resolve();
 
         // If the user is not found or the token is invalid, return false and revoke the token
         revokeToken(tokenData._id);

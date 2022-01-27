@@ -87,14 +87,14 @@ export const role:RoleExportInterface = {
 
 interface UserExportInterface {
     get(user: UserInterface | ObjectId, returnErrorKey?: boolean):Promise<RoleInterface[] | ErrorInterface | boolean>;
-    has(user: UserInterface | ObjectId, role:ObjectId[], returnErrorKey?: boolean):Promise<ObjectId[] | ErrorInterface>;
+    has(user: UserInterface | ObjectId, role:ObjectId[], returnErrorKey?: boolean):Promise<{ [key: string]: boolean } | ErrorInterface>;
     add(user: ObjectId, role: ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface>;
     remove(user: ObjectId, role: ObjectId, returnErrorKey?: boolean):Promise<boolean | ErrorInterface>;
 }
 
 export const user:UserExportInterface = {
     get: (user: UserInterface | ObjectId, returnErrorKey?: boolean):Promise<RoleInterface[] | ErrorInterface | boolean> => get_user(user, returnErrorKey),
-    has: (user: UserInterface | ObjectId, role:ObjectId[], returnErrorKey?: boolean):Promise<ObjectId[] | ErrorInterface> => user_has(user, role, returnErrorKey),
+    has: (user: UserInterface | ObjectId, role:ObjectId[], returnErrorKey?: boolean):Promise<{ [key: string]: boolean } | ErrorInterface> => user_has(user, role, returnErrorKey),
     add: (user: ObjectId, role: ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> => user_add(user, role, returnErrorKey),
     remove: (user: ObjectId, role: ObjectId, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => user_remove(user, role, returnErrorKey),
 }

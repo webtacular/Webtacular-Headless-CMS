@@ -4,7 +4,7 @@ import { addID, get as get_role, removeID } from "./manageRole";
 import { user as userDB } from "../../user_service";
 import getUser from "../../user_service/src/get";
 import { locals, returnLocal } from "../../response_handler";
-
+import { user as user_service } from "../../user_service";
 /**
  * fetches all roles that a user has, and if they have a role that no longer exists, it removes it.
  * 
@@ -36,7 +36,7 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
     for(let role of user_data.permissions.roles) {
 
         // Get the role
-        let role_data = await get_role(role.toLowerCase());
+        let role_data = await get_role(role);
 
         // if the role is found, push it to the roles array
         if(role_data) roles.push(role_data as RoleInterface);
@@ -58,17 +58,17 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
  * 
  * @returns boolean | ErrorInterface - true if the user has the role, false if not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
 */
-export async function has(user: UserInterface | ObjectId, roles:ObjectId[], returnErrorKey?:boolean):Promise<ObjectId[] | ErrorInterface> {
+export async function has(user: UserInterface | ObjectId, roles:ObjectId[], returnErrorKey?:boolean):Promise<{ [key: string]: boolean } | ErrorInterface> {
     let data;
 
     // Get the roles that the user has
     if(user instanceof ObjectId)
-        data = await get(user);
+        data = await user_service.get(user) 
     else data = user;
-
+ 
     // place the roles that the user has into this array
-    let has_roles:ObjectId[] = [];
-
+    let has_roles:{ [key: string]: boolean } = {};
+    
     // if the user dosent exist, return an error
     if(data === false) {
         if(returnErrorKey === true)
@@ -77,7 +77,7 @@ export async function has(user: UserInterface | ObjectId, roles:ObjectId[], retu
                 message: returnLocal(locals.KEYS.USER_NOT_FOUND)
             };
 
-        return [];
+        return {};
     }
 
     // make sure the data is in the correct type
@@ -85,23 +85,18 @@ export async function has(user: UserInterface | ObjectId, roles:ObjectId[], retu
 
     // Loop through the roles that the user has
     data?.permissions?.roles?.forEach(user_role => {
+        //console.log(user_role);
         roles?.forEach(role => {
-            if(!ObjectId.isValid(user_role))
-                return;
 
             // If the user has the role, set the has_role to true
-            if(new ObjectId(user_role) === role)
-                has_roles = [...has_roles, role];
+            if(user_role.toString() === role.toString())
+                Object.assign(has_roles, { [role.toString()]: true });
+
+            // If the user does not have the role, set the has_role to false
+            else Object.assign(has_roles, { [role.toString()]: false });
         });
     });
 
-    
-    // Return the has_role
-    if(returnErrorKey === true && has_roles === [])
-        return { 
-            local_key: 'NO_ROLE_FOUND',
-            message: returnLocal(locals.KEYS.NO_ROLE_FOUND)
-        };
 
     return has_roles;
 }

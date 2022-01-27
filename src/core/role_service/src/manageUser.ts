@@ -142,14 +142,14 @@ async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErr
         return false;
     }
     else user_data = user_data as UserInterface;
-    
+
     // Get the roles that the user has
     let role_array:Array<ObjectId> = [...user_data.permissions.roles];
 
     // check if the user has the role
     let string_array = role_array.map(role => role.toString()),
         hasRole = string_array.includes(role.toString());
-
+    
     // check if the user already has the role
     switch(action) {
         case 'add':
@@ -160,7 +160,12 @@ async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErr
             role_array.push(role);
 
             // Update the role user id's
-            addID(role, user);
+            let addRes:boolean | ErrorInterface = await addID(role, user, returnErrorKey);
+
+            // add the role to the user
+            if ((addRes as ErrorInterface)?.local_key !== undefined)
+                return addRes;
+
             break;
 
         case 'remove':
@@ -168,10 +173,11 @@ async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErr
                 return true;
 
             // Remove the role from the user
-            role_array = role_array.filter(role => role !== role);
+            role_array = role_array.filter(arr_role => arr_role?.toString() !== role?.toString());
 
             // Update the role user id's
-            removeID(role, user);
+            await removeID(role, user, returnErrorKey);
+
             break;
     }
 

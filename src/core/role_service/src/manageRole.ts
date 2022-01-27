@@ -72,6 +72,7 @@ export async function get(role:ObjectId, returnErrorKey?:boolean):Promise<RoleIn
     return new Promise((resolve:any) => {
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
+
             if (err) {
                 if(returnErrorKey === true) return resolve({
                     local_key: locals.KEYS.DB_ERROR,
@@ -94,7 +95,7 @@ export async function get(role:ObjectId, returnErrorKey?:boolean):Promise<RoleIn
             }
 
             //----------[ Role found ]----------//
-            
+
             // If we found the role, return the role object
             resolve(result);
         });
@@ -169,15 +170,18 @@ export async function remove(role:ObjectId, returnErrorKey?:boolean):Promise<boo
 export async function update(role:ObjectId, new_role:RoleInterface, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
 
     // validate the role
-    let value = validateRole(new_role, returnErrorKey);
+    //TODO: FIx this validateRole function
+    // let value = true; //validateRole(new_role, returnErrorKey);
 
-    //----[ if the role is not valid ]----//
-    if(value === false)
-        return value as boolean;
+    // console.log(value);
 
-    else if(returnErrorKey === true && (value as ErrorInterface ).local_key)
-        return value as ErrorInterface;
-    //------------------------------------//
+    // //----[ if the role is not valid ]----//
+    // if(value === false)
+    //     return value as boolean;
+
+    // else if(returnErrorKey === true && (value as ErrorInterface ).local_key)
+    //     return value as ErrorInterface;
+    // //------------------------------------//
 
     // The object to find in the database
     let mongoDBupdateOBJ:any = {
@@ -185,7 +189,7 @@ export async function update(role:ObjectId, new_role:RoleInterface, returnErrorK
     }
 
     return new Promise((resolve:any) => {
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).findOneAndUpdate(mongoDBupdateOBJ, { $set: role as any }, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).findOneAndUpdate(mongoDBupdateOBJ, { $set: new_role as any }, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) {
                 if(returnErrorKey === true) return resolve({
@@ -258,10 +262,14 @@ async function modifyID(role:ObjectId, user_id:ObjectId, action:string, returnEr
     // Make sure that the role is the right type
     else role_data = role_data as RoleInterface;
 
+    // If the user somehows already is appart of the role, dont add him twice
+    if(role_data?.users.indexOf(user_id) === -1)
+        return true;
+
     switch(action) {
         case 'add':
             // update the role in the database
-            role_data.users = [...role_data.users, user_id];
+            role_data.users = [...role_data?.users, user_id];
             break;
 
         case 'remove':

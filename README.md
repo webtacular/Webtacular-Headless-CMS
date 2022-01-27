@@ -30,6 +30,8 @@ we use the _id to find the token in the db, and we compare the token to the hash
 
 with cacheing enabled, we shave of 60-70 ms of the request time! down from 70-80ms to 15-25 ms
 
+graphQL queries to the DB take on average 10-20ms, ofcourse, the server it self is hosted localy, but the DB is hosted on a remote server somewhere in the cloud.
+
 for the user, you have to set the 'email' to be a UNIQUE key
 
 

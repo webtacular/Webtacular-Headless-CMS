@@ -1,6 +1,5 @@
 import { roleRegex } from "../../regex_service";
 import { role as role_service } from "../";
-import { RoleInterface } from "../../interfaces";
 
 let role = async (args:any, req:any) => {
     // Test the Name

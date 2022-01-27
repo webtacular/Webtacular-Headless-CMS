@@ -13,13 +13,15 @@ let user = async (args:any, req:any) => {
 
     // Get the ID and the user data
     let id:ObjectId = new ObjectId(args?.id),
-        user_data = await user_manager.get(id);
+        user_data:any = await user_manager.get(id);
 
     // If the user does not exist, return nothing
     if(user_data === false) return;
 
     // make sure the data is in the correct type
-    else user_data = user_data as UserInterface;
+    else user_data = user_data as UserInterface[];
+
+    user_data = user_data[0] as UserInterface;
 
     // if the user is an admin, return all the data
     if(req.auth.admin === true)

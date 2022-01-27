@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { ErrorInterface, RoleInterface, UserInterface } from "../../interfaces";
+import { ErrorInterface, RoleInterface, UserGetInterface, UserInterface } from "../../interfaces";
 import { addID, get as get_role, removeID } from "./manageRole";
 import { user as userDB } from "../../user_service";
 import getUser from "../../user_service/src/get";
@@ -141,10 +141,10 @@ async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErr
 
         return false;
     }
-    else user_data = user_data as UserInterface;
+    else user_data = user_data as UserGetInterface;
 
     // Get the roles that the user has
-    let role_array:Array<ObjectId> = [...user_data.permissions.roles];
+    let role_array:Array<ObjectId> = [...user_data[user.toString()].permissions.roles];
 
     // check if the user has the role
     let string_array = role_array.map(role => role.toString()),

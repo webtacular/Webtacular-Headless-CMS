@@ -199,3 +199,5 @@ export interface AddonInterface {
 
     import: any;
 }
+
+export interface UserGetInterface { [key:string]: UserInterface }

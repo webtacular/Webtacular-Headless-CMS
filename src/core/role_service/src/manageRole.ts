@@ -63,43 +63,40 @@ export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<b
  * 
  * @returns RoleInterface, false - the role details if found, false if not
 */
-export async function get(role:ObjectId, returnErrorKey?:boolean):Promise<RoleInterface | false | ErrorInterface> {
-    // The object to find in the database
-    let mongoDBfindOBJ:any = {
-        _id: role
-    }
+export async function get(role:ObjectId | ObjectId[], filter?:any, returnErrorKey?:boolean):Promise<RoleInterface[] | false | ErrorInterface> {
+    // check if the user_id is an array, if not, make it an array
+    if((role as ObjectId[])?.length === undefined)
+        role = [role] as ObjectId[];
 
-    return new Promise((resolve:any) => {
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
-            // If the DB throws an error, pass it to the error handler
+    // make sure the user_id is an array of ObjectIds type
+    else role = role as ObjectId[];
 
-            if (err) {
-                if(returnErrorKey === true) return resolve({
-                    local_key: locals.KEYS.DB_ERROR,
-                    where: 'manageRole.ts',
-                    message: err.message
-                } as ErrorInterface);
-
-                return resolve(false);
-            }
-
-            //----------[ No role found ]----------//
-
-            // If we cant find the user, return a 404
-            if (!result) {
-                if(returnErrorKey === true) return resolve({
-                    local_key: locals.KEYS.ROLE_NOT_FOUND,
-                } as ErrorInterface);
-
-                return resolve(false);
-            }
-
-            //----------[ Role found ]----------//
-
-            // If we found the role, return the role object
-            resolve(result);
-        });
+    // validate role id's
+    role.forEach((id:ObjectId) => {
+        if(ObjectId.isValid(id) !== true) {
+            if(returnErrorKey === true) return {
+                local_key: locals.KEYS.INVALID_ID,
+                message: returnLocal('INVALID_ID'),
+                where: id.toString(),
+            } as ErrorInterface;
+    
+            return false;
+        }
     });
+
+    let mask:any = [
+        {
+            $match: {
+                _id: { $in: role },
+            }
+        }
+    ]
+
+    // if the filter is set, add it to the mask
+    if(filter) mask = [...mask, { $project: filter }];
+
+    // find the role in the database, and return it
+    return await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).aggregate(mask).toArray() as RoleInterface[];
 }
 
 /**
@@ -127,10 +124,10 @@ export async function remove(role:ObjectId, returnErrorKey?:boolean):Promise<boo
     }
 
     // Make sure that the role is the right type
-    else role_info = role_info as RoleInterface;
+    else role_info = role_info as RoleInterface[];
 
     // loop through the users that have the role, and remove the role from them
-    for(let user of role_info.users) {
+    for(let user of role_info[0].users) {
         await user_remove(user, role);
     }
 
@@ -260,24 +257,23 @@ async function modifyID(role:ObjectId, user_id:ObjectId, action:string, returnEr
     }
 
     // Make sure that the role is the right type
-    else role_data = role_data as RoleInterface;
-
+    else role_data = role_data as RoleInterface[];
     // If the user somehows already is appart of the role, dont add him twice
-    if(role_data?.users.indexOf(user_id) === -1)
+    if(role_data[0]?.users.indexOf(user_id) === -1)
         return true;
 
     switch(action) {
         case 'add':
             // update the role in the database
-            role_data.users = [...role_data?.users, user_id];
+            role_data[0].users = [...role_data[0]?.users, user_id];
             break;
 
         case 'remove':
             // remove the user id from the role
-            role_data.users.splice(role_data.users.indexOf(user_id), 1);
+            role_data[0].users.splice(role_data[0].users.indexOf(user_id), 1);
             break;
     }
 
     // Update the role in the database
-    return update(role, role_data, returnErrorKey);
+    return update(role, role_data[0], returnErrorKey);
 }

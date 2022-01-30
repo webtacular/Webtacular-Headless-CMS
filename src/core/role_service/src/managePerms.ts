@@ -73,5 +73,5 @@ export async function get(role: ObjectId, returnErrorKey?: boolean):Promise<Arra
         return false;
     }
 
-    return (role_data as RoleInterface).permissions;
+    return (role_data as RoleInterface[])[0].permissions;
 }

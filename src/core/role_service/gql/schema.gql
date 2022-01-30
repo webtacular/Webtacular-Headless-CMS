@@ -6,5 +6,5 @@ type Role  {
     name: String
     color: String
     permissions: [String]
-    users: [User]
+    users: [String]
 }

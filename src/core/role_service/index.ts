@@ -32,7 +32,7 @@ export const values:ValueInterface = {
 interface RoleExportInterface {
     add(role: RoleInterface, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
     remove(role: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
-    get(role: ObjectId, returnErrorKey?: boolean): Promise<RoleInterface | false | ErrorInterface>;
+    get(role:ObjectId | ObjectId[], filter?:any, returnErrorKey?: boolean): Promise<RoleInterface[] | false | ErrorInterface>;
     update(role: ObjectId, new_role: RoleInterface, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
     addID(role: ObjectId, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
     removeID(role: ObjectId, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
@@ -42,7 +42,7 @@ export const role:RoleExportInterface = {
     add: (role: RoleInterface, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => add_role(role, returnErrorKey),
     remove: (role: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => remove_role(role, returnErrorKey),
     update: (role: ObjectId, new_role: RoleInterface, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => update_role(role, new_role, returnErrorKey),
-    get: (role: ObjectId, returnErrorKey?: boolean): Promise<RoleInterface | false | ErrorInterface> => get_role(role, returnErrorKey),
+    get: (role:ObjectId | ObjectId[], filter?:any, returnErrorKey?: boolean): Promise<RoleInterface[] | false | ErrorInterface> => get_role(role, filter, returnErrorKey),
     addID: (role: ObjectId, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>=> addID(role, id, returnErrorKey),
     removeID: (role: ObjectId, id: ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => removeID(role, id, returnErrorKey),
 }

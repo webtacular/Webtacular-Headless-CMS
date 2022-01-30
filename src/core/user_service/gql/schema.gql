@@ -19,7 +19,6 @@ type User {
 
 type User_Permissions {
     roles: [String]
-    owner: Boolean
 }
 
 type User_Security {

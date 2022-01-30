@@ -2,8 +2,10 @@ import { user as user_manager } from '../';
 import { checkForToken } from '../../token_service';
 import { UserInterface } from '../../interfaces';
 import { ObjectId } from 'mongodb';
+import { graphql } from "../../../api";
+import { FastifyInstance } from 'fastify';
 
-let user = async (args:any, req:any) => {
+let user = async (args:any, req:FastifyInstance, context:any) => {
     // Check if the request is authenticated
     await checkForToken(req, true);
 
@@ -13,18 +15,18 @@ let user = async (args:any, req:any) => {
 
     // Get the ID and the user data
     let id:ObjectId = new ObjectId(args?.id),
-        user_data:any = await user_manager.get(id);
+        filter = graphql.filter(context).user,
+        user_data:any = await user_manager.get(id, filter);
 
     // If the user does not exist, return nothing
     if(user_data === false) return;
 
     // make sure the data is in the correct type
     else user_data = user_data as UserInterface[];
-
     user_data = user_data[0] as UserInterface;
 
     // if the user is an admin, return all the data
-    if(req.auth.admin === true)
+    if((req as any)?.auth?.admin === true)
         return user_data;
 
     // This is the baic data that any one can see
@@ -34,10 +36,11 @@ let user = async (args:any, req:any) => {
         language: user_data?.language,
         profile_picture: user_data?.profile_picture,
         blog_info: user_data?.blog_info,
+        permissions: user_data?.permissions,
     }
 
     // if the user is checking their own data, return more data
-    if(user_data?._id?.toString() === req?.auth?.user_id?.toString()) {
+    if(user_data?._id?.toString() === (req as any)?.auth?.user_id?.toString()) {
         Object.assign(base_response, {
             email: user_data?.email,
             security_info: user_data?.security_info,
@@ -53,5 +56,5 @@ let user = async (args:any, req:any) => {
 }
 
 export const rootFuncs = {
-    user: (args:any, req:any) => user(args, req)
+    user: (args:any, req:FastifyInstance, context:any) => user(args, req, context)
 }

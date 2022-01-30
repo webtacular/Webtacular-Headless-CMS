@@ -36,10 +36,10 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
     for(let role of user_data.permissions.roles) {
 
         // Get the role
-        let role_data = await get_role(role);
+        let role_data = await get_role(role) as RoleInterface[];
 
         // if the role is found, push it to the roles array
-        if(role_data) roles.push(role_data as RoleInterface);
+        if(role_data) roles.push(role_data[0] as RoleInterface);
 
         // if the role is not found, remove it from the user
         else remove(user_data, role);
@@ -141,10 +141,10 @@ async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErr
 
         return false;
     }
-    else user_data = user_data as UserGetInterface;
+    else user_data = user_data as UserGetInterface[];
 
     // Get the roles that the user has
-    let role_array:Array<ObjectId> = [...user_data[user.toString()].permissions.roles];
+    let role_array:Array<ObjectId> = [...user_data[0][user.toString()].permissions.roles];
 
     // check if the user has the role
     let string_array = role_array.map(role => role.toString()),

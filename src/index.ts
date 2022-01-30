@@ -6,7 +6,7 @@ export const app = Fastify({
 import { mongoDB } from './core/db_service';
 import { addons } from './core/addon_service';
 import { user } from './core/user_service';
-import { lockGraphQL } from './api/graphql';
+import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { perm, role, user as user_role } from "./core/role_service";
 import { ObjectId } from "mongodb";

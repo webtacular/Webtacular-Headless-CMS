@@ -1,5 +1,5 @@
 extend type Query {
-    role(name: String!): Role
+    role(id: String!): Role
 }
 
 type Role  {

@@ -1,5 +1,4 @@
 import { Collection, MongoClient } from "mongodb";
-import { JsonDB } from 'node-json-db';
 
 export interface MongoDatabasesInterface {
     [key: string]: { 
@@ -9,9 +8,6 @@ export interface MongoDatabasesInterface {
     };
 }
 
-export interface LocalDatabasesInterface {
-    [key: string]: JsonDB;
-}
 
 //---------[ MONGODB FUNCTIONS ]---------//
 
@@ -27,13 +23,5 @@ export const mongoDB:MongoFunctions = require("./src/mongoDB");
 
 
 //---------[ LOCALDB FUNCTIONS ]---------//
-
-interface LocalFunctions {
-    local_databases: LocalDatabasesInterface;
-    addDB: (name:string) => JsonDB;
-    getDB: (name:string) => JsonDB;
-}
-
-export const localDB:LocalFunctions = require("./src/localDB");
 
 //---------------------------------------//

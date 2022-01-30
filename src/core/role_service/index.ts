@@ -4,7 +4,7 @@ import { get as get_role, update as update_role, add as add_role, remove as remo
 import { get as get_user, has as user_has, add as user_add, remove as user_remove } from "./src/manageUser";
 import { get as get_perm, has as perm_has } from "./src/managePerms";
 import { rootFuncs } from "./gql/graphQL";
-import { expandGQL } from "../../api/graphql";
+import { graphql } from "../../api/";
 
 export let permissions: Array<string> = [],
     precedence: { [key: number]:string } = {},
@@ -80,7 +80,7 @@ interface PermExportInterface {
 export const perm:PermExportInterface = {
     has: (user: UserInterface | ObjectId, permission:string, returnErrorKey?: boolean):Promise<boolean | ErrorInterface> => perm_has(user, permission, returnErrorKey),
     get: (role: ObjectId, returnErrorKey?: boolean):Promise<Array<string> | ErrorInterface | boolean> => get_perm(role, returnErrorKey),
-    gql: ():any => expandGQL(__dirname, 'gql/schema.gql', rootFuncs)
+    gql: ():any => graphql.expand(__dirname, 'gql/schema.gql', rootFuncs)
 }
 
 //---------------------------------//

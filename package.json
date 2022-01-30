@@ -8,8 +8,6 @@
         "@graphql-tools/stitch": "^8.4.3",
         "@types/node": "^16.11.19",
         "bcrypt": "^5.0.0",
-        "body-parser": "^1.19.1",
-        "cookie-parser": "^1.4.6",
         "express": "^4.17.2",
         "express-graphql": "^0.12.0",
         "fastify": "^3.27.0",
@@ -22,9 +20,7 @@
         "ipaddr.js": "^2.0.1",
         "memory-cache": "^0.2.0",
         "mercurius": "^9.1.0",
-        "mercurius-codegen": "^3.3.0",
         "mongodb": "^4.3.1",
-        "node-json-db": "^1.4.1",
         "typescript": "^4.5.4"
     },
     "scripts": {
@@ -33,8 +29,8 @@
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.0",
+        "@types/lodash": "^4.14.178",
         "@types/memory-cache": "^0.2.1",
-        "@types/mongodb": "^4.0.7",
         "nodemon": "^2.0.15"
     }
 }

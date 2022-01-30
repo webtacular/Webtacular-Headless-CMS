@@ -9,7 +9,7 @@ const mercurius = require('mercurius')
 
 let schemas:any[] = [],
     root_resolver:any = {},
-    root_loader:any = {};
+    root_loader:any = {}
 
 /**
  * WARNING. When you want to add a new root key, you MUST use the following format:
@@ -22,15 +22,16 @@ let schemas:any[] = [],
  * @param file_name usually 'schema.gql'
  * @param root_resolver the root resolver for the schema
  */
-export function expandGQL(path:string, file_name:string, resolver?:any):void {
+export function expandGraphQL(path:string, file_name:string, resolver?:any):void {
     // Load the schema
     schemas.push(require('fs').readFileSync(join(path, file_name), 'utf8')); //TODO: Query can only be loaded once, so we need a way to combine it
 
     // Load the resolvers and loaders
-
     if(resolver)
         Object.assign(root_resolver, resolver);
 }
+    
+
 
 /**
  * This function is used to setup the graphql api,
@@ -41,7 +42,8 @@ export function expandGQL(path:string, file_name:string, resolver?:any):void {
  * @param graphiql boolean - if true, the graphiql interface will be enabled
  * @param path the path to the graphql api
  */
-export function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:string = '/graphql') {
+export async function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:string = '/graphql') {
+    
     let combined = schemas.join('\n');
 
     app.register(mercurius, {
@@ -51,4 +53,10 @@ export function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:
         graphiql,
         path
     });
+
+    await app.ready();
+
+    (app as any)?.graphql?.addHook('preExecution', async function (schema:any, document:any, context:any) {
+        //console.log(JSON.stringify(document));
+    })
 }

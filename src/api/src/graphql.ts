@@ -3,7 +3,7 @@
 import { FastifyInstance } from 'fastify';
 import { join } from 'path'
 
-const mercurius = require('mercurius')
+import mercurius from 'mercurius';
 
 //------------------------------------//
 

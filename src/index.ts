@@ -8,8 +8,7 @@ import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
-import { perm, role, user as user_role } from "./core/role_service";
-import { ObjectId } from "mongodb";
+import { perm } from "./core/role_service";
 
 const settings = require('../settings.json');
 

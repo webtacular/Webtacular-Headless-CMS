@@ -7,7 +7,7 @@ import { current_addons } from "./scan";
 const exportFuncs:{[key:string]:Function} = {
     userService: require("../../user_service"),
     roleService: require("../../role_service"),
-    contentService: require("../../content_service"),
+    contentService: require("../../content_service").content,
     grapgQL: require("../../../api"),
     ipService: require("../../ip_service"),
     tokenService: require("../../token_service"),
@@ -55,11 +55,11 @@ export default (app:FastifyInstance):void => {
             if(addon_types[type])
                 throw new Error(`[error loading addon] Addon with the type ${type} already exists`);
 
-            // Combine the type and the addon name
-            addon_types[type] = `${(addon as AddonInterface)?.name}_${type}`;
+            // if not, add it to the types array
+            addon_types[type] = type;
         });
 
         // execute the main function of the addon
-        (func:Function) => func(app, exportFuncs, addon_types)
+        addon.import.main(app, exportFuncs, addon, addon_types);
     });
 };

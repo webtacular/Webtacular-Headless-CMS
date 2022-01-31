@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+//God this is unorganized
 
 export interface RouterCallback {
     (req: any, res: any, resources:Array<string>): void;
@@ -88,17 +89,7 @@ export interface UserInterface {
         }[];
     };
 
-    blog_info: {
-        blogs?: {
-            blog_id: ObjectId;
-            owner: boolean;
-            blog_name: string;
-        }[];
-        comments?: {
-            comment_id: ObjectId;
-            blog_id: ObjectId;
-        }[];
-    }
+    content: ContentInterface[];
 };
 
 export interface TokenInterface {
@@ -158,10 +149,7 @@ export let UserInterfaceTemplate = (): UserInterface => {
             login_attempts: [],
         },
 
-        blog_info: {
-            blogs: [],
-            comments: [],
-        }
+        content: [],
     };
 }
 
@@ -201,3 +189,17 @@ export interface AddonInterface {
 }
 
 export interface UserGetInterface { [key:string]: UserInterface }
+
+export interface ContentInterface {
+    _id: ObjectId;
+    addon_id: ObjectId;
+    type: string;
+    owner?: ObjectId;
+    content: any;
+    history: {
+        content: any, 
+        owner?: ObjectId, 
+        date: Date, 
+        eason: string
+    }[];
+}

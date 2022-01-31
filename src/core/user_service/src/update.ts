@@ -11,7 +11,7 @@ import { locals } from "../../response_handler";
  * @param returnErrorKey - If true, return the error key instead of the user object
  * @returns Promise<UserInterface | boolean | ErrorInterface> - The user object or the error key
  */
-export default async function (user_id:ObjectId, user:UserInterface, returnErrorKey?:boolean):Promise<UserInterface | boolean | ErrorInterface> {
+export default async function (user_id:ObjectId, user:any, returnErrorKey?:boolean):Promise<UserInterface | boolean | ErrorInterface> {
     // validate user_id
     if(ObjectId.isValid(user_id) !== true){
         if(returnErrorKey === true) return {

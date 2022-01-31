@@ -34,6 +34,7 @@ declare global {
         user_collection: 'users',
         token_collection: 'tokens',
         role_collection: 'roles',
+        content_collection: 'content',
     }
 
     global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these

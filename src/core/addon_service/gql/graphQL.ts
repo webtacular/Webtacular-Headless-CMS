@@ -43,10 +43,10 @@ let addons = async (args:any, req:FastifyInstance, context:any) => {
     let addon_array:AddonInterface[] = [];
     
     // Get the addon data
-    imported_addons.addons.forEach(elem => {
-        addon_array = [...addon_array, getAddonData(req, args, new ObjectId(elem.id))];
-    });
+    imported_addons.addons.forEach(elem => 
+        addon_array = [...addon_array, getAddonData(req, args, new ObjectId(elem.id))]);
 
+    // return the data
     return addon_array;
 }
 

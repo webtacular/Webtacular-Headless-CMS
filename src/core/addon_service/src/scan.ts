@@ -1,5 +1,5 @@
 import { AddonInterface } from '../../interfaces';
-import { validateJSON } from './validate';
+import validateJSON from "./validate"
 import { join } from 'path';
 
 const fs = require('fs');

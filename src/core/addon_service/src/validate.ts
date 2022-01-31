@@ -33,7 +33,7 @@ let emptyObject = ():AddonInterface => {
  * @param json string - The json string to validate
  * @returns AddonInterface - The validated addon or an error object
  */
-export let validateJSON = (json:string | any, path:string):AddonInterface | Error => {
+export default (json:string | any, path:string):AddonInterface | Error => {
 
     // First, convert the string to a JSON object
     try {

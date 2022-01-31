@@ -9,6 +9,7 @@ import { user } from './core/user_service';
 import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { perm } from "./core/role_service";
+import {ObjectId} from "mongodb";
 
 const settings = require('../settings.json');
 

@@ -23,13 +23,13 @@ const exportFuncs:{[key:string]:Function} = {
  * 
  * @param app the fastify instance
  */
-export let start = (app:FastifyInstance):void => {
-    let names:string[] = [],
-        id:string [] = [],
-        funcs:Function[] = [];
+export default (app:FastifyInstance):void => {
+    let names:string[] = [];
 
     // Get all the names of the addons
-    Object.keys(current_addons).forEach((addon: string | AddonInterface, i: number) => {
+    Object.keys(current_addons).forEach((addon: any, i: number) => {
+        let addon_types:{[key:string]:string} = {};
+
         // make sure the addon is an instance of AddonInterface
         addon = current_addons[i] as AddonInterface;
 
@@ -45,10 +45,21 @@ export let start = (app:FastifyInstance):void => {
         // if not, add it to the ID array
         else names.push(addon.id.toString());
 
-        // Pass its function to the funcs array
-        funcs.push(addon.import.main);
-    });
+        // loop through the types
+        addon.types.forEach((type: string) => {
+            // Validate the type /^[a-zA-Z0-9]{2,50}/
+            if(!(/^[a-z0-9_]{2,50}/).test(type))
+                throw new Error(`[error loading addon] Addon with the type ${type} is not valid`);
 
-    // Loop through all the addons
-    funcs.forEach((func:Function) => func(app, exportFuncs));
+            // Check if an addon with the same type exists
+            if(addon_types[type])
+                throw new Error(`[error loading addon] Addon with the type ${type} already exists`);
+
+            // Combine the type and the addon name
+            addon_types[type] = `${(addon as AddonInterface)?.name}_${type}`;
+        });
+
+        // execute the main function of the addon
+        (func:Function) => func(app, exportFuncs, addon_types)
+    });
 };

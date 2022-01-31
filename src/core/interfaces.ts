@@ -201,7 +201,3 @@ export interface AddonInterface {
 }
 
 export interface UserGetInterface { [key:string]: UserInterface }
-
-export interface ModuleInterface{
-    
-}

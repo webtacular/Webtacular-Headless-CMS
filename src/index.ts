@@ -19,6 +19,7 @@ app.register(require('fastify-cookie'), {});
 
 // Global variables set by the settings file
 declare global {
+    var __GLOBAL_ROLE_IDS__:{[key:string]:ObjectId};
     var __DEF_MONGO_DB__: string;
     var __AUTH_COLLECTIONS__:any;
     var __SECURITY_OPTIONS__:any;
@@ -50,6 +51,10 @@ declare global {
         cache_tokens: true,
     }
 
+    global.__GLOBAL_ROLE_IDS__ = {
+        'admin': new ObjectId('61f1cd2524b5e8bb098a1f52'),
+    }
+
     require('events').EventEmitter.defaultMaxListeners = 15;
 
     //scan and load plugins
@@ -58,6 +63,7 @@ declare global {
     //load the gql schemas
     user.gql();
     perm.gql();
+    addons.gql();
 
     //Let the plugins do their thing
     addons.start(app);

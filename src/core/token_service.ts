@@ -313,15 +313,14 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
     //--------[ ADMIN REQUEST ]--------//
     // If the user is an admin, do further checks
 
-    //TODO: On the first creation of the server, generate the admin role, and store the roles id somewhere
-
     // Cretae a promise to return the token data
     return new Promise(async(resolve:any) => {
+        let adminID:ObjectId = global.__GLOBAL_ROLE_IDS__.admin;
 
         // Check if the user holds those roles
-        let userRoles = await user.has(new ObjectId(tokenData.user_id), [new ObjectId('61f1cd2524b5e8bb098a1f52')], true);
+        let userRoles = await user.has(new ObjectId(tokenData.user_id), [adminID], true);
 
-        if((userRoles as { [key: string]: boolean })['61f1cd2524b5e8bb098a1f52'] === true)
+        if((userRoles as { [key: string]: boolean })[adminID.toString()] === true)
             return resolve();
 
         // If the user is not found or the token is invalid, return false and revoke the token

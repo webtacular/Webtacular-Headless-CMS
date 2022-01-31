@@ -4,6 +4,19 @@ import { FastifyInstance } from "fastify";
 import { AddonInterface } from "../../interfaces";
 import { current_addons } from "./scan";
 
+const exportFuncs:{[key:string]:Function} = {
+    userService: require("../../user_service"),
+    roleService: require("../../role_service"),
+    contentService: require("../../content_service"),
+    grapgQL: require("../../../api"),
+    ipService: require("../../ip_service"),
+    tokenService: require("../../token_service"),
+    databaseService: require("../../db_service"),
+    interfaces: require("../../interfaces"),
+    responeService: require("../../response_handler"),
+    regexService: require("../../regex_service"),
+    hashingService: require("../../hashing_service"),
+};
 
 /** 
  * This function is used to call the main function of the addon
@@ -37,5 +50,5 @@ export let start = (app:FastifyInstance):void => {
     });
 
     // Loop through all the addons
-    funcs.forEach((func:Function) => func(app));
+    funcs.forEach((func:Function) => func(app, exportFuncs));
 };

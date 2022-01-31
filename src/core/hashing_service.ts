@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import {ErrorInterface} from './interfaces';
+import { ErrorInterface } from './interfaces';
 
 /**
  * 

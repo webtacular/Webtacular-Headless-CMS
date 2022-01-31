@@ -84,6 +84,3 @@ export const perm:PermExportInterface = {
 }
 
 //---------------------------------//
-
-
-//TODO: Change this service to use MongoDB

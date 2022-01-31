@@ -1,3 +1,2 @@
-export function main(app:any) {
-    
+export function main(app:any, func:any) {
 }

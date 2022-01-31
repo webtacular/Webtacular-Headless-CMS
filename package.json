@@ -1,5 +1,5 @@
 {
-    "name": "gcms",
+    "name": "ghcms",
     "version": "0.1.0",
     "private": false,
     "dependencies": {
@@ -15,7 +15,7 @@
     },
     "scripts": {
         "start-api-dev": "nodemon --ignore ./src/internal/db_service/src/databases/ src/index.ts",
-        "test-api": ""
+        "test-api": "jest"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.0",

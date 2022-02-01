@@ -35,6 +35,11 @@ export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<b
     // make sure that this is not the default role
     role.default = false;
 
+    // remove the precedence from the role,
+    // we need to cast role as any because the interface requires the precedence to be there
+    // whilst we only want it so we can pass it to a different function
+    delete ((role as any).precedence);
+
     //TODO: validation dosent work
     // //----[ if the role is not valid ]----//
     // if(value === false || (value as ErrorInterface).message !== undefined)
@@ -67,9 +72,20 @@ export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<b
                 return resolve(false);
             }
             
-            let precedence_respone = await precedence.set(mongoDBpushOBJ._id, role.precedence);
+            let precedence_response = await precedence.set(mongoDBpushOBJ._id, role.precedence);
 
-            console.log(precedence_respone);
+            // If the precedence service throws an error, delete the role from the database and throw the error
+            if((precedence_response as ObjectId[])?.includes(mongoDBpushOBJ._id) === false) {
+                await remove(mongoDBpushOBJ._id, returnErrorKey);
+                
+                if(returnErrorKey === true) return resolve({
+                    local_key: locals.KEYS.DB_ERROR,        
+                    where: 'manageRole.ts',
+                    message: (precedence_response as ErrorInterface).message
+                } as ErrorInterface);
+
+                return resolve(false);
+            }
 
             // If we successfully added the role, return true
             resolve(true);

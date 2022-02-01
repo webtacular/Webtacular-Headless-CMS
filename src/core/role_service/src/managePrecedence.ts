@@ -19,7 +19,7 @@ export async function validateDB():Promise<void> {
     });
 }
 
-export async function set(id: ObjectId, precedence: number, returnErrorKey?:boolean): Promise<boolean | ErrorInterface> {
+export async function set(id: ObjectId, precedence: number, returnErrorKey?:boolean): Promise<boolean | ErrorInterface | ObjectId[]> {
     // Try get the role details
     let role:any = await role_get(id, { _id: 1, default: 1 }, returnErrorKey);
 
@@ -35,7 +35,7 @@ export async function set(id: ObjectId, precedence: number, returnErrorKey?:bool
 
     // Check if the role is the default role
     // the default role's precedence is 0, and it cannot be changed.
-    if(role[0].default === true) {
+    if(role[0]?.default === true) {
         if(returnErrorKey === true) return {
             local_key: 'ROLE_DEFAULT',
             message: returnLocal(locals.KEYS.ROLE_DEFAULT),
@@ -75,13 +75,13 @@ export async function set(id: ObjectId, precedence: number, returnErrorKey?:bool
     });
 
     // Now add the precedence to the correct position
-    currentPrecedence.splice(precedence, 0, id);
+    currentPrecedence.splice(precedence, 0, new ObjectId(id));
     
     // Save the precedence
     await roleDB.put('precedence', JSON.stringify(currentPrecedence));
 
     // It worked, return true
-    return true;
+    return currentPrecedence;
 }
 
 // get the current precedence
@@ -101,8 +101,18 @@ export async function get(returnErrorKey?:boolean): Promise<ObjectId[] | ErrorIn
                 return reject(false);
             }
 
+            // Get the precedence data
+            let currentPrecedence:string[] | ObjectId[] = JSON.parse(value.toString());
+
+            // Make sure everything is an object id
+            currentPrecedence = currentPrecedence.map(id => new ObjectId(id));
+
             // return the value
-            return resolve(JSON.parse(value.toString()));
+            return resolve(currentPrecedence as ObjectId[]);
         });
     });
+}
+
+export async function remove(id: ObjectId, returnErrorKey?:boolean): Promise<boolean | ErrorInterface | ObjectId[]> {
+    return true;
 }

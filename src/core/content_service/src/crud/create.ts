@@ -23,7 +23,9 @@ import { user } from "../../../user_service";
  * @param type - The type of content to create, has to be a type defined in the addon json
  * @param returnErrorKey - If true, the function will return an error object instead of a boolean
  * @param content - The content to create { content: any, owner?: ObjectId }, content can be anything, while the owner is either undefined or a valid user BSON ID, or else it will be ignored
- */
+ *
+ * @returns - If returnErrorKey is true, the function will return an error object, else it will return a boolean if an error occured, else it will return the content object
+*/
 export default async function(addon:AddonInterface, type:string, content:{ content:any, owner?:ObjectId }, returnErrorKey?: boolean): Promise<boolean | ErrorInterface | ContentInterface> {
     // Validate that the type is valid
     if(!addon.types.includes(type)) {

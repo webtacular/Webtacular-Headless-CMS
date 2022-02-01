@@ -157,8 +157,10 @@ export interface RoleInterface {
     _id?: ObjectId | string;
     name: string;
     color: string;
+    default?: boolean;
     permissions: string[];
     users: ObjectId[];
+    precedence: number;
 }
 
 export interface ErrorInterface {
@@ -188,11 +190,17 @@ export interface AddonInterface {
     import: any;
 }
 
-export interface UserGetInterface { [key:string]: UserInterface }
+export interface UserGetInterface { 
+    [key:string]: UserInterface 
+}
 
 export interface ContentInterface {
     _id: ObjectId;
     addon_id: ObjectId;
+    permissions?: {
+        roles?: { [key:string]:string[] }[];
+        users?: { [key:string]:string[] }[];
+    };
     type: string;
     owner?: ObjectId;
     content: any;

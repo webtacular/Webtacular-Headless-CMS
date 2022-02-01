@@ -4,6 +4,7 @@ import { remove as user_remove } from "./manageUser";
 import validateRole from "./role_validation_service"
 import { ObjectId } from "mongodb";
 import { locals, returnLocal } from "../../response_handler";
+import { precedence } from "..";
 
 /**
  * adds a role to the database
@@ -18,12 +19,29 @@ export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<b
     // validate the role
     let value = validateRole(role, returnErrorKey);
 
-    //----[ if the role is not valid ]----//
-    if(value === false)
-        return value as boolean;
+    // floor the precedence
+    role.precedence = Math.floor(role.precedence);
 
-    else if(returnErrorKey === true && (value as ErrorInterface ).local_key)
-        return value as ErrorInterface;
+    // validate the presence of the role, cant be 0 as that is the default role
+    if(role.precedence < 1) {
+        if(returnErrorKey === true) return {
+            local_key: 'ROLE_PRECEDENCE_NEGATIVE',
+            message: returnLocal(locals.KEYS.ROLE_PRECEDENCE_NEGATIVE)  
+        }
+
+        return false;
+    }
+
+    // make sure that this is not the default role
+    role.default = false;
+
+    //TODO: validation dosent work
+    // //----[ if the role is not valid ]----//
+    // if(value === false || (value as ErrorInterface).message !== undefined)
+    //     return value as boolean;
+
+    // else if(returnErrorKey === true && (value as ErrorInterface ).local_key)
+    //     return value as ErrorInterface;
     //------------------------------------//
 
     // Push the role to the database
@@ -49,6 +67,10 @@ export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<b
                 return resolve(false);
             }
             
+            let precedence_respone = await precedence.set(mongoDBpushOBJ._id, role.precedence);
+
+            console.log(precedence_respone);
+
             // If we successfully added the role, return true
             resolve(true);
         });

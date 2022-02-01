@@ -2,25 +2,23 @@ import { ObjectId } from "mongodb";
 import { ErrorInterface, RoleInterface, UserInterface } from "../interfaces";
 import { get as get_role, update as update_role, add as add_role, remove as remove_role, removeID, addID } from "./src/manageRole";
 import { get as get_user, has as user_has, add as user_add, remove as user_remove } from "./src/manageUser";
+import { get as get_precedence, set as set_precedence, validateDB } from "./src/managePrecedence";
 import { get as get_perm, has as perm_has } from "./src/managePerms";
 import { rootFuncs } from "./gql/graphQL";
 import { graphql } from "../../api/";
 
 export let permissions: Array<string> = [],
-    precedence: { [key: number]:string } = {},
     roles:{ [key:string]:RoleInterface } = {};
 
 //--------[ Value exports ]--------//
 
 interface ValueInterface {
     permissions: Array<string>;
-    precedence: { [key: number]:string };
     roles: { [key:string]:RoleInterface };
 }
 
 export const values:ValueInterface = {
     permissions,
-    precedence,
     roles,
 }
 
@@ -84,3 +82,24 @@ export const perm:PermExportInterface = {
 }
 
 //---------------------------------//
+
+
+
+//------[ precedence exports ]-----//
+
+interface PrecedenceInterface { 
+    set(role: ObjectId, precedence: number, returnErrorKey?: boolean): Promise<boolean | ErrorInterface>;
+    get(returnErrorKey?: boolean): Promise<boolean | ErrorInterface | ObjectId[]>;
+    validateDB(): Promise<void>;
+}
+
+export const precedence:PrecedenceInterface = {
+    set: (role: ObjectId, precedence: number, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> => set_precedence(role, precedence, returnErrorKey),
+    get: (returnErrorKey?: boolean): Promise<boolean | ErrorInterface | ObjectId[]> => get_precedence(returnErrorKey),
+    validateDB: (): Promise<void> => validateDB(),
+}
+
+//---------------------------------//
+
+
+//TODO: Get role details from cache and only refresh the cache if the role has changed or at the start of the server

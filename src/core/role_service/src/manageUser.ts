@@ -129,7 +129,7 @@ export async function remove(user: ObjectId, role:ObjectId, returnErrorKey?:bool
 
 async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErrorKey?:boolean,):Promise<boolean | ErrorInterface> {
     // Get the user
-    let user_data = await getUser(user);
+    let user_data = await getUser(user, { permissions: 1 });
 
     // if the user dosent exist, return an error
     if(user_data === false) {
@@ -143,8 +143,10 @@ async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErr
     }
     else user_data = user_data as UserGetInterface[];
 
+    //TODO: verify that the role exists
+    
     // Get the roles that the user has
-    let role_array:Array<ObjectId> = [...user_data[0][user.toString()].permissions.roles];
+    let role_array:Array<ObjectId> = [...(user_data[0] as any)?.permissions?.roles];
 
     // check if the user has the role
     let string_array = role_array.map(role => role.toString()),

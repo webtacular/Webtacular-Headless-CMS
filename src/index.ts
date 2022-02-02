@@ -92,13 +92,11 @@ declare global {
     //console.log(((await precedence.set(new ObjectId('61f960442eadd02f82cadef8'), 1)) as any));
     //console.log(await precedence.get().catch(err => err));
     //let msg = await user.get([new ObjectId('61e9aa2f3e6e687d3b0ba58c'), new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61e9a16ac82a7ded5811144e')]);
-    let msg = await user_role.add(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f96033d7940f6317d1bc9e'), true);
+    //let msg = await user_role.add(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f96033d7940f6317d1bc9e'), true);
     //let msg = await user_role.remove(new ObjectId('61e9aa2f3e6e687d3b0ba58c'), new ObjectId('61f1cd2524b5e8bb098a1f52'), true);
-    console.log(msg);
+    //console.log(msg);
     //let msg = await user_role.remove(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f1cd2524b5e8bb098a1f52'), true);
-    //TODO: Has dosent work.
-    console.log(await user_role.has(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f96033d7940f6317d1bc9e'), true));
-
+    //console.log(await user_role.has(new ObjectId('61e9a16ac82a7ded5811144e'), new ObjectId('61f96033d7940f6317d1bc9e'), true));
     //precedence.set(new ObjectId('61f1ccc79623d445bd2f677f'), 1);
 })();
 

@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mongoDB } from "../../../db_service";
 import { ContentInterface, ErrorInterface } from "../../../interfaces";
-import { locals, mongoErrorHandler, returnLocal } from "../../../response_handler";
+import { locals, returnLocal } from "../../../response_handler";
 
 /**
  * This function is used get content from the database, only used by plugins.

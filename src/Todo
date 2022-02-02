@@ -1,9 +1,1 @@
-REDO ERROR SYSTEM
-
-we need to add levels
-eg 
-0 - error
-1 - warning
-2 - info
-3 - debug
-etc
+When adding a role to a user, the role object is not updated

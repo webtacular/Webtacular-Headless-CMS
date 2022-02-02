@@ -15,5 +15,12 @@ let role = async (args:any, req:FastifyInstance, context:any) => {
 
 export const rootFuncs = {
     role: (args:any, req:FastifyInstance, context:any) => role(args, req, context),
-    roles: async() => { await precedence.get() }
+    roles: async() => { 
+        let roles:any = await precedence.get().catch(() => { return [] }),
+            formated:{ id:string, precedence:number }[] = [];
+
+        (roles as ObjectId[]).forEach((role, i) => formated = [...formated, { id: role.toString(), precedence: i }]);
+        
+        return formated;
+    }
 }

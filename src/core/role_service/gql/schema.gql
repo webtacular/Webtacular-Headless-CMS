@@ -1,6 +1,6 @@
 extend type Query {
     role(id: String!): Role,
-    roles: [Role_id]
+    roles: [Role_Object]
 }
 
 type Role  {
@@ -10,6 +10,7 @@ type Role  {
     users: [String]
 }
 
-type Role_id { 
+type Role_Object {
     id: String
+    precedence: Int
 }

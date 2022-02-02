@@ -1,4 +1,4 @@
-import { role as role_service } from "../";
+import { precedence, role as role_service } from "../";
 import { ObjectId } from "mongodb";
 import { FastifyInstance } from "fastify";
 import { graphql } from "../../../api";
@@ -14,5 +14,6 @@ let role = async (args:any, req:FastifyInstance, context:any) => {
 }
 
 export const rootFuncs = {
-    role: (args:any, req:FastifyInstance, context:any) => role(args, req, context)
+    role: (args:any, req:FastifyInstance, context:any) => role(args, req, context),
+    roles: async() => { await precedence.get() }
 }

@@ -1,7 +1,6 @@
 import { ErrorInterface, RoleInterface } from "../../interfaces";
 import { mongoDB } from "../../db_service";
 import { remove as user_remove } from "./manageUser";
-import validateRole from "./role_validation_service"
 import { ObjectId } from "mongodb";
 import { locals, returnLocal } from "../../response_handler";
 import { precedence } from "..";
@@ -10,85 +9,74 @@ import { precedence } from "..";
  * adds a role to the database
  * 
  * @param role RoleInterface - the role details to add
- * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
+ * @param returnError boolean - if true, the error key will be returned, if false the output will be a boolean
  * 
- * @returns boolean - true if the role was added, false if not
- */
-export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
-    
-    // validate the role
-    let value = validateRole(role, returnErrorKey);
+ * @returns Promise <boolean | ErrorInterface | RoleInterface> - if the role was added a RoleInterface object will be returned, false if it was not, if 'returnError' is true, the error key will be returned as a 'RoleError' obj 
+*/
+export async function add(role:RoleInterface, returnError?:boolean):Promise<boolean | ErrorInterface | RoleInterface> {
+    return new Promise((resolve:any, reject:any) => {
+        // floor the precedence
+        role.precedence = Math.floor(role.precedence);
 
-    // floor the precedence
-    role.precedence = Math.floor(role.precedence);
+        // validate the presence of the role, cant be 0 as that is the default role
+        if(role.precedence < 1) {
+            if(returnError === true) return reject({
+                code: 1,    
+                local_key: locals.KEYS.INVALID_PRECEDENCE,
+                message: returnLocal(locals.KEYS.ROLE_PRECEDENCE_NEGATIVE),
+            });
 
-    // validate the presence of the role, cant be 0 as that is the default role
-    if(role.precedence < 1) {
-        if(returnErrorKey === true) return {
-            local_key: 'ROLE_PRECEDENCE_NEGATIVE',
-            message: returnLocal(locals.KEYS.ROLE_PRECEDENCE_NEGATIVE)  
+            return reject (false);
         }
 
-        return false;
-    }
+        // make sure that this is not the default role
+        role.default = false;
 
-    // make sure that this is not the default role
-    role.default = false;
+        // remove the precedence from the role,
+        // we need to cast role as any because the interface requires the precedence to be there
+        // whilst we only want it so we can pass it to a different function
+        delete ((role as any).precedence);
 
-    // remove the precedence from the role,
-    // we need to cast role as any because the interface requires the precedence to be there
-    // whilst we only want it so we can pass it to a different function
-    delete ((role as any).precedence);
 
-    //TODO: validation dosent work
-    // //----[ if the role is not valid ]----//
-    // if(value === false || (value as ErrorInterface).message !== undefined)
-    //     return value as boolean;
+        // Push the role to the database
+        let mongoDBpushOBJ:any = {
+            _id: new ObjectId(),
+        }
 
-    // else if(returnErrorKey === true && (value as ErrorInterface ).local_key)
-    //     return value as ErrorInterface;
-    //------------------------------------//
+        // merge the role object into the mongoDBpushOBJ
+        Object.assign(mongoDBpushOBJ, role);
 
-    // Push the role to the database
-    
-    // The object to find in the database
-    let mongoDBpushOBJ:any = {
-        _id: new ObjectId(),
-    }
-
-    // merge the role object into the mongoDBpushOBJ
-    Object.assign(mongoDBpushOBJ, role);
-
-    return new Promise((resolve:any) => {
+        // push the role to the database
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).insertOne(mongoDBpushOBJ, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
-            if (err) {
-                if(returnErrorKey === true) return resolve({
+            if(err) {
+                if(returnError === true) return reject({
+                    code: 0,
                     local_key: locals.KEYS.DB_ERROR,
-                    where: 'manageRole.ts',
-                    message: err.message
+                    message: returnLocal(locals.KEYS.DB_ERROR),
+                    where: 'role_service.manageRole.add()'
                 } as ErrorInterface);
-
-                return resolve(false);
+                
+                return reject(false);
             }
             
-            let precedence_response = await precedence.set(mongoDBpushOBJ._id, role.precedence);
+            let precedence_response = await precedence.set(mongoDBpushOBJ._id, role.precedence).catch(err => {});
 
             // If the precedence service throws an error, delete the role from the database and throw the error
             if((precedence_response as ObjectId[])?.includes(mongoDBpushOBJ._id) === false) {
-                await remove(mongoDBpushOBJ._id, returnErrorKey);
+                await remove(mongoDBpushOBJ._id, returnError);
                 
-                if(returnErrorKey === true) return resolve({
+                if(returnError === true) return reject({
                     local_key: locals.KEYS.DB_ERROR,        
                     where: 'manageRole.ts',
                     message: (precedence_response as ErrorInterface).message
                 } as ErrorInterface);
 
-                return resolve(false);
+                return reject(false);
             }
 
             // If we successfully added the role, return true
-            resolve(true);
+            resolve(mongoDBpushOBJ as RoleInterface);
         });
     });
 }
@@ -96,99 +84,87 @@ export async function add(role:RoleInterface, returnErrorKey?:boolean):Promise<b
 /**
  * fetches a role from the database
  * 
- * @param role ObjectId - the ObjectId of the role to fetch
- * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
+ * @param role ObjectId | ObjectId[] - the ObjectId(s) of the role(s) to fetch
  * 
- * @returns RoleInterface, false - the role details if found, false if not
+ * @returns Promise <RoleInterface[]> - if the role(s) were found, a RoleInterface object will be returned
 */
-export async function get(role:ObjectId | ObjectId[], filter?:any, returnErrorKey?:boolean):Promise<RoleInterface[] | false | ErrorInterface> {
-    // check if the user_id is an array, if not, make it an array
-    if((role as ObjectId[])?.length === undefined)
+export async function get(role:ObjectId | ObjectId[], filter?:any):Promise<RoleInterface[]> {
+    return new Promise((resolve:any) => {
+        // check if the user_id is an array, if not, make it an array
+        if((role as ObjectId[])?.length === undefined)
         role = [role] as ObjectId[];
 
-    // make sure the user_id is an array of ObjectIds type
-    else role = role as ObjectId[];
+        // make sure the user_id is an array of ObjectIds type
+        else role = role as ObjectId[];
 
-    // validate role id's
-    role.forEach((id:ObjectId) => {
-        if(ObjectId.isValid(id) !== true) {
-            if(returnErrorKey === true) return {
-                local_key: locals.KEYS.INVALID_ID,
-                message: returnLocal('INVALID_ID'),
-                where: id.toString(),
-            } as ErrorInterface;
-    
-            return false;
-        }
-    });
-
-    let mask:any = [
-        {
-            $match: {
-                _id: { $in: role },
+        let mask:any = [
+            {
+                $match: {
+                    _id: { $in: role },
+                }
             }
-        }
-    ]
+        ]
 
-    // if the filter is set, add it to the mask
-    if(filter) mask = [...mask, { $project: filter }];
+        // if the filter is set, add it to the mask
+        if(filter) mask = [...mask, { $project: filter }];
 
-    // find the role in the database, and return it
-    return await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).aggregate(mask).toArray() as RoleInterface[];
+        // find the role in the database, and return it
+        return resolve(mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).aggregate(mask).toArray() as Promise<RoleInterface[]>);
+    });
 }
 
 /**
  * deletes a role from the database
  * 
  * @param role_name string - the name of the role to delete
- * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the role was deleted, false if it was not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
+ * @returns Promise <boolean | ErrorInterface> - if the role was deleted, true will be returned, if not, if 'returnError' is true, the error key will be returned as a 'RoleError' obj
 */
-export async function remove(role:ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
+export async function remove(role:ObjectId, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return new Promise(async(resolve:any, reject:any) => {
+        // find the role in the database
+        let role_info = await get(role);
 
-    // find the role in the database
-    let role_info = await get(role);
+        //----[ if the role does not exist ]----//
+        if(role_info[0] === undefined){
+            if(returnError === true) return reject({ 
+                code: 1,
+                local_key: locals.KEYS.USER_NOT_FOUND,
+                message: returnLocal(locals.KEYS.USER_NOT_FOUND)
+            });
 
-    //----[ if the role does not exist ]----//
-    if(role_info === false){
-        if(returnErrorKey === true)
-            return { 
-                local_key: 'ROLE_NOT_FOUND',
-                message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
-            };
+            return reject(false);
+        }
 
-        else return false;
-    }
+        // Make sure that the role is the right type
+        else role_info = role_info as RoleInterface[];
 
-    // Make sure that the role is the right type
-    else role_info = role_info as RoleInterface[];
+        // loop through the users that have the role, and remove the role from them
+        for(let user of role_info[0].users) {
+            await user_remove(user, role).catch(() => {});
+        }
 
-    // loop through the users that have the role, and remove the role from them
-    for(let user of role_info[0].users) {
-        await user_remove(user, role);
-    }
+        // The object to find in the database
+        let mongoDBremoveOBJ:any = {
+            _id: role
+        }
 
-    // The object to find in the database
-    let mongoDBremoveOBJ:any = {
-        _id: role
-    }
-
-    return new Promise((resolve:any) => {
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).findOneAndDelete(mongoDBremoveOBJ, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) {
-                if(returnErrorKey === true) return resolve({
+                if(returnError === true) return reject({
+                    code: 0,
                     local_key: locals.KEYS.DB_ERROR,
                     where: 'manageRole.ts',
                     message: err.message
                 } as ErrorInterface);
 
-                return resolve(false);
+                return reject(false);
             }
             
             // If we successfully removed the role, return true
-            resolve(true);
+            return resolve(true);
         });
     });
 }
@@ -198,57 +174,46 @@ export async function remove(role:ObjectId, returnErrorKey?:boolean):Promise<boo
  * 
  * @param role ObjectId - the ObjectId of the role to update
  * @param new_role RoleInterface - the new role details
- * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the role was deleted, false if it was not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
+ * @returns Promise <boolean | ErrorInterface> - if the role was updated, true will be returned, if not, if 'returnError' is true, the error key will be returned as a 'RoleError' obj
  */
-export async function update(role:ObjectId, new_role:RoleInterface, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
+export async function update(role:ObjectId, new_role:RoleInterface, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return new Promise((resolve, reject) => {
+        //TODO: FIx this validateRole function
 
-    // validate the role
-    //TODO: FIx this validateRole function
-    // let value = true; //validateRole(new_role, returnErrorKey);
+        // The object to find in the database
+        let mongoDBupdateOBJ:any = {
+            _id: role
+        }
 
-    // console.log(value);
-
-    // //----[ if the role is not valid ]----//
-    // if(value === false)
-    //     return value as boolean;
-
-    // else if(returnErrorKey === true && (value as ErrorInterface ).local_key)
-    //     return value as ErrorInterface;
-    // //------------------------------------//
-
-    // The object to find in the database
-    let mongoDBupdateOBJ:any = {
-        _id: role
-    }
-
-    return new Promise((resolve:any) => {
+        // Try and update the role in the database
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.role_collection).findOneAndUpdate(mongoDBupdateOBJ, { $set: new_role as any }, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
-            if (err) {
-                if(returnErrorKey === true) return resolve({
+            if(err) {
+                if(returnError === true) return reject({
+                    code: 0,
                     local_key: locals.KEYS.DB_ERROR,
-                    where: 'manageRole.ts',
-                    message: err.message
+                    message: returnLocal(locals.KEYS.DB_ERROR),
+                    where: 'role_service.manageRole.update()'       
                 } as ErrorInterface);
-
-                return resolve(false);
+                
+                return reject(false);
             }
 
-            //----[ if the role does not exist ]----//
-            if(!result){
-                if(returnErrorKey === true)
-                    return { 
-                        local_key: 'ROLE_NOT_FOUND',
-                        message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
-                    };
-
-                else return false;
+            // If no token was removed, return false
+            if(!result) {
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.NOT_FOUND,
+                    message: returnLocal(locals.KEYS.NOT_FOUND)
+                } as ErrorInterface);
+                
+                return reject(false);
             }
             
             // If we successfully removed the role, return true
-            resolve(result);
+            return resolve(result);
         });
     });
 }
@@ -258,12 +223,12 @@ export async function update(role:ObjectId, new_role:RoleInterface, returnErrorK
  * 
  * @param role ObjectId - the ObjectId of the role to update
  * @param user_id ObjectId - the id of the user to add
- * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the role was deleted, false if it was not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
+ * @returns Promise<boolean | ErrorInterface> - true if the role was deleted, false if it was not, if 'returnError' is true, the error key will be returned as a 'RoleError' obj
  */
-export async function addID(role:ObjectId, user_id:ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
-    return modifyID(role, user_id, 'add', returnErrorKey);
+export async function addID(role:ObjectId, user_id:ObjectId, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return modifyID(role, user_id, 'add', returnError);
 }
 
 /**
@@ -271,47 +236,47 @@ export async function addID(role:ObjectId, user_id:ObjectId, returnErrorKey?:boo
  * 
  * @param role ObjectId - the ObjectId of the role to update
  * @param user_id ObjectId - the id of the user to remove
- * @param returnErrorKey boolean - if true, the error key will be returned, if false the output will be a boolean
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the role was deleted, false if it was not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj */
-export async function removeID(role:ObjectId, user_id:ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
-    return modifyID(role, user_id, 'remove', returnErrorKey);
+ * @returns Promise<boolean | ErrorInterface> - true if the role was deleted, false if it was not, if 'returnError' is true, the error key will be returned as a 'RoleError' obj */
+export async function removeID(role:ObjectId, user_id:ObjectId, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return modifyID(role, user_id, 'remove', returnError);
 }
 
-async function modifyID(role:ObjectId, user_id:ObjectId, action:string, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
+async function modifyID(role:ObjectId, user_id:ObjectId, action:string, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return new Promise(async(resolve, reject) => {
+        
+        // find the role in the database
+        let role_data = await get(role) as RoleInterface[];
 
-    // find the role in the database
-    let role_data = await get(role);
+        //----[ if the role does not exist ]----//
+        if(role_data[0] === undefined) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.NOT_FOUND,
+                message: returnLocal(locals.KEYS.NOT_FOUND)
+            } as ErrorInterface);
+            
+            return reject(false);
+        }
 
-    //----[ if the role does not exist ]----//
-    if(role_data === false) {
-        if(returnErrorKey === true)
-            return { 
-                local_key: 'ROLE_NOT_FOUND',
-                message: returnLocal(locals.KEYS.ROLE_NOT_FOUND)
-            };
-    
-        return false;
-    }
+        // If the user somehows already is appart of the role, dont add him twice
+        if(role_data[0]?.users.indexOf(user_id) === -1)
+            return true;
 
-    // Make sure that the role is the right type
-    else role_data = role_data as RoleInterface[];
-    // If the user somehows already is appart of the role, dont add him twice
-    if(role_data[0]?.users.indexOf(user_id) === -1)
-        return true;
+        switch(action) {
+            case 'add':
+                // update the role in the database
+                role_data[0].users = [...role_data[0]?.users, user_id];
+                break;
 
-    switch(action) {
-        case 'add':
-            // update the role in the database
-            role_data[0].users = [...role_data[0]?.users, user_id];
-            break;
+            case 'remove':
+                // remove the user id from the role
+                role_data[0].users.splice(role_data[0].users.indexOf(user_id), 1);
+                break;
+        }
 
-        case 'remove':
-            // remove the user id from the role
-            role_data[0].users.splice(role_data[0].users.indexOf(user_id), 1);
-            break;
-    }
-
-    // Update the role in the database
-    return update(role, role_data[0], returnErrorKey);
+        // Update the role in the database
+        update(role, role_data[0], returnError).then(resolve).catch(reject);
+    }); 
 }

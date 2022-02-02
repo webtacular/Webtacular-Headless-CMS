@@ -1,5 +1,6 @@
 extend type Query {
-    role(id: String!): Role
+    role(id: String!): Role,
+    roles: [Role_id]
 }
 
 type Role  {
@@ -7,4 +8,8 @@ type Role  {
     color: String
     permissions: [String]
     users: [String]
+}
+
+type Role_id { 
+    id: String
 }

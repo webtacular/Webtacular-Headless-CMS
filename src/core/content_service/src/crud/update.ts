@@ -10,9 +10,9 @@ import read from "./read";
  * @param post_id - The id of the content to update
  * @param content - The new content to update
  * @param strict - default true, it will only update if the content type is the same as the old content type
- * @param returnErrorKey - If true, the function will return an error object, else it will return a boolean if an error occured
+ * @param returnError - If true, the function will return an error object, else it will return a boolean if an error occured
  */
-export default async function(post_id:ObjectId | ObjectId[], new_content:{ content:any, owner?:ObjectId }, strict:boolean = true, returnErrorKey?:boolean): Promise<boolean | ErrorInterface | ContentInterface[]> {
+export default async function(post_id:ObjectId | ObjectId[], new_content:{ content:any, owner?:ObjectId }, strict:boolean = true, returnError?:boolean): Promise<boolean | ErrorInterface | ContentInterface[]> {
     // try to remove the content from the database
     return new Promise(async(resolve:any, reject:any) => {
         // Check if an owner was set, if so, we need to update the user
@@ -26,7 +26,7 @@ export default async function(post_id:ObjectId | ObjectId[], new_content:{ conte
 
         // if we cant find the content, return an error/false
         if (!content) {
-            if(returnErrorKey === true) return reject({ 
+            if(returnError === true) return reject({ 
                 local_key: locals.KEYS.NOT_FOUND,
                 where: 'update.ts',
                 message: returnLocal(locals.KEYS.NOT_FOUND)
@@ -37,7 +37,7 @@ export default async function(post_id:ObjectId | ObjectId[], new_content:{ conte
 
         // if the content type is not the same as the old content type, and strict is true, return an error
         if (strict && content.content.type !== content.content.type) {
-            if(returnErrorKey === true) return reject({
+            if(returnError === true) return reject({
                 local_key: locals.KEYS.INVALID_CONTENT_TYPE,
                 where: 'update.ts',
                 message: returnLocal(locals.KEYS.INVALID_CONTENT_TYPE)
@@ -62,7 +62,7 @@ export default async function(post_id:ObjectId | ObjectId[], new_content:{ conte
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: content }, (err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) {
-                if(returnErrorKey === true) return reject({
+                if(returnError === true) return reject({
                     local_key: locals.KEYS.DB_ERROR,
                     where: 'update.ts',
                     message: err.message
@@ -75,7 +75,7 @@ export default async function(post_id:ObjectId | ObjectId[], new_content:{ conte
 
             // If we cant find the content, return a 404
             if (!result) {
-                if(returnErrorKey === true) return reject({
+                if(returnError === true) return reject({
                     local_key: locals.KEYS.NOT_FOUND,
                     where: 'delete.ts',
                     message: returnLocal(locals.KEYS.NOT_FOUND)

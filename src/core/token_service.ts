@@ -230,7 +230,7 @@ export async function revokeToken(token_id:ObjectId, returnError?:boolean):Promi
             token_cache.del(token_id.toString());
 
             // If no token was removed, return false
-            if(result === null) {
+            if(!result) {
                 if(returnError === true) return reject({
                     code: 1,
                     local_key: locals.KEYS.NOT_FOUND,
@@ -386,7 +386,7 @@ export async function checkForToken(req:any, returnError?:boolean, skipCache:boo
     // // If the user is not found or the token is invalid, return false and revoke the token
     // revokeToken(tokenData._id);
 
-    // if(returnErrorKey === true) return resolve({
+    // if(returnError === true) return resolve({
     //     local_key: 'INVALID_TOKEN',
     //     message: returnLocal(locals.KEYS.INVALID_TOKEN)
     // });

@@ -20,8 +20,3 @@ interface MongoFunctions {
 export const mongoDB:MongoFunctions = require("./src/mongoDB");
 
 //---------------------------------------//
-
-
-//---------[ LOCALDB FUNCTIONS ]---------//
-
-//---------------------------------------//

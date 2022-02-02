@@ -8,7 +8,7 @@ import { locals, returnLocal } from "../../../response_handler";
  * 
  * @param id - The id of the content to get
  */
-export default async function(post_id:ObjectId | ObjectId[], filter?:any, returnErrorKey?:boolean): Promise<boolean | ErrorInterface | ContentInterface[]> {
+export default async function(post_id:ObjectId | ObjectId[], filter?:any, returnError?:boolean): Promise<boolean | ErrorInterface | ContentInterface[]> {
 
     // check if the post_id is an array, if not, make it an array
     if((post_id as ObjectId[])?.length === undefined)
@@ -20,7 +20,7 @@ export default async function(post_id:ObjectId | ObjectId[], filter?:any, return
     // validate user_id
     post_id.forEach((id:ObjectId) => {
         if(ObjectId.isValid(id) !== true) {
-            if(returnErrorKey === true) return {
+            if(returnError === true) return {
                 local_key: locals.KEYS.INVALID_ID,
                 message: returnLocal('INVALID_ID'),
                 where: id.toString(),

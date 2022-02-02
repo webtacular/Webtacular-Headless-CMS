@@ -4,6 +4,7 @@ import { ErrorInterface, RoleInterface } from "../../interfaces";
 import { roleRegex } from "../../regex_service";
 import { locals, returnLocal } from "../../response_handler";
 
+//TODO: Fix this function
 export default (role:RoleInterface, returnError?:boolean, ignoreNonePresent?:boolean):boolean | ErrorInterface => {
     // validate the name
     if(ignoreNonePresent === false && !role?.name || roleRegex.role_name.test(role?.name) !== true){
@@ -23,6 +24,7 @@ export default (role:RoleInterface, returnError?:boolean, ignoreNonePresent?:boo
 
     let pass:boolean = false,
         error_obj:ErrorInterface = {
+            code: 1,
             local_key: '',
             message: '',
         };
@@ -33,6 +35,7 @@ export default (role:RoleInterface, returnError?:boolean, ignoreNonePresent?:boo
         // validate the name
         if(roleRegex.role_permissions.test(elem) !== true){
             error_obj = {
+                code: 1,
                 local_key: 'INVALID_PERMISSION_NAME',
                 where: elem,
                 message: returnLocal(locals.KEYS.INVALID_PERMISSION_NAME)
@@ -46,6 +49,7 @@ export default (role:RoleInterface, returnError?:boolean, ignoreNonePresent?:boo
         // validate the value
         if(permissions.includes(elem.toLowerCase()) !== true){
             error_obj = {
+                code: 1,
                 local_key: 'INVALID_PERMISSION_VALUE',
                 where: elem,
                 message: returnLocal(locals.KEYS.INVALID_PERMISSION_VALUE)
@@ -61,6 +65,7 @@ export default (role:RoleInterface, returnError?:boolean, ignoreNonePresent?:boo
     for(let elem of role?.users) {
         if(ObjectId.isValid(elem) !== true){
             error_obj = {
+                code: 1,
                 local_key: 'INVALID_USER_ID',
                 where: elem.toString(),
                 message: returnLocal(locals.KEYS.INVALID_USER_ID)

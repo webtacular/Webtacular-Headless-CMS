@@ -9,103 +9,114 @@ import { user as user_service } from "../../user_service";
  * fetches all roles that a user has, and if they have a role that no longer exists, it removes it.
  * 
  * @param user UserInterface | ObjectId - the user to check, if it is an object id it will be fetched from the database, if it is a user object it will be used directly
- * @param returnErrorKey boolean - if true, the error key will be returned
- * @returns RoleInterface[] | ErrorInterface | boolean - the roles the user has if theres an error and 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj, else a boolean will be returned
- */
-export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolean):Promise<RoleInterface[] | ErrorInterface | boolean> {
-    let user_data:any = user;
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
+ * @returns Promise<UserGetInterface[] | boolean | ErrorInterface> - The user object array or the error key
+*/
+export async function get(user: UserInterface | ObjectId, returnError?:boolean):Promise<RoleInterface[] | ErrorInterface | boolean> {
+    return new Promise(async (resolve, reject) => {
+        let user_data:any = user;
 
-    if(user instanceof ObjectId)
-        user_data = await getUser(user);
+        if(user instanceof ObjectId)
+            user_data = await getUser(user, true);
 
-    //---------[ User not found ]---------//
-    if(!user_data?.permissions?.roles) {
-        if(returnErrorKey === true)
-            return { 
-                local_key: 'USER_NOT_FOUND',
+        //---------[ User not found ]---------//
+        if(!user_data[0]?.permissions?.roles) {
+            if(returnError === true) return reject({ 
+                code: 1,
+                local_key: locals.KEYS.USER_NOT_FOUND,
                 message: returnLocal(locals.KEYS.USER_NOT_FOUND)
-            };
+            });
 
-        return false;
-    }
+            return reject(false);
+        }
 
-    //---------[ User found ]---------//
-    let roles:RoleInterface[] = [];
+        //---------[ User found ]---------//
+        let roles:RoleInterface[] = [];
 
-    // Loop through the roles that the user has
-    for(let role of user_data.permissions.roles) {
+        // Loop through the roles that the user has
+        for(let role of user_data.permissions.roles) {
 
-        // Get the role
-        let role_data = await get_role(role) as RoleInterface[];
+            // Get the role
+            let role_data = await get_role(role) as RoleInterface[];
 
-        // if the role is found, push it to the roles array
-        if(role_data) roles.push(role_data[0] as RoleInterface);
+            // if the role is found, push it to the roles array
+            if(role_data) roles.push(role_data[0] as RoleInterface);
 
-        // if the role is not found, remove it from the user
-        else remove(user_data, role);
-    }
+            // if the role is not found, remove it from the user
+            else remove(user_data, role);
+        }
 
-    // Return the roles
-    return roles;
+        // Return the roles
+        return resolve;
+    });
 }
 
 /**
  * Checks if a user has a role
  * 
  * @param user UserInterface | ObjectId - the user to check, if it is an object id it will be fetched from the database, if it is a user object it will be used directly
- * @param role string - the role to check
- * @param returnErrorKey boolean - if true, the error key will be returned
+ * @param roles ObjectId[] | ObjectId - The ID(s) of the roles to check
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the user has the role, false if not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
+ * @returns Promise<{ [key: string]: boolean }  |boolean | ErrorInterface> - The user object array or the error key
 */
-export async function has(user: UserInterface | ObjectId, roles:ObjectId[] | ObjectId, returnErrorKey?:boolean):Promise<{ [key: string]: boolean } | ErrorInterface> {
-    let data;
+export async function has(user: UserInterface | ObjectId, roles:ObjectId[] | ObjectId, returnError?:boolean):Promise<{ [key: string]: boolean } | ErrorInterface | boolean> {
+    return new Promise(async (resolve, reject) => {
+        // Create an empty variable to store the roles
+        let data:any;
 
-    // Check if roles is an array or an object id
-    if(roles instanceof Array === false)
-        roles = [roles] as ObjectId[];
+        // Check if roles is an array or an object id
+        if(roles instanceof Array === false)
+            roles = [roles] as ObjectId[];
 
-    // Make sure the roles are an array of object ids
-    roles = roles as ObjectId[];
+        // Make sure the roles are an array of object ids
+        roles = roles as ObjectId[];
 
-    // Get the roles that the user has
-    if(user instanceof ObjectId)
-        data = await user_service.get(user, { permissions: 1 }) 
-    else data = user;
- 
-    // place the roles that the user has into this array
-    let has_roles:{ [key: string]: boolean } = {};
+
+        // If we pass an object id, fetch the user
+        if(user instanceof ObjectId)
+            data = await user_service.get(user, { permissions: 1 })
+
+        // If we pass a user object, use it
+        else data = [user];
+
+        // Make sure everything is the right type
+        data = data as UserGetInterface;
+
     
-    // if the user dosent exist, return an error
-    if(data === false) {
-        if(returnErrorKey === true)
-            return { 
-                local_key: 'USER_NOT_FOUND',
+        // place the roles that the user has into this array
+        let has_roles:{ [key: string]: boolean } = {};
+        
+
+        //---------[ User not found ]---------//
+        if(!data[0]?.permissions?.roles) {
+            if(returnError === true) return reject({ 
+                code: 1,
+                local_key: locals.KEYS.USER_NOT_FOUND,
                 message: returnLocal(locals.KEYS.USER_NOT_FOUND)
-            };
+            });
 
-        return {};
-    }
-    
-    // make sure the data is in the correct type
-    else data = data as UserGetInterface;
+            return reject(false);
+        }
+        
+        // Loop through the roles that the user has
+        data[0].permissions.roles.forEach((has_role: ObjectId) => {
 
-    // Loop through the roles that the user has
-    data[0].permissions.roles.forEach(user_role => {
-        //console.log(user_role);
-        (roles as ObjectId[])?.forEach(role => {
+            // Loop through the roles that we want to check
+            (roles as ObjectId[])?.forEach(role => {
 
-            // If the user has the role, set the has_role to true
-            if(user_role.toString() === role.toString())
-                Object.assign(has_roles, { [role.toString()]: true });
+                // If the user has the role, set the has_role to true
+                if(has_role.toString() === role.toString())
+                    Object.assign(has_roles, { [role.toString()]: true });
 
-            // If the user does not have the role, set the has_role to false
-            else Object.assign(has_roles, { [role.toString()]: false });
+                // If the user does not have the role, set the has_role to false
+                else Object.assign(has_roles, { [role.toString()]: false });
+            });
         });
+
+
+        return resolve(has_roles);
     });
-
-
-    return has_roles;
 }
 
 /**
@@ -113,97 +124,91 @@ export async function has(user: UserInterface | ObjectId, roles:ObjectId[] | Obj
  * 
  * @param user ObjectId - the user to add the role to, if it is an object id it will be fetched from the database, if it is a user object it will be used directly
  * @param role ObjectId - the role to add
- * @param returnErrorKey boolean - if true, the error key will be returned
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the user has the role, false if not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
+ * @returns Promise<boolean | ErrorInterface> - true if the role was added, false if the role was not added, or the error object
 */
-export async function add(user: ObjectId, role:ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
-    return edit_data(user, role, 'add', returnErrorKey);
+export async function add(user: ObjectId, role:ObjectId, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return edit_data(user, role, 'add', returnError);
 }
 
 /**
- * removes a role from a user
+ * Removes a role from a user
  * 
- * @param user ObjectId - the user to remove the role from, if it is an object id it will be fetched from the database, if it is a user object it will be used directly
- * @param role ObjectId - the role to remove
- * @param returnErrorKey boolean - if true, the error key will be returned
+ * @param user ObjectId - the user to add the role to, if it is an object id it will be fetched from the database, if it is a user object it will be used directly
+ * @param role ObjectId - the role to add
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
- * @returns boolean | ErrorInterface - true if the user has the role removed or if they didint have it to begin with, false if not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
+ * @returns Promise<boolean | ErrorInterface> - true if the role was removed, false if the role was not removed, or the error object
 */
-export async function remove(user: ObjectId, role:ObjectId, returnErrorKey?:boolean):Promise<boolean | ErrorInterface> {
-    return edit_data(user, role, 'remove', returnErrorKey);
+export async function remove(user: ObjectId, role:ObjectId, returnError?:boolean):Promise<boolean | ErrorInterface> {
+    return edit_data(user, role, 'remove', returnError);
 }
 
-async function edit_data(user: ObjectId, role:ObjectId, action:string, returnErrorKey?:boolean,):Promise<boolean | ErrorInterface> {
-    // Get the user
-    let user_data = await getUser(user, { permissions: 1 });
+async function edit_data(user: ObjectId, role:ObjectId, action:string, returnError?:boolean,):Promise<boolean | ErrorInterface> {
+   return new Promise(async (resolve, reject) => { 
+        // Get the user
+        let user_data = await user_service.get(user, { permissions: 1 })
 
-    // if the user dosent exist, return an error
-    if(user_data === false) {
-        if(returnErrorKey === true)
-            return { 
-                local_key: 'USER_NOT_FOUND',
+        //---------[ User not found ]---------//
+        if(!user_data[0]?.permissions?.roles) {
+            if(returnError === true) return reject({ 
+                code: 1,
+                local_key: locals.KEYS.USER_NOT_FOUND,
                 message: returnLocal(locals.KEYS.USER_NOT_FOUND)
-            };
+            });
 
-        return false;
-    }
-    else user_data = user_data as UserGetInterface[];
+            return reject(false);
+        }
 
-    //TODO: verify that the role exists
-    
-    // Get the roles that the user has
-    let role_array:Array<ObjectId> = [...(user_data[0] as any)?.permissions?.roles];
+        //---------[ Find the role ]---------//
+        await get_role(role).catch((err) => { return reject(err) });
+        
+        // Get the roles that the user has
+        let role_array:Array<ObjectId> = [...user_data[0]?.permissions?.roles];
 
-    // check if the user has the role
-    let string_array = role_array.map(role => role.toString()),
-        hasRole = string_array.includes(role.toString());
-    
-    // check if the user already has the role
-    switch(action) {
-        case 'add':
-            if(hasRole === true)
-                return true;
+        // check if the user has the role
+        let string_array = role_array.map(role => role.toString()),
+            hasRole = string_array.includes(role.toString());
+        
+        // check if the user already has the role
+        switch(action) {
+            case 'add':
+                if(hasRole === true)
+                    return resolve(true);
 
-            // Add the role to the user
-            role_array.push(role);
+                // Add the role to the user
+                role_array.push(role);
 
-            // Update the role user id's
-            let addRes:boolean | ErrorInterface = await addID(role, user, returnErrorKey);
+                // Update the role user id's
+                let addRes:boolean | ErrorInterface = await addID(role, user, returnError);
 
-            // add the role to the user
-            if ((addRes as ErrorInterface)?.local_key !== undefined)
-                return addRes;
+                // add the role to the user
+                if ((addRes as ErrorInterface)?.local_key !== undefined)
+                    return addRes;
 
-            break;
+                break;
 
-        case 'remove':
-            if(hasRole === false)
-                return true;
+            case 'remove':
+                if(hasRole === false)
+                    return resolve(true);
 
-            // Remove the role from the user
-            role_array = role_array.filter(arr_role => arr_role?.toString() !== role?.toString());
+                // Remove the role from the user
+                role_array = role_array.filter(arr_role => arr_role?.toString() !== role?.toString());
 
-            // Update the role user id's
-            await removeID(role, user, returnErrorKey);
+                // Update the role user id's
+                await removeID(role, user, returnError);
 
-            break;
-    }
+                break;
+        }
 
-    // create an object to store the new roles
-    let role_data:any = { permissions: { roles: role_array } };
-    
-    // update the user
-    let result = await userDB.update(user, role_data, true);
+        // create an object to store the new roles
+        let role_data:any = { permissions: { roles: role_array } };
+        
+        // update the user
+        await userDB.update(user, role_data, true).catch((err) => { return reject(err) });
 
-    // if the update failed, return an error
-    if((result as ErrorInterface).local_key) {
-        if(returnErrorKey === true)
-            return result as ErrorInterface;
-
-        return false;
-    }
-
-    // Return true
-    return true;
+        // Return true
+        return resolve(true);
+   });
 }

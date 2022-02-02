@@ -1,41 +1,34 @@
 import { ObjectId } from "mongodb";
 import { mongoDB } from "../../db_service";
 import { ErrorInterface, UserInterface } from "../../interfaces";
-import { locals } from "../../response_handler";
+import { locals, returnLocal } from "../../response_handler";
 
 /**
  * this function is used to update a user in the database
  * 
- * @param user_id - The user id to update
- * @param user - The user object to update
- * @param returnErrorKey - If true, return the error key instead of the user object
+ * @param id - The user id to update
+ * @param user ObjectId - The user object to update
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * @returns Promise<UserInterface | boolean | ErrorInterface> - The user object or the error key
  */
-export default async function (user_id:ObjectId, user:any, returnErrorKey?:boolean):Promise<UserInterface | boolean | ErrorInterface> {
+export default async function (id:ObjectId, user:any, returnError?:boolean):Promise<UserInterface | boolean | ErrorInterface> {
     return new Promise((resolve:any, reject:any) => {
-        // validate user_id
-        if(ObjectId.isValid(user_id) !== true){
-            if(returnErrorKey === true) return reject({
-                local_key: locals.KEYS.INVALID_ID,
-            } as ErrorInterface);
-
-            return reject(false);
-        }
 
         // The object to find in the database
         let mongoDBfindOBJ:any = {
-            _id: new ObjectId(user_id)
+            _id: id
         }
 
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: user }, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
-            if (err) {
-                if(returnErrorKey === true) return reject({
+            if(err) {
+                if(returnError === true) return reject({
+                    code: 0,
                     local_key: locals.KEYS.DB_ERROR,
-                    where: 'update.ts',
-                    message: err.message
-                });
-
+                    message: returnLocal(locals.KEYS.DB_ERROR),
+                    where: 'user_service.update',              
+                } as ErrorInterface);
+                
                 return reject(false);
             }
 
@@ -43,10 +36,12 @@ export default async function (user_id:ObjectId, user:any, returnErrorKey?:boole
 
             // If we cant find the user, return a 404
             if (!result) {
-                if(returnErrorKey === true) return reject({
-                    local_key: locals.KEYS.USER_NOT_FOUND,
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.NOT_FOUND,
+                    message: returnLocal(locals.KEYS.NOT_FOUND),
                 });
-
+    
                 return reject(false);
             }
 

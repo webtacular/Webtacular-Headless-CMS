@@ -40,16 +40,16 @@ export async function addDB(cs:string, db:string, collection:string):Promise<Mon
  * 
  * @param db string - the name of the database to get the collection from
  * @param collection string - the name of the collection to get, optional, uses the default collection if not provided
- * @param returnErrorKey boolean - if true, returns an error object, if false, returns a boolean
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * 
  * @returns Collection - the collection object
 **/
-export function getClient(db:string, collection?:string, returnErrorKey?:boolean):Collection<{[key: string | number]: any}> | ErrorInterface {
-    
+export function getClient(db:string, collection?:string, returnError?:boolean):Collection<{[key: string | number]: any}> | ErrorInterface {
     // If the database doesn't exist, throw an error
     if(!mongo_databases[db]) {
         // If the response object is defined, send an error to the client
-        if(returnErrorKey === true) return {
+        if(returnError === true) return {
+            code: 0,
             local_key: 'DATABASE_UNKNOWN_ERROR',
             message: returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR)
         } as ErrorInterface;

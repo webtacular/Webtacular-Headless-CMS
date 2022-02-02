@@ -8,7 +8,7 @@ import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
-import { perm, precedence, role } from "./core/role_service";
+import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
 import { user as user_role } from "./core/role_service";
 
@@ -67,7 +67,7 @@ declare global {
 
     //load the gql schemas
     user.gql();
-    perm.gql();
+    role.gql();
     addons.gql();
 
     //Let the plugins do their thing

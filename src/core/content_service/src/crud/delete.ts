@@ -12,9 +12,9 @@ import { user } from "../../../user_service";
  * 
  * @param id ObjectId - The id of the content to delete
  *
- * @returns - If returnErrorKey is true, the function will return an error object, else it will return a boolean if an error occured
+ * @returns - If returnError is true, the function will return an error object, else it will return a boolean if an error occured
 */
-export default async function(id:ObjectId, returnErrorKey?: boolean): Promise<boolean | ErrorInterface> {
+export default async function(id:ObjectId, returnError?: boolean): Promise<boolean | ErrorInterface> {
     // try to remove the content from the database
     return new Promise(async(resolve:any, reject:any) => {
         // Check if an owner was set, if so, we need to update the user
@@ -26,7 +26,7 @@ export default async function(id:ObjectId, returnErrorKey?: boolean): Promise<bo
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).deleteOne(mongoDBfindOBJ, (err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) {
-                if(returnErrorKey === true) return reject({
+                if(returnError === true) return reject({
                     local_key: locals.KEYS.DB_ERROR,
                     where: 'delete.ts',
                     message: err.message
@@ -39,7 +39,7 @@ export default async function(id:ObjectId, returnErrorKey?: boolean): Promise<bo
 
             // If we cant find the content, return a 404
             if (!result) {
-                if(returnErrorKey === true) return reject({
+                if(returnError === true) return reject({
                     local_key: locals.KEYS.NOT_FOUND,
                     where: 'delete.ts',
                     message: returnLocal(locals.KEYS.NOT_FOUND)

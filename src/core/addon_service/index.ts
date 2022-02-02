@@ -11,14 +11,14 @@ import start from "./src/load";
 //--------[ Exports ]--------//
 interface AddonService { 
     start(app:FastifyInstance):void;
-    get(id:string | ObjectId, returnErrorKey?:boolean):AddonInterface | boolean | ErrorInterface;
+    get(id:string | ObjectId, returnError?:boolean):AddonInterface | boolean | ErrorInterface;
     addons:AddonInterface[];
     gql: () => void;
 }
 
 export const addons:AddonService = {
     start: (app:FastifyInstance) => start(app),
-    get: (id:string | ObjectId, returnErrorKey?:boolean):AddonInterface | boolean | ErrorInterface => get(id, returnErrorKey),
+    get: (id:string | ObjectId, returnError?:boolean):AddonInterface | boolean | ErrorInterface => get(id, returnError),
     addons: current_addons,
     gql: () => graphql.expand(__dirname, 'gql/schema.gql', rootFuncs)
 }

@@ -7,16 +7,16 @@ import { current_addons } from "./scan";
  * This function is used to get details about an addon using its ID or name.
  * 
  * @param id the ID or name of the addon
- * @param returnErrorKey if true, the function will return the error key instead of the addon
- * @returns the addon object, or the error key if 'returnErrorKey' is true
+ * @param returnError if true, the function will return the error key instead of the addon
+ * @returns the addon object, or the error key if 'returnError' is true
  */
-export default (id:ObjectID | string, returnErrorKey?: boolean):boolean | AddonInterface | ErrorInterface => {
+export default (id:ObjectID | string, returnError?: boolean):boolean | AddonInterface | ErrorInterface => {
     let usingID:boolean = false;
 
     // Validate ID
     if (id instanceof ObjectID && !ObjectID.isValid(id.toString())) {
 
-        if(returnErrorKey === true) return {
+        if(returnError === true) return {
             local_key: locals.KEYS.INVALID_ID,
             message: returnLocal('INVALID_ID'),
             where: id.toString(),
@@ -44,7 +44,7 @@ export default (id:ObjectID | string, returnErrorKey?: boolean):boolean | AddonI
         return found_addon;
 
     // else error out
-    if(returnErrorKey === true) return {
+    if(returnError === true) return {
         local_key: locals.KEYS.NOT_FOUND,
         message: returnLocal('NOT_FOUND'),
         where: id.toString(),

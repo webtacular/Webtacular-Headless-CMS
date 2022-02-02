@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import {mongoDB} from "../../../db_service";
 import { AddonInterface, ContentInterface, ErrorInterface } from "../../../interfaces";
-import { locals, mongoErrorHandler } from "../../../response_handler";
+import { locals } from "../../../response_handler";
 import { user } from "../../../user_service";
 
 /**
@@ -21,59 +21,60 @@ import { user } from "../../../user_service";
  * 
  * @param addon - The details of the addon trying to create content
  * @param type - The type of content to create, has to be a type defined in the addon json
- * @param returnErrorKey - If true, the function will return an error object instead of a boolean
+ * @param returnError - If true, the function will return an error object instead of a boolean
  * @param content - The content to create { content: any, owner?: ObjectId }, content can be anything, while the owner is either undefined or a valid user BSON ID, or else it will be ignored
  *
- * @returns - If returnErrorKey is true, the function will return an error object, else it will return a boolean if an error occured, else it will return the content object
+ * @returns - If returnError is true, the function will return an error object, else it will return a boolean if an error occured, else it will return the content object
 */
-export default async function(addon:AddonInterface, type:string, content:{ content:any, owner?:ObjectId }, returnErrorKey?: boolean): Promise<boolean | ErrorInterface | ContentInterface> {
-    // Validate that the type is valid
-    if(!addon.types.includes(type)) {
-        if(returnErrorKey === true) return {
-            local_key: locals.KEYS.INVALID_TYPE,
-            where: 'create.ts',
-            message: `The type ${type} is not defined in the addon ${addon.name}`
-        } as ErrorInterface;
-
-        return false;
-    }
-
-
-    // Start creating the content
-    let pushOBJ:ContentInterface = {
-        _id: new ObjectId(),
-        addon_id: new ObjectId(addon.id),
-        type: type.toLowerCase(),
-        history: [],
-        content: content.content,
-    };
-
-    // If the owner is set, set it
-    if(content?.owner !== undefined) {
-        // Validate that the owner is valid
-        if(ObjectId.isValid(content.owner) !== true) {
-            if(returnErrorKey === true) return {
-                local_key: locals.KEYS.INVALID_ID,
+export default async function(addon:AddonInterface, type:string, content:{ content:any, owner?:ObjectId }, returnError?: boolean): Promise<boolean | ErrorInterface | ContentInterface> {
+    return new Promise(async(resolve:any, reject:any) => {
+        // Validate that the type is valid
+        if(!addon.types.includes(type)) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.INVALID_TYPE,
                 where: 'create.ts',
-                message: `The owner ${content.owner} is not a valid BSON ID`
-            } as ErrorInterface;
-            else return false;
+                message: `The type ${type} is not defined in the addon ${addon.name}`
+            } as ErrorInterface);
+
+            return reject(false);
         }
 
-        else pushOBJ.owner = new ObjectId(content.owner);
-    }
-    
+        // Start creating the content
+        let pushOBJ:ContentInterface = {
+            _id: new ObjectId(),
+            addon_id: new ObjectId(addon.id),
+            type: type.toLowerCase(),
+            history: [],
+            content: content.content,
+        };
 
-    // try to insert the content into the database
-    return new Promise(async(resolve:any, reject:any) => {
+        // If the owner is set, set it
+        if(content?.owner !== undefined) {
+            // Validate that the owner is valid
+            if(ObjectId.isValid(content.owner) !== true) {
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.INVALID_ID,
+                    where: 'create.ts',
+                    message: `The owner ${content.owner} is not a valid BSON ID`
+                } as ErrorInterface);
+
+                else return reject(false);
+            }
+
+            else pushOBJ.owner = new ObjectId(content.owner);
+        }
+        
         // Check if an owner was set, if so we need to update the user
         if(pushOBJ.owner !== undefined) {
             // Get the user
-            let user_data:any = await user.get(pushOBJ.owner, { content: 1 }, returnErrorKey);
+            let user_data:any = await user.get(pushOBJ.owner, { content: 1 });
 
             // Check if the user exists
             if(user_data === false || user_data.message !== undefined || user_data[0] === undefined){
-                if(returnErrorKey === true) return reject({
+                if(returnError === true) return reject({
+                    code: 1,
                     local_key: locals.KEYS.INVALID_ID,
                     where: 'create.ts',
                     message: `The owner ${content.owner} is not found`
@@ -82,19 +83,16 @@ export default async function(addon:AddonInterface, type:string, content:{ conte
                 else return reject(false);
             } 
 
-
             // Add the content to the user
-            let new_user:any = user.update(pushOBJ.owner, { content: [...user_data.content || [], pushOBJ._id] }, returnErrorKey);
-
-            // make sure the user was updated and not an error
-            if(new_user === false || new_user.message !== undefined)
-                return reject(new_user);
+            await user.update(pushOBJ.owner, { content: [...user_data.content || [], pushOBJ._id] }, returnError).catch(err => {
+                if(err.code === 0) throw Error(err.message);
+                else return resolve(err);
+            }) ;
         }
 
-
-        await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).insertOne(pushOBJ as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).insertOne(pushOBJ as any, (err:any, result:any) => {
             if (err) {
-                if(returnErrorKey === true) return reject({
+                if(returnError === true) return reject({
                     local_key: locals.KEYS.DB_ERROR,
                     where: 'update.ts',
                     message: err.message

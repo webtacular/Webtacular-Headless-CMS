@@ -1,34 +1,27 @@
 import { ObjectId } from "mongodb";
 import { mongoDB } from "../../db_service";
 import { ErrorInterface, UserGetInterface } from "../../interfaces";
-import { locals, returnLocal } from "../../response_handler";
 
-export default async function (user_id:ObjectId | ObjectId[], filter?:any, returnErrorKey?:boolean):Promise<UserGetInterface[] | ErrorInterface | boolean> {
+/**
+ * this function is used to get a user in the database
+ * 
+ * @param id - The user id to update
+ * @param filter - The filter to use while fetching the user
+ * @returns Promise<UserGetInterface[]> - The user object array or the error key 
+ */
+export default async function (id:ObjectId | ObjectId[], filter?:any):Promise<UserGetInterface[]> {
     
     // check if the user_id is an array, if not, make it an array
-    if((user_id as ObjectId[])?.length === undefined)
-        user_id = [user_id] as ObjectId[];
+    if((id as ObjectId[])?.length === undefined)
+        id = [id] as ObjectId[];
 
     // make sure the user_id is an array of ObjectIds type
-    else user_id = user_id as ObjectId[];
-
-    // validate user_id
-    user_id.forEach((id:ObjectId) => {
-        if(ObjectId.isValid(id) !== true) {
-            if(returnErrorKey === true) return {
-                local_key: locals.KEYS.INVALID_ID,
-                message: returnLocal('INVALID_ID'),
-                where: id.toString(),
-            } as ErrorInterface;
-    
-            return false;
-        }
-    });
+    else id = id as ObjectId[];
 
     let mask:any = [
         {
             $match: {
-                _id: { $in: user_id },
+                _id: { $in: id },
             }
         }
     ]

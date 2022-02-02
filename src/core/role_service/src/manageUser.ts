@@ -58,12 +58,19 @@ export async function get(user: UserInterface | ObjectId, returnErrorKey?:boolea
  * 
  * @returns boolean | ErrorInterface - true if the user has the role, false if not, if 'returnErrorKey' is true, the error key will be returned as a 'RoleError' obj
 */
-export async function has(user: UserInterface | ObjectId, roles:ObjectId[], returnErrorKey?:boolean):Promise<{ [key: string]: boolean } | ErrorInterface> {
+export async function has(user: UserInterface | ObjectId, roles:ObjectId[] | ObjectId, returnErrorKey?:boolean):Promise<{ [key: string]: boolean } | ErrorInterface> {
     let data;
+
+    // Check if roles is an array or an object id
+    if(roles instanceof Array === false)
+        roles = [roles] as ObjectId[];
+
+    // Make sure the roles are an array of object ids
+    roles = roles as ObjectId[];
 
     // Get the roles that the user has
     if(user instanceof ObjectId)
-        data = await user_service.get(user) 
+        data = await user_service.get(user, { permissions: 1 }) 
     else data = user;
  
     // place the roles that the user has into this array
@@ -79,14 +86,14 @@ export async function has(user: UserInterface | ObjectId, roles:ObjectId[], retu
 
         return {};
     }
-
+    
     // make sure the data is in the correct type
-    else data = data as UserInterface;
+    else data = data as UserGetInterface;
 
     // Loop through the roles that the user has
-    data?.permissions?.roles?.forEach(user_role => {
+    data[0].permissions.roles.forEach(user_role => {
         //console.log(user_role);
-        roles?.forEach(role => {
+        (roles as ObjectId[])?.forEach(role => {
 
             // If the user has the role, set the has_role to true
             if(user_role.toString() === role.toString())

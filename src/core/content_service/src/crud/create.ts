@@ -65,7 +65,7 @@ export default async function(addon:AddonInterface, type:string, content:{ conte
     
 
     // try to insert the content into the database
-    return new Promise(async(resolve:any) => {
+    return new Promise(async(resolve:any, reject:any) => {
         // Check if an owner was set, if so we need to update the user
         if(pushOBJ.owner !== undefined) {
             // Get the user
@@ -73,13 +73,13 @@ export default async function(addon:AddonInterface, type:string, content:{ conte
 
             // Check if the user exists
             if(user_data === false || user_data.message !== undefined || user_data[0] === undefined){
-                if(returnErrorKey === true) return resolve({
+                if(returnErrorKey === true) return reject({
                     local_key: locals.KEYS.INVALID_ID,
                     where: 'create.ts',
                     message: `The owner ${content.owner} is not found`
                 }) as ErrorInterface;
 
-                else return resolve(false);
+                else return reject(false);
             } 
 
 
@@ -88,19 +88,19 @@ export default async function(addon:AddonInterface, type:string, content:{ conte
 
             // make sure the user was updated and not an error
             if(new_user === false || new_user.message !== undefined)
-                return resolve(new_user);
+                return reject(new_user);
         }
 
 
         await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).insertOne(pushOBJ as any, (err:any, result:any) => {
             if (err) {
-                if(returnErrorKey === true) return resolve({
+                if(returnErrorKey === true) return reject({
                     local_key: locals.KEYS.DB_ERROR,
                     where: 'update.ts',
                     message: err.message
                 });
 
-                return resolve(false);
+                return reject(false);
             }
 
             // if the content was added, return the content

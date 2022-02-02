@@ -28,18 +28,6 @@ export let isResourceInterface = (obj: any):boolean => {
 // Database interfaces //
 //---------------------//
 
-// interface for IP logging
-export interface IpInterface {
-    _id?: ObjectId | string;
-    ip: string;
-    count: number;
-    last_accessed: number;
-    settings: {
-        bypass_timeout: boolean;
-        bypass_acc_limit: boolean;
-    }
-    accounts: { user_id:string, timestamp:number }[];
-}
 
 // Interface of the user object
 export interface UserInterface {
@@ -164,6 +152,7 @@ export interface RoleInterface {
 }
 
 export interface ErrorInterface {
+    code: number;
     local_key: string;
     where?: string;
     message: string;
@@ -209,5 +198,22 @@ export interface ContentInterface {
         owner?: ObjectId, 
         date: Date, 
         eason: string
+    }[];
+}
+
+export interface IPhistoryInterface {
+    _id: ObjectId;
+    ip: string;
+    banned: boolean;
+    last_accessed: number;
+    created: number;
+    count: number;
+    settings: {
+        bypass_timeout: boolean;
+        bypass_acc_limit: boolean;
+    };
+    accounts: {
+        user_id: ObjectId;  
+        timestamp: number;      
     }[];
 }

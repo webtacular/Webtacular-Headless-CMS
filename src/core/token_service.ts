@@ -5,8 +5,7 @@ import { locals, returnLocal } from './response_handler';
 import { mongoDB } from './db_service';
 import { compareHash, hashString } from "./hashing_service";
 import { Cache } from 'memory-cache';
-import { getTimeInSeconds } from "./general_service";
-import { user } from "./role_service";
+import { getTimeInSeconds, handleError } from "./general_service";
 
 // this is the cache for the token service
 export let token_cache:any = new Cache();
@@ -26,103 +25,129 @@ let emptyTokenObject = ():TokenInterface => {
  * 
  * @param userID string - the user's ID
  * @param ttl number - the time to live of the token in seconds, optional
- * @returns token string - the generated token
+ * @param admin boolean - if true, the user is an admin, optional   
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
+ * @returns Promise<TokenInterface | boolean | ErrorInterface> - if true, the token is added to the database, if false, the token is not added to the database
  */
-export async function generateToken(userID:string, ttl:number = global.__SECURITY_OPTIONS__.token_expiration, admin:boolean = false):Promise<TokenInterface> {
-    
-    // Generate a cryptographically random enough token
-    let raw_token = randomBytes(global.__SECURITY_OPTIONS__.token_lenght).toString('hex');
+export async function generateToken(userID:string, ttl:number = global.__SECURITY_OPTIONS__.token_expiration, admin:boolean = false, returnError?:boolean):Promise<TokenInterface | ErrorInterface | boolean> {
+    return new Promise(async (resolve, reject) => {
+        
+        // Generate a cryptographically random enough token
+        let raw_token = randomBytes(global.__SECURITY_OPTIONS__.token_lenght).toString('hex');
 
-    // hash the token
-    let token = await hashString(raw_token, global.__SECURITY_OPTIONS__.token_salt_rounds),
-        timestamp = getTimeInSeconds();
+        // hash the token
+        let token = await hashString(raw_token, global.__SECURITY_OPTIONS__.token_salt_rounds),
+            timestamp = getTimeInSeconds();
 
-    // Object to be inserted in the database
-    let toBeInserted:TokenInterface = {
-        _id: new ObjectId(),
-        token: token as string,
-        user_id: userID,
-        timestamp: timestamp,
-        expiration: timestamp + ttl,
-        admin
-    }
+        // Object to be inserted in the database
+        let toBeInserted:TokenInterface = {
+            _id: new ObjectId(),
+            token: token as string,
+            user_id: userID,
+            timestamp: timestamp,
+            expiration: timestamp + ttl,
+            admin
+        }
 
-    // Since we generate a token with a non asychronous function,
-    // we can return it right away, and not wait for the database to be connected
-    // to add it to the database.
+        // Since we generate a token with a non asychronous function,
+        // we can return it right away, and not wait for the database to be connected
+        // to add it to the database.
 
-    // Get the database client
-    mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
-        if(err) console.log(err);
-        //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
-    }); 
-    
+        // Get the database client
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
+            if(err) {
+                if(returnError === true) return reject({
+                    code: 0,
+                    local_key: locals.KEYS.DB_ERROR,
+                    message: returnLocal(locals.KEYS.DB_ERROR),
+                    where: 'token_service.generateToken()',
+                } as ErrorInterface);
+                
+                return reject(false);
+            }
+        }); 
+        
 
-    // contain the raw token to be sent to the client
-    let returnable:any = {
-        combined: `${toBeInserted._id.toString()}.${raw_token}`
-    }
+        // contain the raw token to be sent to the client
+        let returnable:any = {
+            combined: `${toBeInserted._id.toString()}.${raw_token}`
+        }
 
-    // clone the toBeInserted to avoid modifying the original object
-    // which would effect the database by pushing the raw token to the database
-    Object.assign(returnable, toBeInserted);
-
-
-    // object that is to be put in the cache
-    let toCache:any = { 
-        _id: toBeInserted._id.toString(),
-        combined: returnable.combined,
-        admin: toBeInserted.admin,
-        user_id: toBeInserted.user_id,
-    }
-
-    // if cacheing is enabled, push the token to cache
-    if(global.__SECURITY_OPTIONS__.cache_tokens === true) 
-        token_cache.put(toBeInserted._id.toString(), toCache, global.__SECURITY_OPTIONS__.token_cache_expiration * 1000);
+        // clone the toBeInserted to avoid modifying the original object
+        // which would effect the database by pushing the raw token to the database
+        Object.assign(returnable, toBeInserted);
 
 
-    // Return the token data
-    return returnable;
+        // object that is to be put in the cache
+        let toCache:any = { 
+            _id: toBeInserted._id.toString(),
+            combined: returnable.combined,
+            admin: toBeInserted.admin,
+            user_id: toBeInserted.user_id,
+        }
+
+        // if cacheing is enabled, push the token to cache
+        if(global.__SECURITY_OPTIONS__.cache_tokens === true) 
+            token_cache.put(toBeInserted._id.toString(), toCache, global.__SECURITY_OPTIONS__.token_cache_expiration * 1000);
+
+
+        // Return the token data
+        return resolve(returnable);
+    });
 }
 
 /**
  * This function is used to check if a token is valid.
  * 
  * @param token string - the token to check, must be in the format of 'id.token', where id is the token's id and token is the raw token itself
- * @returns userID string - the userID of the user that the token belongs to, undefined if the token is invalid
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
+ * @returns Promise<TokenInterface | ErrorInterface | boolean> - the token data if the token is valid, false if the token is invalid, and an ErrorInterface object if returnError is true and the function errors
 */
-export async function validateToken(token:string):Promise<TokenInterface> {
+export async function validateToken(token:string, returnError?:boolean):Promise<TokenInterface | ErrorInterface | boolean> {
+    return new Promise(async (resolve, reject) => {
+        // split the token into the id and unhashed token
+        // 0 = id, 1 = unhashed token
+        let tokenSplit = token.split('.');
 
-    // split the token into the id and unhashed token
-    // 0 = id, 1 = unhashed token
-    let tokenSplit = token.split('.');
+        if(ObjectId.isValid(tokenSplit[0]) !== true) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.INVALID_TOKEN,
+                message: returnLocal(locals.KEYS.INVALID_TOKEN)
+            });
 
-    if(ObjectId.isValid(tokenSplit[0]) !== true)
-        return emptyTokenObject();
+            return reject(false);
+        }
 
-    // Object to be found in the database
-    let mongoDBfindOBJ:any = {
-        _id: new ObjectId(tokenSplit[0]),
-    }
-
-    // Cretae a promise to return the token data
-    return new Promise((resolve:any) => {
+        // Object to be found in the database
+        let mongoDBfindOBJ:any = {
+            _id: new ObjectId(tokenSplit[0]),
+        }
 
         // Get the database client and make the request
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
-
-            //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
-            if(err) console.log(err);
-
+            if(err) {
+                if(returnError === true) return reject({
+                    code: 0,
+                    local_key: locals.KEYS.DB_ERROR,
+                    message: returnLocal(locals.KEYS.DB_ERROR),
+                    where: 'token_service.validateToken()'                
+                } as ErrorInterface);
+                
+                return reject(false);
+            }
             
             //---------[ Token is invalid ]---------//
             // If no token was found, return an empty object
-            if(result === null)
-                return resolve(emptyTokenObject());
-            
-            // check if the provided token is valid
-            else if(await compareHash(tokenSplit[1], result.token) !== true) 
-                return resolve(emptyTokenObject());
+            if(result === null || await compareHash(tokenSplit[1], result.token) !== true) {
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.INVALID_TOKEN,
+                    message: returnLocal(locals.KEYS.INVALID_TOKEN)
+                });
+    
+                return reject(false);
+            }
 
             // If the token was found, but is expired, return an empty object
             else if(result.expiration < getTimeInSeconds()){
@@ -131,7 +156,13 @@ export async function validateToken(token:string):Promise<TokenInterface> {
                 revokeToken(new ObjectId(result._id));
 
                 // return an empty object
-                return resolve(emptyTokenObject());
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.EXPIRED_TOKEN,
+                    message: returnLocal(locals.KEYS.EXPIRED_TOKEN)
+                });
+    
+                return reject(false);
             }
             //--------------------------------------//
 
@@ -159,32 +190,55 @@ export async function validateToken(token:string):Promise<TokenInterface> {
  * Provide the token _id NOT the token itself
  * 
  * @param token_id string - the token_id to be removed
- */
-export async function revokeToken(token_id:ObjectId):Promise<boolean> {
-    // make sure that the _id is valid, otherwise it will crash
-    if(ObjectId.isValid(token_id) !== true)
-        return false;
-
-    // Object to be found in the database and removed
-    let mongoDBfindOBJ:any = {
-        _id: new ObjectId(token_id)
-    }
-
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
+ * @returns Promise<boolean | ErrorInterface> - if returnError is true, it will return an ErrorInterface object, if false, a boolean will be returned
+*/
+export async function revokeToken(token_id:ObjectId, returnError?:boolean):Promise<boolean | ErrorInterface> {
     // Cretae a promise to return the token data
-    return new Promise((resolve:any) => {
+    return new Promise((resolve, reject) => {
+        // make sure that the _id is valid, otherwise it will crash
+        if(ObjectId.isValid(token_id) !== true) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.INVALID_TOKEN,
+                message: returnLocal(locals.KEYS.INVALID_TOKEN)
+            });
+
+            return reject(false);
+        }
+
+        // Object to be found in the database and removed
+        let mongoDBfindOBJ:any = {
+            _id: new ObjectId(token_id)
+        }
 
         // Get the database client and make the request
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, async(err:any, result:any) => {
 
-            //TODO: Handle errors, and logging, dont want to do anything with loggin right now as I dont want to create another Log4J situation
-            if(err) console.log(err);
+            if(err) {
+                if(returnError === true) return reject({
+                    code: 0,
+                    local_key: locals.KEYS.DB_ERROR,
+                    message: returnLocal(locals.KEYS.DB_ERROR),
+                    where: 'token_service.revokeToken()'                
+                } as ErrorInterface);
+                
+                return reject(false);
+            }
             
             // remove it from cache
             token_cache.del(token_id.toString());
 
             // If no token was removed, return false
-            if(result === null)
-                return resolve(false);
+            if(result === null) {
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.NOT_FOUND,
+                    message: returnLocal(locals.KEYS.NOT_FOUND)
+                } as ErrorInterface);
+                
+                return reject(false);
+            }
 
             // if the token was removed, return true
             resolve(true);
@@ -226,10 +280,10 @@ export function refreshToken(tokenInfo:TokenInterface):void {
  * This function is used to check if the client provided a valid authentication token within the header or cookie of the request.
  * 
  * @param req any - the request object
- * @param returnErrorKey boolean - if true, errors will be returned as error objects, if false, errors will not be returned
- */
-
-export async function checkForToken(req:any, returnErrorKey:boolean = true, skipCache:boolean = false):Promise<ErrorInterface | void> {
+ * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
+ * @param skipCache boolean - if false, the token will not be checked for in the cache
+*/
+export async function checkForToken(req:any, returnError?:boolean, skipCache:boolean = false):Promise<ErrorInterface | void> {
 
     // this ensures that the there is data in the req.auth object
     req.auth = emptyTokenObject();
@@ -251,7 +305,8 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
     //-------[ NO TOKEN FOUND ]-------//
     // If the token is undefined, return false
     if(token === undefined) {
-        if(returnErrorKey === true) return {
+        if(returnError === true) return {
+            code: 1,
             local_key: 'MISSING_TOKEN',
             message: returnLocal(locals.KEYS.MISSING_TOKEN)
         }
@@ -279,14 +334,18 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
 
     //--------[ TOKEN FOUND ]--------//
     // Now that we have a token, validate it
-    let tokenData = await validateToken(token);
+    let tokenData = await validateToken(token, true).catch(err => handleError(err));
+
+    // If valid, return the token data
+    tokenData = tokenData as TokenInterface;
 
     // assign the token data to the req.auth object
     req.auth = tokenData;
 
     // If the token is invalid, return false
-    if(tokenData.authorized !== true){
-        if(returnErrorKey === true) return {
+    if(tokenData?.authorized !== true){
+        if(returnError === true) return {
+            code: 1,
             local_key: 'INVALID_TOKEN',
             message: returnLocal(locals.KEYS.INVALID_TOKEN)
         }
@@ -296,7 +355,8 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
 
     // If the token is expired, return false
     if(tokenData.expired === true){
-        if(returnErrorKey === true) return {
+        if(returnError === true) return {
+            code: 1,
             local_key: 'EXPIRED_TOKEN',
             message: returnLocal(locals.KEYS.EXPIRED_TOKEN)
         }
@@ -310,27 +370,26 @@ export async function checkForToken(req:any, returnErrorKey:boolean = true, skip
     //-------------------------------//
 
 
-    //--------[ ADMIN REQUEST ]--------//
+    //TODO://--------[ ADMIN REQUEST ]--------//
     // If the user is an admin, do further checks
 
     // Cretae a promise to return the token data
-    return new Promise(async(resolve:any) => {
-        let adminID:ObjectId = global.__GLOBAL_ROLE_IDS__.admin;
+ 
+    // let adminID:ObjectId = global.__GLOBAL_ROLE_IDS__.admin;
 
-        // Check if the user holds those roles
-        let userRoles = await user.has(new ObjectId(tokenData.user_id), [adminID], true);
+    // // Check if the user holds those roles
+    // let userRoles = await user.has(new ObjectId(tokenData.user_id), adminID, true);
 
-        if((userRoles as { [key: string]: boolean })[adminID.toString()] === true)
-            return resolve();
+    // if((userRoles as { [key: string]: boolean })[adminID.toString()] === true)
+    //     return resolve();
 
-        // If the user is not found or the token is invalid, return false and revoke the token
-        revokeToken(tokenData._id);
+    // // If the user is not found or the token is invalid, return false and revoke the token
+    // revokeToken(tokenData._id);
 
-        if(returnErrorKey === true) return resolve({
-            local_key: 'INVALID_TOKEN',
-            message: returnLocal(locals.KEYS.INVALID_TOKEN)
-        });
+    // if(returnErrorKey === true) return resolve({
+    //     local_key: 'INVALID_TOKEN',
+    //     message: returnLocal(locals.KEYS.INVALID_TOKEN)
+    // });
 
-        else return resolve();    
-    });
+    // else return resolve();    
 }

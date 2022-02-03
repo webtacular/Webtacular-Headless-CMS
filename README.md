@@ -16,6 +16,7 @@ System
 
 # Random notes
 
+Ill start writing tests after we get stable.
 Once we have a stable build we will branch from master.
 
 [1]: Configureing MongoDB

@@ -1,15 +1,15 @@
 import { ObjectId } from "mongodb";
 import { mongoDB } from "../../db_service";
-import { ErrorInterface, UserGetInterface } from "../../interfaces";
+import { UserInterface } from "../../interfaces";
 
 /**
  * this function is used to get a user in the database
  * 
  * @param id - The user id to update
  * @param filter - The filter to use while fetching the user
- * @returns Promise<UserGetInterface[]> - The user object array or the error key 
+ * @returns Promise<UserInterface[]> - The user object array or the error key 
  */
-export default async function (id:ObjectId | ObjectId[], filter?:any):Promise<UserGetInterface[]> {
+export default async function (id:ObjectId | ObjectId[], filter?:any):Promise<UserInterface[]> {
     
     // check if the user_id is an array, if not, make it an array
     if((id as ObjectId[])?.length === undefined)
@@ -30,5 +30,5 @@ export default async function (id:ObjectId | ObjectId[], filter?:any):Promise<Us
     if(filter) mask = [...mask, { $project: filter }];
 
     // get the users from the database
-    return await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).aggregate(mask).toArray() as UserGetInterface[];
+    return await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).aggregate(mask).toArray() as UserInterface[];
 }

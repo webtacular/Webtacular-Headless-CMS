@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { graphql } from "../../../api";
 import { FastifyInstance } from 'fastify';
 
-let user = async (args:any, req:FastifyInstance, context:any) => {
+let get_user = async (args:any, req:FastifyInstance, context:any) => {
     // Check if the request is authenticated
     await checkForToken(req, true);
 
@@ -55,12 +55,14 @@ let user = async (args:any, req:FastifyInstance, context:any) => {
     return base_response;
 }
 
+let login_user = async (resolvers:any, req:any, context:any, a:any) => {
+    console.log( graphql.filter(a).login);
+}
+
 export const rootResolvers = {
-    user: (args:any, req:FastifyInstance, context:any) => user(args, req, context)
+    user: (args:any, req:FastifyInstance, context:any) => get_user(args, req, context)
 }
 
 export const rootMutators = {
-    login: (args:any, req:FastifyInstance, context:any) => {
-        console.log(args);
-    }
+    login: (args:any, req:any, context:any, a:any) => login_user(args, req, context, a),
 }

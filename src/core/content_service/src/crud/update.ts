@@ -11,8 +11,10 @@ import read from "./read";
  * @param content - The new content to update
  * @param strict - default true, it will only update if the content type is the same as the old content type
  * @param returnError - If true, the function will return an error object, else it will return a boolean if an error occured
+ * 
+ * @return Promise<boolean | ErrorInterface | ContentInterface> - If returnError is true, the function will return an error object, else it will return a boolean if an error occured
  */
-export default async function(post_id:ObjectId | ObjectId[], new_content:{ content:any, owner?:ObjectId }, strict:boolean = true, returnError?:boolean): Promise<boolean | ErrorInterface | ContentInterface[]> {
+export default async function(post_id:ObjectId, new_content:{ content:any, owner?:ObjectId }, strict:boolean = true, returnError?:boolean): Promise<boolean | ErrorInterface | ContentInterface> {
     // try to remove the content from the database
     return new Promise(async(resolve:any, reject:any) => {
         // Check if an owner was set, if so, we need to update the user

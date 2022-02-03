@@ -2,6 +2,12 @@ type Query {
     user(id: String!): User
 }
 
+#-----------------[ WRITING USER ]-----------------#
+type Mutation {
+    login(user_name: String, email: String, tfat: String, password: String!): User
+}
+#---------------------[ END ]----------------------#
+
 #-----------------[ READING USER ]-----------------#
 
 # Root user object
@@ -42,11 +48,5 @@ type User_Content {
     _id: String
     type: String
 }
-
-#---------------------[ END ]----------------------#
-
-
-
-#-----------------[ WRITING USER ]-----------------#
 
 #---------------------[ END ]----------------------#

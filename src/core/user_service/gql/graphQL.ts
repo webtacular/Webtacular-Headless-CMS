@@ -55,6 +55,12 @@ let user = async (args:any, req:FastifyInstance, context:any) => {
     return base_response;
 }
 
-export const rootFuncs = {
+export const rootResolvers = {
     user: (args:any, req:FastifyInstance, context:any) => user(args, req, context)
+}
+
+export const rootMutators = {
+    login: (args:any, req:FastifyInstance, context:any) => {
+        console.log(args);
+    }
 }

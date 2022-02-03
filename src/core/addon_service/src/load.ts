@@ -8,7 +8,7 @@ const exportFuncs:{[key:string]:Function} = {
     userService: require("../../user_service"),
     roleService: require("../../role_service"),
     contentService: require("../../content_service").content,
-    grapgQL: require("../../../api"),
+    graphql: require("../../../api").graphql,
     ipService: require("../../ip_service"),
     tokenService: require("../../token_service"),
     databaseService: require("../../db_service"),

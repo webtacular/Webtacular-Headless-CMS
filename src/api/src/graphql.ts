@@ -9,7 +9,7 @@ import mercurius from 'mercurius';
 
 let schemas:any[] = [],
     root_resolver:any = {},
-    root_loader:any = {}
+    root_mutator:any = {};
 
 /**
  * WARNING. When you want to add a new root key, you MUST use the following format:
@@ -22,16 +22,19 @@ let schemas:any[] = [],
  * @param file_name usually 'schema.gql'
  * @param root_resolver the root resolver for the schema
  */
-export function expandGraphQL(path:string, file_name:string, resolver?:any):void {
+export function expandGraphQL(path:string, file_name:string, resolver?:any, mutator?:any):void {
     // Load the schema
     schemas.push(require('fs').readFileSync(join(path, file_name), 'utf8')); //TODO: Query can only be loaded once, so we need a way to combine it
 
     // Load the resolvers and loaders
     if(resolver)
         Object.assign(root_resolver, resolver);
+
+    // Load the mutation
+    if(mutator)
+        Object.assign(root_resolver, { Mutation: mutator });
 }
     
-
 
 /**
  * This function is used to setup the graphql api,
@@ -49,14 +52,8 @@ export async function lockGraphQL(app:FastifyInstance, graphiql:boolean = false,
     app.register(mercurius, {
         schema: combined,
         resolvers: root_resolver,
-        loaders: root_loader,
+        defineMutation: true,
         graphiql,
         path
     });
-
-    await app.ready();
-
-    (app as any)?.graphql?.addHook('preExecution', async function (schema:any, document:any, context:any) {
-        //console.log(JSON.stringify(document));
-    })
 }

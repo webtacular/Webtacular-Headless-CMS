@@ -10,6 +10,7 @@
         "ipaddr.js": "^2.0.1",
         "leveldown": "^6.1.0",
         "levelup": "^5.1.1",
+        "lodash": "^4.17.21",
         "memory-cache": "^0.2.0",
         "mercurius": "^9.1.0",
         "mongodb": "^4.3.1",

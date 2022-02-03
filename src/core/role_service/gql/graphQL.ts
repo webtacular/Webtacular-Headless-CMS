@@ -2,7 +2,7 @@ import { precedence, role as role_service } from "../";
 import { ObjectId } from "mongodb";
 import { FastifyInstance } from "fastify";
 import { graphql } from "../../../api";
-import {RoleInterface} from "../../interfaces";
+import { RoleInterface } from "../../interfaces";
 
 let role = async (args:any, req:FastifyInstance, context:any) => {
     // Test the Name

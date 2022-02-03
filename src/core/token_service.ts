@@ -23,13 +23,13 @@ let emptyTokenObject = ():TokenInterface => {
 /**
  * This function is used add a new authentication token to the database.
  * 
- * @param userID string - the user's ID
+ * @param userID ObjectId - the user's ID
  * @param ttl number - the time to live of the token in seconds, optional
  * @param admin boolean - if true, the user is an admin, optional   
  * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * @returns Promise<TokenInterface | boolean | ErrorInterface> - if true, the token is added to the database, if false, the token is not added to the database
  */
-export async function generateToken(userID:string, ttl:number = global.__SECURITY_OPTIONS__.token_expiration, admin:boolean = false, returnError?:boolean):Promise<TokenInterface | ErrorInterface | boolean> {
+export async function generateToken(userID:ObjectId, ttl:number = global.__SECURITY_OPTIONS__.token_expiration, admin:boolean = false, returnError?:boolean):Promise<TokenInterface | ErrorInterface | boolean> {
     return new Promise(async (resolve, reject) => {
         
         // Generate a cryptographically random enough token
@@ -63,6 +63,18 @@ export async function generateToken(userID:string, ttl:number = global.__SECURIT
                     where: 'token_service.generateToken()',
                 } as ErrorInterface);
                 
+                return reject(false);
+            }
+
+            // check if that user exists
+            if (!result) {
+                if(returnError === true) return reject({
+                    local_key: locals.KEYS.NOT_FOUND,
+                    code: 1,
+                    where: 'token_service.ts',
+                    message: returnLocal(locals.KEYS.NOT_FOUND)
+                });
+
                 return reject(false);
             }
         }); 

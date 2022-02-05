@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { ErrorInterface, IPhistoryInterface } from './interfaces';
 import { mongoDB } from './db_service';
 import { getTimeInSeconds } from './general_service';
-import {locals} from './response_handler';
+import { locals } from './response_handler';
 
 /**
  * Gets the ip from a express request object, parses it and than returns it as B64
@@ -12,9 +12,9 @@ import {locals} from './response_handler';
  * @returns string - Base64 encoded IP
  */
 export function getIP(req:any):string {
-    let ip = req?.headers['cf-connecting-ip'] !== undefined ? req?.headers['cf-connecting-ip'] : req.connection.remoteAddress;
-    ip = ipaddr.parse(ip).toString();
-    return Buffer.from(ip).toString('base64');
+    let ip = req?.headers?.includes('cf-connecting-ip') !== undefined ? req?.headers['cf-connecting-ip'] : req?.ip;
+    console.log(req.ip);    
+    return ipaddr.parse(ip).toString();
 }
 
 /**
@@ -38,20 +38,44 @@ export async function checkIPlogs(ip:string, returnError?:boolean):Promise<IPhis
                 return reject(false);
             }
 
+            if(!result) {
+                if(returnError === true) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.NOT_FOUND,
+                    message: locals.KEYS.NOT_FOUN,
+                    where: 'ip_service.checkIPlogs()',
+                } as ErrorInterface);
+
+                return reject(false);
+            }
+
             resolve(result as IPhistoryInterface)
         }); 
     });
 }
 
 /**
- * This function will add a new IP history object to the database
+ * This function will add an IP history object to the database
  * 
  * @param ip - the ip to be added to the database
  * @param user_id - the user id to be added to the database
  * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * @returns Promise<boolean | ErrorInterface> - if true, the ip is added to the database, if false, the ip is not added to the database
  */
-export async function logNewIP(ip:string, user_id:ObjectId, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> {
+export async function logIP(ip:string, user_id:ObjectId, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> {
+    let res = await checkIPlogs(ip, true).catch(err => {
+        if(err.code === 0) throw err;
+    });      
+
+    // Never seen this IP before, create a new entry
+    if((res as ErrorInterface)?.message === locals.KEYS.NOT_FOUND)
+        return log_new(ip, user_id, returnError);
+
+    // We have seen this IP before, update it
+    else return log_old(ip, user_id, res as IPhistoryInterface, returnError);
+}
+
+let log_new = async (ip:string, id:ObjectId, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> => {
     return new Promise((resolve, reject) => {
 
         // Create the new IP object
@@ -68,7 +92,7 @@ export async function logNewIP(ip:string, user_id:ObjectId, returnError?:boolean
             },
             accounts: [
                 {
-                    user_id: user_id,
+                    user_id: id,
                     timestamp: getTimeInSeconds()
                 }
             ]
@@ -95,16 +119,7 @@ export async function logNewIP(ip:string, user_id:ObjectId, returnError?:boolean
     });
 }
 
-/**
- * This function it will create a new IP history object in the database
- * 
- * @param ip_history - The IP updated object
- * @param user_id - The user id to add to the IP history
- * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
- * 
- * @returns Promise<IPhistoryInterface | boolean | ErrorInterface> - The updated IP object
- */
-export async function logSameIP(ip_history:IPhistoryInterface, user_id:ObjectId, returnError?:boolean): Promise<IPhistoryInterface | boolean | ErrorInterface> {
+let log_old = async (ip:string, id:ObjectId, ip_history:IPhistoryInterface, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> => {
     return new Promise((resolve, reject) => {
         
         // Create the new IP history object
@@ -113,7 +128,7 @@ export async function logSameIP(ip_history:IPhistoryInterface, user_id:ObjectId,
             count: ++ip_history.count,
             accounts: [...ip_history.accounts,
                 {
-                    user_id: user_id,
+                    user_id: id,
                     timestamp: getTimeInSeconds()
                 }
             ]

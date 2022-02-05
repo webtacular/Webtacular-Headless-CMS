@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import {getTimeInSeconds} from "./general_service";
 //God this is unorganized
 
 export interface RouterCallback {
@@ -80,6 +81,13 @@ export interface UserInterface {
     content: ContentInterface[];
 };
 
+export interface SingupInterface {
+    user_name: string;
+    email: string;
+    password: string;        
+    ip: string;   
+}
+
 export interface TokenInterface {
     _id: ObjectId;
     user_id: ObjectId | string;
@@ -108,6 +116,7 @@ export interface AuthCollection {
 //and edit the object without having to clone it.
 export let UserInterfaceTemplate = (): UserInterface => {
     return {
+        _id: new ObjectId(),
         user_name: '',
         email: '',
         password: '',
@@ -122,17 +131,17 @@ export let UserInterfaceTemplate = (): UserInterface => {
         },
 
         permissions: {
-            roles: [ ],
+            roles: [  ],
             owner: false,
         },
 
         security_info: {
-            last_login: Date.now() / 1000,
+            last_login: getTimeInSeconds(),
             signup_ip: '',
             account_locked: false,
             attempts: 0,
-            last_email: Date.now() / 1000,
-            account_creation: Date.now() / 1000,
+            last_email: getTimeInSeconds(),
+            account_creation: getTimeInSeconds(),
             email_verified: false,
             login_attempts: [],
         },

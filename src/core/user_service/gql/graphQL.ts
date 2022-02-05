@@ -1,11 +1,11 @@
 import { user as user_manager } from '../';
 import { checkForToken } from '../../token_service';
-import { UserInterface } from '../../interfaces';
 import { ObjectId } from 'mongodb';
 import { graphql } from "../../../api";
 import { FastifyInstance } from 'fastify';
+import {getIP} from '../../ip_service';
 
-let get_user = async (args:any, req:FastifyInstance, context:any) => {
+let get_user = async (args:any, req:any, context:any) => {
     // Check if the request is authenticated
     await checkForToken(req, true);
 
@@ -16,14 +16,7 @@ let get_user = async (args:any, req:FastifyInstance, context:any) => {
     // Get the ID and the user data
     let id:ObjectId = new ObjectId(args?.id),
         filter = graphql.filter(context).user,
-        user_data:any = await user_manager.get(id, filter);
-
-    // If the user does not exist, return nothing
-    if(user_data === false) return;
-
-    // make sure the data is in the correct type
-    else user_data = user_data as UserInterface[];
-    user_data = user_data[0] as UserInterface;
+        user_data:any = (await user_manager.get(id, filter))[0];
 
     // if the user is an admin, return all the data
     if((req as any)?.auth?.admin === true)
@@ -55,8 +48,13 @@ let get_user = async (args:any, req:FastifyInstance, context:any) => {
     return base_response;
 }
 
-let login_user = async (resolvers:any, req:any, context:any, a:any) => {
-    console.log( graphql.filter(a).login);
+let register_user = async (resolvers:any, params:any, req:any, context:any) => {
+    //TODO: tell the user that they inputted invalid data
+    // await user_manager.create({
+    //     user_name: 'test',
+    //     email: 'fghdfghdfgh',
+    //     password: '',
+    // }, true).catch((err:any) => { return err });    
 }
 
 export const rootResolvers = {
@@ -64,5 +62,5 @@ export const rootResolvers = {
 }
 
 export const rootMutators = {
-    login: (args:any, req:any, context:any, a:any) => login_user(args, req, context, a),
+    register: (resolvers:any, params:any, req:FastifyInstance, context:any) => register_user(resolvers, params, req, context),
 }

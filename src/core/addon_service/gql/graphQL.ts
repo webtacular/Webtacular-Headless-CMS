@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import {ObjectId} from 'mongodb';
-import {checkForToken} from '../../token_service';
+import { ObjectId } from 'mongodb';
+import { checkForToken } from '../../token_service';
 import { addons as imported_addons } from '../';
-import {AddonInterface} from '../../interfaces';
+import { AddonInterface } from '../../interfaces';
 
 let getAddonData = (req:any, args:any, id:ObjectId) => {
     // Get the addon data

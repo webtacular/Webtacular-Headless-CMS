@@ -1,5 +1,3 @@
-//TODO: We need to check if the there are addons with the same names and types
-
 import { FastifyInstance } from "fastify";
 import { AddonInterface } from "../../interfaces";
 import { current_addons } from "./scan";

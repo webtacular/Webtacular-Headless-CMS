@@ -36,7 +36,9 @@
         "PASSWORD_INVALID": "You have entered an invalid password",
         "USER_NAME_INVALID": "You have entered an invalid username",
         "IP_ACCOUNT_LIMIT_REACHED": "You have reached the maximum number of accounts allowed from this IP",
-        "IP_TIMEOUT_REACHED": "A new account can only be created in {0} secconds from this IP"
+        "IP_TIMEOUT_REACHED": "A new account can only be created in {0} secconds from this IP",
+        "TOKEN_GENERATION_FAILED": "Token generation failed, but your account has been created, please try and login",
+        "IP_BANNED": "Your ip has been banned from registering"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -69,6 +71,8 @@
         "PASSWORD_INVALID": "PASSWORD_INVALID",
         "USER_NAME_INVALID": "USER_NAME_INVALID",
         "IP_ACCOUNT_LIMIT_REACHED": "IP_ACCOUNT_LIMIT_REACHED",
-        "IP_TIMEOUT_REACHED": "IP_TIMEOUT_REACHED"
+        "IP_TIMEOUT_REACHED": "IP_TIMEOUT_REACHED",
+        "TOKEN_GENERATION_FAILED": "TOKEN_GENERATION_FAILED",
+        "IP_BANNED": "IP_BANNED"
     }
 }

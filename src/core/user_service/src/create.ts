@@ -1,10 +1,11 @@
 import { mongoDB } from "../../db_service";
 import {getTimeInSeconds} from "../../general_service";
 import {hashString} from "../../hashing_service";
-import { ErrorInterface, IPhistoryInterface, SingupInterface, UserInterface, UserInterfaceTemplate } from "../../interfaces";
+import { ErrorInterface, IPhistoryInterface, SingupInterface, TokenInterface, UserInterface, UserInterfaceTemplate } from "../../interfaces";
 import {checkIPlogs, logIP} from "../../ip_service";
 import { userRegex } from "../../regex_service";
-import { locals, returnLocal } from "../../response_handler";
+import { locals, mongoErrorHandler, returnLocal } from "../../response_handler";
+import {generateToken} from "../../token_service";
 
 /**
  * this function is used to create a user in the database
@@ -94,6 +95,18 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
             return reject(false);
         }
 
+        // Check if this IP has been banned
+        if(ipHistory.banned === true) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.IP_BANNED,   
+                message: returnLocal(locals.KEYS.IP_BANNED),            
+                where: 'user_service.create',
+            } as ErrorInterface);
+
+            return reject(false);
+        }   
+
         // If the IP passes all the checks, we can create the user and log the IP  
         (await logIP(user.ip, userObject._id, undefined, true).catch(err => {
             return reject(err);
@@ -105,21 +118,26 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
         // remove the IP from the root of the user object
         delete (userObject as any).ip;    
 
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).insertOne((user as any), async(err:any, result:any) => {
+        // create the user
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).insertOne((userObject as any), async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
-            if(err) {
-                if(returnError === true) return reject({
-                    code: 0,
-                    local_key: locals.KEYS.DB_ERROR,
-                    message: returnLocal(locals.KEYS.DB_ERROR),
-                    where: 'user_service.create',              
-                } as ErrorInterface);
-                
-                return reject(false);
-            }
+            if(err) return reject(mongoErrorHandler(err.code, err.message, returnError));
+
+            // Generate a token for the user
+            let token = (await generateToken(result.insertedId).catch(err => {
+                return reject({
+                    code: 1,
+                    local_key: locals.KEYS.TOKEN_GENERATION_FAILED, 
+                    message: returnLocal(locals.KEYS.TOKEN_GENERATION_FAILED),
+                    where: 'user_service.create',
+                });
+            }) as TokenInterface);
 
             // if the user was created, return the user object 
-            resolve(result);
+            resolve({
+                token: token.combined,
+                user: userObject,
+            });
         });
     });
 }

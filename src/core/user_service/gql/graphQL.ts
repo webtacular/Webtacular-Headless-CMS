@@ -49,13 +49,12 @@ let get_user = async (args:any, req:any, context:any) => {
 }
 
 let register_user = async (resolvers:any, params:any, context:any, schema:any) => {
-    await user_manager.create({
+    return await user_manager.create({
         user_name: params?.user_name,
         email: params?.email,
         password: params?.password,
         ip: getIP(context.reply.request)
     }, true).catch((err:any) => { 
-        console.log(err);
         return err 
     });  
 }

@@ -48,19 +48,22 @@ let get_user = async (args:any, req:any, context:any) => {
     return base_response;
 }
 
-let register_user = async (resolvers:any, params:any, req:any, context:any) => {
-    //TODO: tell the user that they inputted invalid data
-    // await user_manager.create({
-    //     user_name: 'test',
-    //     email: 'fghdfghdfgh',
-    //     password: '',
-    // }, true).catch((err:any) => { return err });    
+let register_user = async (resolvers:any, params:any, context:any, schema:any) => {
+    await user_manager.create({
+        user_name: params?.user_name,
+        email: params?.email,
+        password: params?.password,
+        ip: getIP(context.reply.request)
+    }, true).catch((err:any) => { 
+        console.log(err);
+        return err 
+    });  
 }
 
 export const rootResolvers = {
-    user: (args:any, req:FastifyInstance, context:any) => get_user(args, req, context)
+    user: (args:any, req:any, context:any) => get_user(args, req, context)
 }
 
 export const rootMutators = {
-    register: (resolvers:any, params:any, req:FastifyInstance, context:any) => register_user(resolvers, params, req, context),
+    register: (resolvers:any, params:any, req:any, context:any) => register_user(resolvers, params, req, context),
 }

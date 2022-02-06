@@ -52,7 +52,6 @@ export async function lockGraphQL(app:FastifyInstance, graphiql:boolean = false,
     app.register(mercurius, {
         schema: combined,
         resolvers: root_resolver,
-        context: (request:any, reply:any) => { return { request, reply } }, 
         defineMutation: true,
         graphiql,
         path

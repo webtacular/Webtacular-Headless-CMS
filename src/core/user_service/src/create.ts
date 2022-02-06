@@ -1,5 +1,8 @@
 import { mongoDB } from "../../db_service";
-import { ErrorInterface, SingupInterface, UserInterface, UserInterfaceTemplate } from "../../interfaces";
+import {getTimeInSeconds} from "../../general_service";
+import {hashString} from "../../hashing_service";
+import { ErrorInterface, IPhistoryInterface, SingupInterface, UserInterface, UserInterfaceTemplate } from "../../interfaces";
+import {checkIPlogs, logIP} from "../../ip_service";
 import { userRegex } from "../../regex_service";
 import { locals, returnLocal } from "../../response_handler";
 
@@ -11,7 +14,7 @@ import { locals, returnLocal } from "../../response_handler";
  * @returns Promise<UserInterface | boolean | ErrorInterface> - The user object or the error key
  */
 export default async function (user:SingupInterface, returnError?:boolean):Promise<UserInterface | boolean | ErrorInterface> {
-    return new Promise((resolve:any, reject:any) => {
+    return new Promise(async(resolve:any, reject:any) => {
         // we need to verify the user object
 
         let tests:{value:string, error: string, RegExp: RegExp}[] = [
@@ -47,14 +50,60 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
             }
         }
 
+        // Hash the password
+        user.password = await hashString(user.password, global.__SECURITY_OPTIONS__.security.password_salt_rounds).catch(err => {
+            return reject(err);
+        });
+
         // if we made it this far, we can create the user
-        //TODO: Make it so we asign the user the default role, after we create a setup function
+        // TODO: Make it so we asign the user the default role, after we create a setup function
         let userObject:UserInterface = UserInterfaceTemplate();
 
         // Merge the two objects
         Object.assign(userObject, user);
 
-        // Get the IP
+        // log the IP
+        (await logIP(user.ip, userObject._id, undefined, true).catch(err => {
+            return reject(err);
+        }));
+
+        // Check logs
+        let ipHistory = await checkIPlogs(user.ip, true).catch(err => { return reject(err); });
+
+        // Check if this IP has reached the limit of allowed accounts
+        if(ipHistory?.settings?.bypass_account_limit === false && ipHistory.count >= global.__SECURITY_OPTIONS__.ip.max_per_ip) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.IP_ACCOUNT_LIMIT_REACHED,
+                message: returnLocal(locals.KEYS.IP_ACCOUNT_LIMIT_REACHED),
+                where: 'user_service.create',
+            } as ErrorInterface);
+
+            return reject(false);
+        }
+
+        // Check if this IP has reached the timeout
+        if(ipHistory?.settings?.bypass_timeout === false && ipHistory.last_accessed + global.__SECURITY_OPTIONS__.ip.timeout > getTimeInSeconds()) {
+            if(returnError === true) return reject({
+                code: 1,
+                local_key: locals.KEYS.IP_TIMEOUT_REACHED,
+                message: returnLocal(locals.KEYS.IP_TIMEOUT_REACHED, undefined, { 0: (ipHistory.last_accessed + global.__SECURITY_OPTIONS__.ip.timeout) - getTimeInSeconds() }),
+                where: 'user_service.create',
+            } as ErrorInterface);
+
+            return reject(false);
+        }
+
+        // If the IP passes all the checks, we can create the user and log the IP  
+        (await logIP(user.ip, userObject._id, undefined, true).catch(err => {
+            return reject(err);
+        }));
+        
+        // add the users signup IP to the user object
+        userObject.security_info.signup_ip = user.ip;   
+
+        // remove the IP from the root of the user object
+        delete (userObject as any).ip;    
 
         mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).insertOne((user as any), async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler

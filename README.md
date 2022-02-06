@@ -38,29 +38,28 @@ for the user, you have to set the 'email' to be a UNIQUE key
 
 ## Goals
 
-| Goal |  |
+| Goals | Progress |
 | ------------- |:-------------:|
-| Oauth 2.0 | ❌  |
-| Plugin system | ❌** |
-| Antivirus file scan | ❌ |
-| GraphQL | ✅* |
-| Backup system | ❌ |
-| Role based permission | ✅ |
+| Oauth 2.0             | ❌ |
+| Plugin system         | ✅ |
+| Antivirus file scan   | ❌ |
+| GraphQL               | ✅ |
+| Backup system         | ❌ |
+| Role based permission | ✅* |
 | Document level permission | ✅ |
-| Localization | ✅ |
-| Importing | ❌ |
-| Exporting | ❌ |
-| Asset fingerprinting | ❌ |
-| Static file delivery | ❌ |
-| CLI | ❌ |
-| User Managment | ✅* |
-| Documentation | ❌ |
-| Content Scheduling | ❌ |
-| Img encoding | ❌ |
-| Automatic setup | ❌ |
+| Localization          | ✅ |
+| Importing             | ❌ |
+| Exporting             | ❌ |
+| Asset fingerprinting  | ❌ |
+| Static file delivery  | ❌ |
+| CLI                   | ❌ |
+| User Managment        | ✅* |
+| Documentation         | ❌* |
+| Content Scheduling    | ❌ |
+| Img encoding          | ❌ |
+| Automatic setup       | ❌ |
 
 *Parital
-** Parital, Techincally all services are available for plugins to use, but there isint an actual plugin mangager right now.
 
 ## Dependencies?
 

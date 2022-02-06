@@ -31,7 +31,12 @@
         "NO_ROLE_FOUND": "No role found",
         "INVALID_PERMISSION_NAME": "You have supplied an invalid permission name",
         "INVALID_PERMISSION_VALUE": "You have supplied an invalid permission value",
-        "NOT_FOUND": "Not found"
+        "NOT_FOUND": "Not found",
+        "EMAIL_INVALID": "You have entered an invalid email",
+        "PASSWORD_INVALID": "You have entered an invalid password",
+        "USER_NAME_INVALID": "You have entered an invalid username",
+        "IP_ACCOUNT_LIMIT_REACHED": "You have reached the maximum number of accounts allowed from this IP",
+        "IP_TIMEOUT_REACHED": "A new account can only be created in {0} secconds from this IP"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -59,6 +64,11 @@
         "NO_ROLE_FOUND": "NO_ROLE_FOUND",
         "INVALID_PERMISSION_NAME": "INVALID_PERMISSION_NAME",
         "INVALID_PERMISSION_VALUE": "INVALID_PERMISSION_VALUE",
-        "NOT_FOUND": "NOT_FOUND"
+        "NOT_FOUND": "NOT_FOUND",
+        "EMAIL_INVALID": "EMAIL_INVALID",
+        "PASSWORD_INVALID": "PASSWORD_INVALID",
+        "USER_NAME_INVALID": "USER_NAME_INVALID",
+        "IP_ACCOUNT_LIMIT_REACHED": "IP_ACCOUNT_LIMIT_REACHED",
+        "IP_TIMEOUT_REACHED": "IP_TIMEOUT_REACHED"
     }
 }

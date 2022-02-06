@@ -1,2 +1,18 @@
 When adding a role to a user, the role object is not updated
-IP_service hasnt been tested in a while, and a lot has been changed.
+
+We currently store roles in an array, we need to store it in an object like so
+[
+    {
+        'view_post': 'inherit'
+    },
+    {
+        'edit_post': 'true'
+    }
+]
+
+Id like to keep most things type safe, so yes, true is a string in this case, as we need 3 different values
+'inherit' -> it means that this permission will be inherited from the users role
+
+'true' -> even if the user dosent have the permission, they can view the post.
+
+'false' -> even if the user has the permission, they can not view the post. 

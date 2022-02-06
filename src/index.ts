@@ -10,6 +10,7 @@ import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
+import {SecurityOptionsInterface} from "./core/interfaces";
 
 const settings = require('../settings.json');
 
@@ -22,7 +23,7 @@ declare global {
     var __GLOBAL_ROLE_IDS__:{[key:string]:ObjectId};
     var __DEF_MONGO_DB__: string;
     var __AUTH_COLLECTIONS__:any;
-    var __SECURITY_OPTIONS__:any;
+    var __SECURITY_OPTIONS__:SecurityOptionsInterface;
 }
     
 (async() => {
@@ -37,19 +38,22 @@ declare global {
         content_collection: 'content',
     }
 
-    global.__SECURITY_OPTIONS__ = { //TODO: Add specific interfaces for these
-        accounts_per_ip: 5,
-        new_account_timeout: 0,
-        max_login_attempts: 5,
-        max_login_history: 15,
-        password_salt_rounds: 12,
-
-        //Tokens
-        token_salt_rounds: 10,
-        token_lenght: 20,
-        token_expiration: 2678400, // 31 days in seconds
-        token_cache_expiration: 600 * 6, // 60 min in seconds
-        cache_tokens: true,
+    global.__SECURITY_OPTIONS__ = { 
+        ip: {
+            max_per_ip: 15,
+            timeout: 2678400,
+        },
+    
+        security: {
+            password_salt_rounds: 12,
+            token_salt_rounds: 12,
+            token_expiration: 2678400, // 1 month in seconds
+            token_cache_ttl: 600 * 6, // 60 minutes in seconds
+            token_cache: true,
+            token_length: 20,
+            max_attempts: 5,
+            max_login_history: 15,
+        }
     }
 
     global.__GLOBAL_ROLE_IDS__ = {

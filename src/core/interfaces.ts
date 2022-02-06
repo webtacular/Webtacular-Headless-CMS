@@ -32,7 +32,7 @@ export let isResourceInterface = (obj: any):boolean => {
 
 // Interface of the user object
 export interface UserInterface {
-    _id?: ObjectId | string;
+    _id: ObjectId;
 
     user_name: string;
     email: string;
@@ -66,6 +66,7 @@ export interface UserInterface {
         attempts: number;
         last_login: number;
         email_verified: boolean;
+        email_code: string;
         last_email: number;
         account_creation: number;
         account_locked: boolean;
@@ -143,6 +144,7 @@ export let UserInterfaceTemplate = (): UserInterface => {
             last_email: getTimeInSeconds(),
             account_creation: getTimeInSeconds(),
             email_verified: false,
+            email_code: '',
             login_attempts: [],
         },
 
@@ -219,10 +221,33 @@ export interface IPhistoryInterface {
     count: number;
     settings: {
         bypass_timeout: boolean;
-        bypass_acc_limit: boolean;
+        bypass_account_limit: boolean;
     };
     accounts: {
         user_id: ObjectId;  
         timestamp: number;      
     }[];
+}
+
+export interface IPobjectSettingsInterface { 
+    bypass_account_limit?: boolean 
+    bypass_timeout?: boolean
+}
+
+export interface SecurityOptionsInterface {
+    ip: {
+        max_per_ip: number;
+        timeout: number;
+    }
+
+    security: {
+        password_salt_rounds: number;
+        token_salt_rounds: number;
+        token_expiration: number;
+        token_cache_ttl: number;
+        token_cache: boolean;
+        token_length: number;
+        max_attempts: number;
+        max_login_history: number;
+    }
 }

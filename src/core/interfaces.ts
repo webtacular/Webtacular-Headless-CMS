@@ -63,20 +63,43 @@ export interface UserInterface {
 
     security_info: {
         signup_ip: string;
-        attempts: number;
         last_login: number;
-        email_verified: boolean;
-        email_code: string;
-        last_email: number;
         account_creation: number;
         account_locked: boolean;
 
-        login_attempts?:{
-            ip: string;
-            timestamp: number;
-            user_agent?: string;
-            succsess: boolean;
-        }[];
+        login_methods?: {
+            sms?: {     
+                ip: string; 
+                phone_number: string;
+                verified: boolean;
+                attempts: number;
+                code: string;
+                last_attempt: number;
+                added_timestamp: number;        
+            }
+            tfa?: {
+                ip: string; 
+                verified: boolean;
+                secret: string;
+                added_timestamp: number;
+            }
+            email?: {
+                ip: string; 
+                email: string;
+                verified: boolean;
+                attempts: number;
+                code: string;
+                last_attempt: number;
+                added_timestamp: number;        
+            }
+            oauth2?: {
+                ip: string; 
+                access_token: string;
+                refresh_token: string;
+                last_refresh: number;
+                added_timestamp: number;
+            }[]
+        }
     };
 
     content: ContentInterface[];
@@ -140,12 +163,7 @@ export let UserInterfaceTemplate = (): UserInterface => {
             last_login: getTimeInSeconds(),
             signup_ip: '',
             account_locked: false,
-            attempts: 0,
-            last_email: getTimeInSeconds(),
             account_creation: getTimeInSeconds(),
-            email_verified: false,
-            email_code: '',
-            login_attempts: [],
         },
 
         content: [],
@@ -250,4 +268,9 @@ export interface SecurityOptionsInterface {
         max_attempts: number;
         max_login_history: number;
     }
+}
+
+export interface EmailContentInterface {
+    subject: string;
+    body: string;   
 }

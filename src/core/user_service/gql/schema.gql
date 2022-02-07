@@ -4,7 +4,8 @@ type Query {
 
 #-----------------[ WRITING USER ]-----------------#
 type Mutation {
-    register(user_name: String!, email: String!, password: String!): loginRegister
+    signup(user_name: String!, email: String!, password: String!): loginRegister
+    signin(user_name: String, email: String, password: String!): loginRegister
 }
 
 type loginRegister {

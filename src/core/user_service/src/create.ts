@@ -1,11 +1,11 @@
 import { mongoDB } from "../../db_service";
-import {getTimeInSeconds} from "../../general_service";
-import {hashString} from "../../hashing_service";
-import { ErrorInterface, IPhistoryInterface, SingupInterface, TokenInterface, UserInterface, UserInterfaceTemplate } from "../../interfaces";
-import {checkIPlogs, logIP} from "../../ip_service";
+import { getTimeInSeconds } from "../../general_service";
+import { hashString } from "../../hashing_service";
+import { ErrorInterface, SingupInterface, TokenInterface, UserInterface, UserInterfaceTemplate } from "../../interfaces";
+import { checkIPlogs, logIP } from "../../ip_service";
 import { userRegex } from "../../regex_service";
 import { locals, mongoErrorHandler, returnLocal } from "../../response_handler";
-import {generateToken} from "../../token_service";
+import { generateToken } from "../../token_service";
 
 /**
  * this function is used to create a user in the database
@@ -132,6 +132,11 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
                     where: 'user_service.create',
                 });
             }) as TokenInterface);
+
+            // sendEmail({
+            //     subject: 'Please confirm your email',
+            //     body: user.email,  
+            // }, user.email);
 
             // if the user was created, return the user object 
             resolve({

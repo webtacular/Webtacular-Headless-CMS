@@ -64,5 +64,5 @@ export const rootResolvers = {
 }
 
 export const rootMutators = {
-    register: (resolvers:any, params:any, req:any, context:any) => register_user(resolvers, params, req, context),
+    signup: (resolvers:any, params:any, req:any, context:any) => register_user(resolvers, params, req, context),
 }

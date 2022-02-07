@@ -14,7 +14,7 @@ let getAddonData = (req:any, args:any, id:ObjectId) => {
 
     // if not, Filter and return the data
     return {
-        _id: addon_data?._id?.toString(),
+        id: addon_data?.id?.toString(),
         name: addon_data?.name,
         description: addon_data?.description,   
         types: addon_data?.types,

@@ -2,8 +2,7 @@ import { user as user_manager } from '../';
 import { checkForToken } from '../../token_service';
 import { ObjectId } from 'mongodb';
 import { graphql } from "../../../api";
-import { FastifyInstance } from 'fastify';
-import {getIP} from '../../ip_service';
+import { getIP } from '../../ip_service';
 
 let get_user = async (args:any, req:any, context:any) => {
     // Check if the request is authenticated
@@ -48,21 +47,21 @@ let get_user = async (args:any, req:any, context:any) => {
     return base_response;
 }
 
-let register_user = async (resolvers:any, params:any, context:any, schema:any) => {
-    return await user_manager.create({
-        user_name: params?.user_name,
-        email: params?.email,
-        password: params?.password,
-        ip: getIP(context.reply.request)
-    }, true).catch((err:any) => { 
-        return err 
-    });  
-}
+// let register_user = async (resolvers:any, params:any, context:any, schema:any) => {
+//     return await user_manager.create({
+//         user_name: params?.user_name,
+//         email: params?.email,
+//         password: params?.password,
+//         ip: getIP(context.reply.request)
+//     }, true).catch((err:any) => { 
+//         return err 
+//     });  
+// }
 
 export const rootResolvers = {
     user: (args:any, req:any, context:any) => get_user(args, req, context)
 }
 
-export const rootMutators = {
-    signup: (resolvers:any, params:any, req:any, context:any) => register_user(resolvers, params, req, context),
-}
+// export const rootMutators = {
+//     signup: (resolvers:any, params:any, req:any, context:any) => register_user(resolvers, params, req, context),
+// }

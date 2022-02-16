@@ -3,7 +3,7 @@
 import { ObjectId } from "mongodb";
 import { graphql } from "../../api/";
 import { EmailContentInterface, ErrorInterface, SingupInterface, UserInterface } from "../interfaces";
-import { rootMutators, rootResolvers } from "./gql/graphQL";
+import { rootResolvers } from "./gql/graphQL";
 
 interface UserFunctions {
     get: (id:ObjectId | ObjectId[], filter?:any) => Promise<UserInterface[]>;
@@ -18,7 +18,7 @@ export let user:UserFunctions = {
     update: (id:ObjectId, user:any, returnError?:boolean):Promise<UserInterface | boolean | ErrorInterface> => require("./src/update").default(id, user, returnError),
     create: (user:SingupInterface, returnError?:boolean):Promise<UserInterface | boolean | ErrorInterface> => require("./src/create").default(user, returnError),
     setEmailHandler: (func:(content:EmailContentInterface, email:string, returnError?:boolean) => Promise<UserInterface | boolean | ErrorInterface>) => require("./src/setEmailHandler").default(func),
-    gql: () => graphql.expand(__dirname, 'gql/schema.gql', rootResolvers, rootMutators)
+    gql: () => graphql.expand(__dirname, 'gql/schema.gql', rootResolvers)
 };
 
 //---------------------------------------//

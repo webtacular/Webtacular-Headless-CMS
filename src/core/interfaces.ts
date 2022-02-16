@@ -77,12 +77,6 @@ export interface UserInterface {
                 last_attempt: number;
                 added_timestamp: number;        
             }
-            tfa?: {
-                ip: string; 
-                verified: boolean;
-                secret: string;
-                added_timestamp: number;
-            }
             email?: {
                 ip: string; 
                 email: string;
@@ -99,6 +93,13 @@ export interface UserInterface {
                 last_refresh: number;
                 added_timestamp: number;
             }[]
+        }
+
+        tfa?: {
+            ip: string; 
+            verified: boolean;
+            secret: string;
+            added_timestamp: number;
         }
     };
 

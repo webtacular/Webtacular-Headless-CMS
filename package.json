@@ -4,6 +4,7 @@
     "private": false,
     "dependencies": {
         "@types/node": "^16.11.19",
+        "axios": "^0.26.0",
         "bcrypt": "^5.0.0",
         "fastify": "^3.27.0",
         "fastify-cookie": "^5.5.0",

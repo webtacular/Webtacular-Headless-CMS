@@ -11,8 +11,9 @@ import { scanAddonDir } from "./core/addon_service/src/scan";
 import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
 import {SecurityOptionsInterface} from "./core/interfaces";
+import { DiscordOauth2, generateURL, resolveRefreshToken } from "./core/auth_service/src/oAuth2/discord";
 
-const settings = require('../settings.json');
+export const settings = require('../settings.json');
 
 const port:number = 3000;
 
@@ -78,6 +79,14 @@ declare global {
 
     //load GQL
     lockGraphQL(app, true, '/gql'); 
+
+    // let refreshToken = await resolveRefreshToken('20C1SsJ7FoIwoAazy0SApMBiLMbvRS').catch(err => console.log(err));
+
+    // console.log(refreshToken);
+    let discord = new DiscordOauth2('0qarZ8FJOuOmExpXu0dDdKrxYxaRLu');
+
+    console.log(discord.get('token').catch(err => console.log(err)));
+
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);

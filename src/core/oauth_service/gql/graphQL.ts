@@ -2,7 +2,56 @@ import { discord } from "..";
 import { graphql } from "../../../api";
 import { checkForToken } from '../../token_service';
 
-let discord_gql = async(args:any, req:any, context:any) => {
+let selector = (type:string) => {  
+    return async(a:any, b:any, c:any, d?:any) => {
+        let filter:string[] = [];
+
+        if(type === 'resolver') {
+            await checkForToken(b);
+            filter = Object.keys(graphql.filter(c).oauth);
+        }
+
+        else if (type === 'mutator') {
+            await checkForToken(c); 
+            filter = Object.keys(graphql.filter(d).oauth);  
+        } 
+
+        // remove duplicate filters
+        filter = [...new Set(filter)];
+
+        // response object
+        let base = {};
+
+        switch(type) {
+            case 'resolver':        
+                // build the response object
+                filter.forEach((key:string) => {
+                    switch(key) {
+                        case 'discord': Object.assign(base, { discord: discord_resolver(a, b, c) }); break;
+                    }
+                });
+                break;
+
+            case 'mutator': 
+                // build the response object
+                filter.forEach((key:string) => {
+                    switch(key) {
+                        case 'discord': Object.assign(base, { discord: discord_mutator(a, b, c, d) }); break;
+                    }
+                });
+                break;
+        }
+        // return the response
+        return base;
+    }
+}
+
+
+//
+// RESOLVERS
+//
+
+let discord_resolver = async(args:any, req:any, context:any) => {
     // Get the data
     let data = discord.default();
 
@@ -22,30 +71,18 @@ let discord_gql = async(args:any, req:any, context:any) => {
     return base;
 }
 
-let oauth = async(args:any, req:any, context:any) => {  
-    // Check if the request is authenticated
-    await checkForToken(req);
+export const rootResolvers = {
+    oauth: async(args:any, req:any, context:any) => selector('resolver')(args, req, context),
+}   
 
-    // Get the filter 
-    let filter = Object.keys(graphql.filter(context).oauth);
 
-    // remove duplicate filters
-    filter = [...new Set(filter)];
+//
+// MUTATIONS
+//
 
-    // response object
-    let base = {};
-
-    // build the response object
-    filter.forEach((key:string) => {
-        switch(key) {
-            case 'discord': Object.assign(base, { discord: discord_gql(args, req, context) }); break;
-        }
-    });
-
-    // return the response
-    return base;
+let discord_mutator = async(resolvers:any, params:any, req:any, context:any) => {
 }
 
-export const rootResolvers = {
-    oauth: (args:any, req:any, context:any) => oauth(args, req, context)
-}   
+export const rootMutators = {
+    oauth: async(resolvers:any, params:any, req:any, context:any) => selector('mutator')(resolvers, params, req, context),
+}

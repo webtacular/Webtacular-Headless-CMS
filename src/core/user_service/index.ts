@@ -6,7 +6,7 @@
             |          |
             |          | New user > |
             |                       |  email already exists > |
-            |                       |                         | force them to login with their password to link their account
+            |                       |                         | force them to login with their password to link their account (Client side)
             |                       |
             |                       |  new email -----------> |
             |                                                 | Create the account with the oauth2 info

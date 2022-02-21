@@ -1,3 +1,5 @@
+#-----------------[ READING OAUTH ]-----------------#
+
 extend type Query {
     oauth: OAuth
 }
@@ -13,3 +15,20 @@ type Discord_Oauth {
     scopes: [String]
     url: String
 }
+
+#----------------------[ END ]----------------------#
+
+
+#-----------------[ WRITING OAUTH ]-----------------#
+
+extend type Mutation {
+    oauth: OAuth_Mutation
+}
+
+type OAuth_Mutation {
+    discord(
+        code: String!,
+        otp: String 
+    ): User
+}
+#----------------------[ END ]----------------------#

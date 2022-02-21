@@ -11,7 +11,7 @@ import { scanAddonDir } from "./core/addon_service/src/scan";
 import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
 import {DiscordBearerInterface, SecurityOptionsInterface} from "./core/interfaces";
-import { discord } from "./core/auth_service";
+import { discord } from "./core/oauth_service";
 
 export const settings = require('../settings.json');
 

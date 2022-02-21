@@ -10,8 +10,8 @@ import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
-import {SecurityOptionsInterface} from "./core/interfaces";
-import { DiscordOauth2, generateURL, resolveRefreshToken } from "./core/auth_service/src/oAuth2/discord";
+import {DiscordBearerInterface, SecurityOptionsInterface} from "./core/interfaces";
+import { discord } from "./core/auth_service";
 
 export const settings = require('../settings.json');
 
@@ -73,20 +73,25 @@ declare global {
     user.gql();
     role.gql();
     addons.gql();
+    discord.gql();
 
     //Let the plugins do their thing
     addons.start(app);
 
     //load GQL
     lockGraphQL(app, true, '/gql'); 
+    
+    // await discord.authorize('wa5nFNQJVQIgaX8AY0fSr08p42hI7K')
+    // .then(data => console.log(data))
+    // .catch(err => console.log(err))
 
-    // let refreshToken = await resolveRefreshToken('20C1SsJ7FoIwoAazy0SApMBiLMbvRS').catch(err => console.log(err));
+    // let data = await discord.refresh('0bx72YBtUViOxDBBgBSr5flXBTzn4D').catch(err => console.log(err))
+    
+    // data = data as DiscordBearerInterface; 
+    // console.log(data);
 
-    // console.log(refreshToken);
-    let discord = new DiscordOauth2('0qarZ8FJOuOmExpXu0dDdKrxYxaRLu');
-
-    console.log(discord.get('token').catch(err => console.log(err)));
-
+    // await discord.get('identify', data).then(data => console.log(data)).catch(err => console.log(err));
+    // await discord.get('identify', data).then(data => console.log(data)).catch(err => console.log(err));
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);

@@ -1,0 +1,15 @@
+extend type Query {
+    oauth: OAuth
+}
+
+type OAuth {
+    discord: Discord_Oauth
+}
+
+type Discord_Oauth {
+    client_id: String
+    client_secret: String       
+    redirect_uri: String
+    scopes: [String]
+    url: String
+}

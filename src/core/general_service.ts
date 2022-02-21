@@ -12,3 +12,20 @@ export let handleError = (err:ErrorInterface):void => {
 
     throw new Error(JSON.stringify(err));     
 }
+
+/**
+ * Stops me from having to do query.set() a million times, provide this function an object
+ * and it will set the query parameters for you.
+ * 
+ * @param obj: {[key:string]:string} - the object containing the serach query parameters
+ * @param query: URLSearchParams - the query 
+ * 
+ * @returns URLSearchParams 
+**/
+export let setUrlQuery = (obj: {[key:string]:string}, query:URLSearchParams):URLSearchParams => {
+    for(let key in obj) {
+        query.set(key, obj[key]);
+    }
+    
+    return query;
+}

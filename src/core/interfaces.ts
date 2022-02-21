@@ -188,6 +188,19 @@ export interface ErrorInterface {
     message: string;
 }
 
+const errorKeys = ['code', 'local_key', 'where', 'message'];
+
+export const isErrorInterface = (obj: any):boolean => {
+    // If nothing is passed in, return false
+    if(obj === undefined) return false;
+
+    // This key is not required, so if it is not there, we can assume it is valid
+    if(obj?.where === undefined) obj.where = '';
+
+    // Check if the object has all the keys
+    return Object.keys(obj).every((key:string) => errorKeys.includes(key));
+}
+
 export interface AddonInterface {
     name: string;
     description: string;
@@ -274,4 +287,33 @@ export interface SecurityOptionsInterface {
 export interface EmailContentInterface {
     subject: string;
     body: string;   
+}
+
+export interface DiscordOauth2Interface {
+    client_id: string;
+    client_secret: string;      
+    redirect_uri: string;
+    scopes: string[];
+}
+
+export interface DiscordBearerInterface {
+    access_token: string;
+    refresh_token: string;
+    expires_at: number;
+    expires_in: number;
+    token_type: string;
+    scope: string[];
+    combined: string;
+}   
+
+export interface DiscordUserInterface {
+    id: string;
+    username: string;
+    discriminator: string;
+    avatar: string;
+    email?: string;
+    verified: boolean;      
+    mfa_enabled: boolean;
+    locale: string;
+    flags: number;
 }

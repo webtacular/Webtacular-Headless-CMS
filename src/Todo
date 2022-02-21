@@ -16,3 +16,5 @@ Id like to keep most things type safe, so yes, true is a string in this case, as
 'true' -> even if the user dosent have the permission, they can view the post.
 
 'false' -> even if the user has the permission, they can not view the post. 
+
+everything has a 'returnError' Paramater, need to refactor to remove this

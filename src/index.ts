@@ -82,12 +82,12 @@ declare global {
     //load GQL
     lockGraphQL(app, true, '/gql'); 
     
-    await sendMail({
-        from: 'greg',
-        to: 'greg',
-        subject: 'test',
-        body: 'test',
-    }).then(console.log).catch(console.error);
+    // await sendMail({
+    //     from: 'greg',
+    //     to: 'greg',
+    //     subject: 'test',
+    //     body: 'test',
+    // }).then(console.log).catch(console.error);
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);

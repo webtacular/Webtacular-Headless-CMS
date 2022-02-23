@@ -285,8 +285,15 @@ export interface SecurityOptionsInterface {
 }
 
 export interface EmailContentInterface {
+    to: string;
+    from: string;
+    cc?: string;
     subject: string;
     body: string;   
+}
+
+export interface EmailFunctionInterface {
+    func (content: EmailContentInterface): Promise<boolean | ErrorInterface>;    
 }
 
 export interface DiscordOauth2Interface {

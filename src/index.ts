@@ -12,6 +12,7 @@ import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
 import {DiscordBearerInterface, SecurityOptionsInterface} from "./core/interfaces";
 import { discord } from "./core/oauth_service";
+import { sendMail } from "./core/contact_service";
 
 export const settings = require('../settings.json');
 
@@ -81,17 +82,12 @@ declare global {
     //load GQL
     lockGraphQL(app, true, '/gql'); 
     
-    // await discord.authorize('wa5nFNQJVQIgaX8AY0fSr08p42hI7K')
-    // .then(data => console.log(data))
-    // .catch(err => console.log(err))
-
-    // let data = await discord.refresh('0bx72YBtUViOxDBBgBSr5flXBTzn4D').catch(err => console.log(err))
-    
-    // data = data as DiscordBearerInterface; 
-    // console.log(data);
-
-    // await discord.get('identify', data).then(data => console.log(data)).catch(err => console.log(err));
-    // await discord.get('identify', data).then(data => console.log(data)).catch(err => console.log(err));
+    await sendMail({
+        from: 'greg',
+        to: 'greg',
+        subject: 'test',
+        body: 'test',
+    }).then(console.log).catch(console.error);
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);

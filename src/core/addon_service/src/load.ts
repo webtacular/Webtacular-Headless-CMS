@@ -3,6 +3,7 @@ import { AddonInterface } from "../../interfaces";
 import { current_addons } from "./scan";
 
 const exportFuncs:{[key:string]:Function} = {
+    contact_service: require('../../contact_service'),
     userService: require("../../user_service").user,
     roleService: require("../../role_service"),
     contentService: require("../../content_service").content,

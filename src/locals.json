@@ -43,7 +43,8 @@
         "INVALID_DISCORD_CODE": "You have entered an invalid discord code",
         "INVALID_DISCORD_GRANT": "You have entered an invalid discord grant",
         "INVALID_RESPONSE_DISCORD": "We have received an invalid response from the discord api",
-        "UNKNOWN_ERROR": "Unknown error, please try again later"
+        "UNKNOWN_ERROR": "Unknown error, please try again later",
+        "EMAIL_HANDLER_NOT_SET": "Email handler not set, Server isint set up to send emails."
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -83,6 +84,7 @@
         "INVALID_DISCORD_CODE": "INVALID_DISCORD_CODE",
         "INVALID_DISCORD_GRANT": "INVALID_DISCORD_GRANT",
         "INVALID_RESPONSE_DISCORD": "INVALID_RESPONSE_DISCORD",
-        "UNKNOWN_ERROR": "UNKNOWN_ERROR"
+        "UNKNOWN_ERROR": "UNKNOWN_ERROR",
+        "EMAIL_HANDLER_NOT_SET": "EMAIL_HANDLER_NOT_SET"
     }
 }

@@ -32,14 +32,14 @@ let selector = (type:string) => {
                 });
                 break;
 
-            case 'mutator': 
-                // build the response object
-                filter.forEach((key:string) => {
-                    switch(key) {
-                        case 'discord': Object.assign(base, { discord: discord_mutator(a, b, c, d) }); break;
-                    }
-                });
-                break;
+            // case 'mutator': 
+            //     // build the response object
+            //     filter.forEach((key:string) => {
+            //         switch(key) {
+            //             case 'discord': Object.assign(base, { discord: discord_mutator(a, b, c, d) }); break;
+            //         }
+            //     });
+            //     break;
         }
         // return the response
         return base;
@@ -74,15 +74,3 @@ let discord_resolver = async(args:any, req:any, context:any) => {
 export const rootResolvers = {
     oauth: async(args:any, req:any, context:any) => selector('resolver')(args, req, context),
 }   
-
-
-//
-// MUTATIONS
-//
-
-let discord_mutator = async(resolvers:any, params:any, req:any, context:any) => {
-}
-
-export const rootMutators = {
-    oauth: async(resolvers:any, params:any, req:any, context:any) => selector('mutator')(resolvers, params, req, context),
-}

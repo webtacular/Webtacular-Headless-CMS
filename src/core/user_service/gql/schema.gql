@@ -2,18 +2,6 @@ type Query {
     user(id: String!): User
 }
 
-#-----------------[ WRITING USER ]-----------------#
-type Mutation {
-    signup(user_name: String!, email: String!, password: String!): loginRegister
-    signin(user_name: String, email: String, password: String!): loginRegister
-}
-
-type loginRegister {
-    token: String
-    user: User
-}
-#---------------------[ END ]----------------------#
-
 #-----------------[ READING USER ]-----------------#
 
 # Root user object

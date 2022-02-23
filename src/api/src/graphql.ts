@@ -46,7 +46,6 @@ export function expandGraphQL(path:string, file_name:string, resolver?:any, muta
  * @param path the path to the graphql api
  */
 export async function lockGraphQL(app:FastifyInstance, graphiql:boolean = false, path:string = '/graphql') {
-    
     let combined = schemas.join('\n');
 
     app.register(mercurius, {

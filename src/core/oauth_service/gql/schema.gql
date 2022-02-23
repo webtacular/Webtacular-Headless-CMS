@@ -17,18 +17,3 @@ type Discord_Oauth {
 }
 
 #----------------------[ END ]----------------------#
-
-
-#-----------------[ WRITING OAUTH ]-----------------#
-
-extend type Mutation {
-    oauth: OAuth_Mutation
-}
-
-type OAuth_Mutation {
-    discord(
-        code: String!,
-        otp: String 
-    ): User
-}
-#----------------------[ END ]----------------------#

@@ -23,7 +23,7 @@ export let defualt = ():DiscordOauth2Interface => {
     }
 }
 
-async function resolveBearerData(data:any): Promise<DiscordBearerInterface | ErrorInterface> {
+const resolveBearerData = async(data:any): Promise<DiscordBearerInterface | ErrorInterface> => {
     return new Promise((resolve, reject) => {
         let throwErr = () => reject({ local_key : locals.KEYS.INVALID_RESPONSE_DISCORD, message: returnLocal(locals.KEYS.INVALID_RESPONSE_DISCORD), code: 0, where: 'auth_service.discord.resolveBearerData()'} as ErrorInterface);
 
@@ -56,7 +56,7 @@ async function resolveBearerData(data:any): Promise<DiscordBearerInterface | Err
  * @param authObj ?DiscordOauth2Interface - the object containing the discord oAuth2 information
  * @returns string - the discord oauth2 url
  */
-export let url = (authObj?:DiscordOauth2Interface):string => {
+export const url = (authObj?:DiscordOauth2Interface):string => {
     // If no auth object is provided, use the default
     if(!authObj) authObj = defualt();
 
@@ -82,7 +82,7 @@ export let url = (authObj?:DiscordOauth2Interface):string => {
  * @param authObj ?DiscordOauth2Interface - the object containing the discord oAuth2 information
  * @returns Promise<DiscordBearerInterface | ErrorInterface> - the discord bearer object
  */
-export let authorize = async(code:string, authObj?:DiscordOauth2Interface):Promise<DiscordBearerInterface | ErrorInterface> => {
+export const authorize = async(code:string, authObj?:DiscordOauth2Interface):Promise<DiscordBearerInterface | ErrorInterface> => {
     return new Promise((resolve, reject) => {
 
         // If no auth object is provided, use the default
@@ -116,12 +116,13 @@ export let authorize = async(code:string, authObj?:DiscordOauth2Interface):Promi
 };
 
 /**
+ * This function returns the discord bearer token from the discord oauth2 refresh token
  * 
  * @param refreshToken string - the discord refresh token
  * @param authObj ?DiscordOauth2Interface - the object containing the discord oAuth2 information
  * @returns Promise<DiscordBearerInterface | ErrorInterface> - the discord bearer object
  */
-export let refresh = async(refreshToken:string, authObj?:DiscordOauth2Interface):Promise<DiscordBearerInterface | ErrorInterface> => {
+export const refresh = async(refreshToken:string, authObj?:DiscordOauth2Interface):Promise<DiscordBearerInterface | ErrorInterface> => {
     return new Promise((resolve, reject) => {
 
         // If no auth object is provided, use the default
@@ -154,35 +155,66 @@ export let refresh = async(refreshToken:string, authObj?:DiscordOauth2Interface)
 }
 
 /**
- * This function returns the discord bearer token from the discord oauth2 response code
+ * This function returns the discord user data from the discord bearer token
  * 
- * @param type string - the type of data to return
  * @param token DiscordBearerInterface - the object containing discord bearer data
+ * @returns Promise<DiscordUserInterface | ErrorInterface> - the discord user object    
 */
-export let get = async(type:string, token:DiscordBearerInterface):Promise<DiscordUserInterface | ErrorInterface> => {
+export const identity = async(token:DiscordBearerInterface): Promise<DiscordUserInterface | ErrorInterface> => {
     return new Promise((resolve, reject) => {
-        type = type.toLowerCase();  
+        // Did we get a token?
+        if(!token?.combined) return reject({ code: 0, local_key: locals.KEYS.INVALID_DISCORD_TOKEN, message: 'No token provided', where: 'discord_oauth2.identity()' } as ErrorInterface);      
 
-        switch(type) {
-            case 'identify': return getIdentify(token,  resolve, reject);
-        }
+        // Build and Make the request
+        axios.get(endpoints.user, { 
+            headers: { Authorization: token.combined } 
+        })
 
-        return reject({ code: 0, local_key: locals.KEYS.UNKNOWN_ERROR, message: 'Unknown type', where: 'discord_oauth2.get()' } as ErrorInterface);    
+        // Process the response
+        .then((response:any) => {
+            console.log(response.data);
+            return resolve(response.data);
+        })
+
+        // Process the error
+        .catch((err:any) => {
+            // This means that the user passed an invalid or expired code   
+            if(err?.response?.data?.message == '401: Unauthorized')
+                return reject({ code: 1, local_key: locals.KEYS.INVALID_DISCORD_CODE, message: err.message, where: 'discord_oauth2.authorize()' } as ErrorInterface)
+
+            // this is for any other error encountered
+            return reject({ code: 0, local_key: locals.KEYS.UNKNOWN_ERROR, message: err.message, where: 'discord_oauth2.getIdentify()' } as ErrorInterface);
+        });
     });
 }
 
-async function getIdentify(token:DiscordBearerInterface, resolve:Function, reject:Function) {
-    axios.get(endpoints.user, { headers: { Authorization: token?.combined || ''} })
-    .then((response:any) => {
-        console.log(response.data);
-        return resolve(response.data);
-    })
-    .catch((err:any) => {
-        // This means that the user passed an invalid or expired code   
-        if(err?.response?.data?.message == '401: Unauthorized')
-            return reject({ code: 1, local_key: locals.KEYS.INVALID_DISCORD_CODE, message: err.message, where: 'discord_oauth2.authorize()' } as ErrorInterface)
+/**
+ * This function is used to revoke a token
+ * 
+ * @param token DiscordBearerInterface - the object containing discord bearer data  
+ * @returns Promise<boolean | ErrorInterface> - true if the token was revoked, false if not
+*/
+export const revoke = async (token:DiscordBearerInterface): Promise<boolean | ErrorInterface> => {
+    return new Promise((resolve, reject) => {
+        // Did we get a token?
+        if(!token?.combined) return reject({ code: 0, local_key: locals.KEYS.INVALID_DISCORD_TOKEN, message: 'No token provided', where: 'discord_oauth2.revoke()' } as ErrorInterface);      
 
-        // this is for any other error encountered
-        return reject({ code: 0, local_key: locals.KEYS.UNKNOWN_ERROR, message: err.message, where: 'discord_oauth2.getIdentify()' } as ErrorInterface);
+        // Build and Make the request
+        axios.post(endpoints.revoke, { 
+            headers: { Authorization: token.combined } 
+        })
+
+        // Process the response
+        .then(() => resolve(true))
+
+        // Process the error
+        .catch((err:any) => {
+            // This means that the user passed an invalid or expired code   
+            if(err?.response?.data?.message == '401: Unauthorized')
+                return reject({ code: 1, local_key: locals.KEYS.INVALID_DISCORD_CODE, message: err.message, where: 'discord_oauth2.authorize()' } as ErrorInterface)
+
+            // this is for any other error encountered
+            return reject({ code: 0, local_key: locals.KEYS.UNKNOWN_ERROR, message: err.message, where: 'discord_oauth2.revoke()' } as ErrorInterface);
+        });
     });
 }

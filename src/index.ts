@@ -15,7 +15,7 @@ import { discord } from "./core/oauth_service";
 
 export const settings = require('../settings.json');
 
-const port:number = 3000;
+const port:number = 443;
 
 app.register(require('fastify-cookie'), {});
 

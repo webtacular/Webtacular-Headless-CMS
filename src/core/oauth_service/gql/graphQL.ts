@@ -72,5 +72,5 @@ let discord_resolver = async(args:any, req:any, context:any) => {
 }
 
 export const rootResolvers = {
-    oauth: async(args:any, req:any, context:any) => selector('resolver')(args, req, context),
+    oauth: selector('resolver'),
 }   

@@ -14,7 +14,7 @@ let role = async (args:any, req:FastifyInstance, context:any) => {
 }
 
 export const rootFuncs = {
-    role: (args:any, req:FastifyInstance, context:any) => role(args, req, context),
+    role: role,
     roles: async() => { 
         let roles:any = await precedence.get().catch(() => { return [] }),
             formated:{ id:string, precedence:number }[] = [];

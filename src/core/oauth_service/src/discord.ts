@@ -2,7 +2,7 @@ import { settings } from "../../..";
 import axios from 'axios';
 import { DiscordBearerInterface, DiscordOauth2Interface, DiscordUserInterface, ErrorInterface, isErrorInterface } from "../../interfaces";
 import { locals, returnLocal } from "../../response_handler";
-import { getTimeInSeconds, setUrlQuery } from "../../general_service";
+import { setUrlQuery } from "../../general_service";
 
 // These are the discord enpoints, these are set in stone as if discord was to change their API,
 // we'd need to change our code, so having these is a separate file is pointless.

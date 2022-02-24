@@ -10,9 +10,10 @@ import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
-import {DiscordBearerInterface, SecurityOptionsInterface} from "./core/interfaces";
+import { SecurityOptionsInterface } from "./core/interfaces";
 import { discord } from "./core/oauth_service";
 import { sendMail } from "./core/contact_service";
+import {authorization} from "./core/authorization_service";
 
 export const settings = require('../settings.json');
 
@@ -75,6 +76,7 @@ declare global {
     role.gql();
     addons.gql();
     discord.gql();
+    authorization.gql();
 
     //Let the plugins do their thing
     addons.start(app);
@@ -91,7 +93,7 @@ declare global {
 
     app.listen(port, (error:any) => {
         if (error) console.error(error);
-        else console.log(`Server listening on port: ${port}`);
+        else console.log(`Server started: http://127.0.0.1:${port}`);
     });
 })();
 

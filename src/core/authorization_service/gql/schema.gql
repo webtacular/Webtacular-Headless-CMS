@@ -10,5 +10,5 @@ type LoginTypes {
 }
 
 type OauthTypes {
-    discord(code: String!, tfa: String): User
+    discord(token: String!, tfa: String): User
 }

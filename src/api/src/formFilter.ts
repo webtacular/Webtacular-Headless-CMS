@@ -4,8 +4,6 @@ export default function (context:any) {
     let filter:any = {};
 
     let getValues = (selection:any, parentObj?:string[]) => {
-        //selection = labelSelection(selection);
-
         selection.map((selection:any) => {
             // Check if the parentObj is defined
             if(parentObj)

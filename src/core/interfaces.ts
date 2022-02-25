@@ -324,3 +324,10 @@ export interface DiscordUserInterface {
     locale: string;
     flags: number;
 }
+
+export interface OauthInterface {
+    _id: ObjectId;
+    type: string;
+    oauth_id: string;
+    user_id: ObjectId;
+}

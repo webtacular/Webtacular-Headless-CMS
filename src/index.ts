@@ -39,6 +39,7 @@ declare global {
         token_collection: 'tokens',
         role_collection: 'roles',
         content_collection: 'content',
+        oauth_collection: 'oauth',
     }
 
     global.__SECURITY_OPTIONS__ = { 

@@ -3,8 +3,11 @@ import _ from "lodash";
 export default function (context:any) {
     let values:any = {};
 
+    // Recursive function to get the values out of the Context object
     let getValues = (selection:any, parentObj:string[], prev:any) => {
+        // Loop through the selection, there might be multiple selections
         selection.map((selection:any) => {
+
             // Check for a nested selection set
             if(selection.selectionSet?.selections !== undefined)
                 // If the selection is nested
@@ -17,6 +20,7 @@ export default function (context:any) {
                 if(prev?.arguments[i]) parameters[prev?.arguments[i].name.value] = prev?.arguments[i].value.value
             }
 
+            // Create a temporary object
             let temp:any = {};
 
             for(let i = parentObj.length; i >= 0; i--) {

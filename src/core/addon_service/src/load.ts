@@ -5,7 +5,7 @@ import { current_addons } from "./scan";
 const exportFuncs:{[key:string]:Function} = {
     contact_service: require('../../contact_service'),
     userService: require("../../user_service").user,
-    roleService: require("../../role_service"),
+    //roleService: require("../../role_service"),
     contentService: require("../../content_service").content,
     graphql: require("../../../api").graphql,
     ipService: require("../../ip_service"),

@@ -8,12 +8,10 @@ import { addons } from './core/addon_service';
 import { user } from './core/user_service';
 import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
-import { precedence, role } from "./core/role_service";
 import { ObjectId } from "mongodb";
 import { SecurityOptionsInterface } from "./core/interfaces";
 import { discord } from "./core/oauth_service";
-import { sendMail } from "./core/contact_service";
-import {authorization} from "./core/authorization_service";
+import { authorization } from "./core/authorization_service";
 
 export const settings = require('../settings.json');
 
@@ -70,11 +68,11 @@ declare global {
     scanAddonDir(__dirname + '/addons');
 
     //load the role cache and db
-    await precedence.validateDB();
+    //await precedence.validateDB();
 
     //load the gql schemas
     user.gql();
-    role.gql();
+    //role.gql();
     addons.gql();
     discord.gql();
     authorization.gql();

@@ -19,7 +19,7 @@ export default async function (id:ObjectId, user:any, returnError?:boolean):Prom
             _id: id
         }
 
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: user }, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.user_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: user }, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if(err) {
                 if(returnError === true) return reject({

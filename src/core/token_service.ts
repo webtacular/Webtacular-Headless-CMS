@@ -54,7 +54,7 @@ export async function generateToken(userID:ObjectId, ttl:number = global.__SECUR
         // to add it to the database.
 
         // Get the database client
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.token_collection).insertOne(toBeInserted as any, (err:any, result:any) => {
             if(err) {
                 if(returnError === true) return reject({
                     code: 0,
@@ -137,7 +137,7 @@ export async function validateToken(token:string, returnError?:boolean):Promise<
         }
 
         // Get the database client and make the request
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.token_collection).findOne(mongoDBfindOBJ, async(err:any, result:any) => {
             if(err) {
                 if(returnError === true) return reject({
                     code: 0,
@@ -225,7 +225,7 @@ export async function revokeToken(token_id:ObjectId, returnError?:boolean):Promi
         }
 
         // Get the database client and make the request
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, async(err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.token_collection).findOneAndDelete(mongoDBfindOBJ, async(err:any, result:any) => {
 
             if(err) {
                 if(returnError === true) return reject({

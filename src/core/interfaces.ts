@@ -179,13 +179,13 @@ export let UserInterfaceTemplate = (): any => {
 }
 
 export interface RoleInterface {
-    _id?: ObjectId | string;
+    _id: ObjectId;
     name: string;
     color: string;
-    default?: boolean;
-    permissions: string[];
-    users: ObjectId[];
-    precedence: number;
+    permissions: [{
+        value: number, 
+        _id:ObjectId 
+    }]
 }
 
 export interface ErrorInterface {

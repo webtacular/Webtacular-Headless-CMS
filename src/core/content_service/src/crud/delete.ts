@@ -23,7 +23,7 @@ export default async function(id:ObjectId, returnError?: boolean): Promise<boole
         };
 
         // Find and remove the content
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).deleteOne(mongoDBfindOBJ, (err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.content_collection).deleteOne(mongoDBfindOBJ, (err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) {
                 if(returnError === true) return reject({

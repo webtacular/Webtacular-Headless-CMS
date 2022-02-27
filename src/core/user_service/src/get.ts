@@ -30,5 +30,5 @@ export default async function (id:ObjectId | ObjectId[], filter?:any):Promise<Us
     if(filter) mask = [...mask, { $project: filter }];
 
     // get the users from the database
-    return await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.user_collection).aggregate(mask).toArray() as UserInterface[];
+    return await mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.user_collection).aggregate(mask).toArray() as UserInterface[];
 }

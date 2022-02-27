@@ -61,7 +61,7 @@ export default async function(post_id:ObjectId, new_content:{ content:any, owner
 
 
         // Find and remove the content
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__AUTH_COLLECTIONS__.content_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: content }, (err:any, result:any) => {
+        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.content_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: content }, (err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
             if (err) {
                 if(returnError === true) return reject({

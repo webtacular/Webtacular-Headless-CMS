@@ -12,6 +12,7 @@ import { ObjectId } from "mongodb";
 import { SecurityOptionsInterface } from "./core/interfaces";
 import { discord } from "./core/oauth_service";
 import { authorization } from "./core/authorization_service";
+import role_service from "./core/role_service";
 
 export const settings = require('../settings.json');
 
@@ -23,7 +24,7 @@ app.register(require('fastify-cookie'), {});
 declare global {
     var __GLOBAL_ROLE_IDS__:{[key:string]:ObjectId};
     var __DEF_MONGO_DB__: string;
-    var __AUTH_COLLECTIONS__:any;
+    var __COLLECTIONS__:any;
     var __SECURITY_OPTIONS__:SecurityOptionsInterface;
 }
     
@@ -31,7 +32,7 @@ declare global {
     await mongoDB.addDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
     global.__DEF_MONGO_DB__ = settings.api.mongodb.dev_db;
 
-    global.__AUTH_COLLECTIONS__ = { //TODO: Add specific interfaces for these
+    global.__COLLECTIONS__ = { //TODO: Add specific interfaces for these
         ip_collection: 'ip',
         user_collection: 'users',
         token_collection: 'tokens',
@@ -77,6 +78,17 @@ declare global {
     discord.gql();
     authorization.gql();
 
+    role_service.create({
+        name: 'admin',
+        permissions: [
+            {
+                _id: new ObjectId(),
+                value: 0,
+            }
+        ],
+        precedence: 5
+    }).catch(console.error).then(console.log);    
+    
     //Let the plugins do their thing
     addons.start(app);
 

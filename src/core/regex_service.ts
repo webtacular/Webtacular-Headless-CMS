@@ -25,3 +25,5 @@ export const addonRegex:regexObjects = {
     addon_version: /^[0-9].[0-9].[0-9]$/,
     addon_author: /^[a-zA-Z0-9_]{3,20}$/,
 }
+
+export const role_name: RegExp = /^[a-zA-Z0-9][a-zA-Z0-9_-]{3,20}$/;

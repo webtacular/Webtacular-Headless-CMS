@@ -3,8 +3,10 @@
 // - 2. Allow for the removal of roles from a user
 // - 3. THe user object stores nothing about the roles, info about what roles the user has is stored in the user_roles collection
 
+import { ObjectId } from "mongodb";
+
 // - 4. Roles are stored in a list, 0 is the default role, the lower the number, the lower the 'rank' aka precedence
-// - 5. Precedence will be stored in the general role object, { [role_precedence:number]: role_id }
+// - 5. Precedence will be stored in the global role object, { [role_precedence:number]: role_id }
 // - 6. The role object will have a list of permissions, { [permission_id:string]: true/false/undefined } 
 //      
 //      - undefined means the permission is not set, 
@@ -68,3 +70,7 @@
 //             Content Permissions for the role 'user' will override the users role
 //
 //          4. continue to merge the rest of the user's roles. 
+
+export default {
+    create: async(object: { name: string, permissions: Array<{ value: number, _id:ObjectId }>, precedence: number }) => require('./src/create').default(object),
+}

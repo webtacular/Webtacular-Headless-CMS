@@ -2,11 +2,12 @@ import { mongoDB } from "../../db_service";
 import { OauthInterface } from "../../interfaces";
 
 /**
- * this function is used to get a user in the database
+ * this function is used to get a Oauth2 Instance from the database
  * 
- * @param id - The user id to update
- * @param filter - The filter to use while fetching the user
- * @returns Promise<UserInterface[]> - The user object array or the error key 
+ * @param id - the id of the Oauth2 Instance
+ * @param filter - The filter to use while fetching the  Oauth2 Instance
+ * @returns Promise<OauthInterface[]> - The Oauth2 Instance array, will be empty if no Oauth2 Instance is found, 
+ *                                     But it will only ever return one Oauth2 Instance.
  */
 export default async function (id:string, filter?:any):Promise<OauthInterface[]> {
     let mask:any = [

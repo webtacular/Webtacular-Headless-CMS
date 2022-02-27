@@ -108,6 +108,10 @@ export const authorize = async(code:string, authObj?:DiscordOauth2Interface):Pro
             // This means that the user passed an invalid or expired code   
             if(err?.response?.data?.error_description == 'Invalid "code" in request.')
                 return reject({ code: 1, local_key: locals.KEYS.INVALID_DISCORD_CODE, message: err.message, where: 'discord_oauth2.authorize()' } as ErrorInterface)
+            
+            // This means that the user used an invalid Redirect URI
+            if(err?.response?.data?.error_description == 'Invalid "redirect_uri" in request')
+                return reject({ code: 1, local_key: locals.KEYS.INVALID_REDIRECT_URI, message: err.message, where: 'discord_oauth2.authorize()' } as ErrorInterface)
 
             // this is for any other error encountered
             return reject({ code: 0, local_key: locals.KEYS.UNKNOWN_ERROR, message: err.message, where: 'discord_oauth2.authorize()' } as ErrorInterface)

@@ -2,7 +2,7 @@ import { graphql } from "../../api";
 import { DiscordBearerInterface, DiscordOauth2Interface, DiscordUserInterface, ErrorInterface, OauthInterface } from "../interfaces";
 import { rootResolvers } from "./gql/graphQL";
 import { url, authorize, refresh, identity, defualt, revoke } from "./src/discord";
-import resolveID from './src/database';
+import resolveID from './src/resolve';
 
 export const discord = {
         url: (authObj?:DiscordOauth2Interface):string => url(authObj),

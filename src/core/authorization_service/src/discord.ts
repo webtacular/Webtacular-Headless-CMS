@@ -17,15 +17,15 @@ export default async(resolvers:any, params:any, req:any, context:any) =>  {
             // by their id
             // If the user is not found, create a new user
             const records = await discord.resolveID(user.id);
-
+ 
             // Has a user been found?
             if(records.length === 0) {
-                
+
             } 
 
             // Otherwise, create a new user
             else {
-
+                
             }
 
         }).catch((err:any) => resolve(err));

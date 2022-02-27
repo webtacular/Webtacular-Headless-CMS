@@ -26,7 +26,7 @@ const oauthRouter = async(resolvers:any, params:any, req:any, context:any) => {
     for(let key in filtered) {
         await createReturnable(key)
     }
-
+    console.log(returnable);    
     // Return the result
     return returnable;
 }

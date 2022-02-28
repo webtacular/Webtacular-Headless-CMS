@@ -140,8 +140,8 @@ export interface TokenInterface {
 //------------------//
 
 export interface AuthCollection {
-    ip_collection: string;
-    user_collection: string;
+    ip: string;
+    user: string;
 }
 
 //this is wraped in a function so that we can just call it
@@ -333,4 +333,20 @@ export interface OauthInterface {
     type: string;
     oauth_id: string;
     user_id: ObjectId;
+}
+
+export interface GlobalRoleObjectInterface {
+    _id: ObjectId,  
+    core_permissions: [{
+        permission_id: ObjectId,
+        name: string,
+    }],
+    addon_permissions: [{
+        permission_id: ObjectId,
+        name: string,
+        addon_id: ObjectId,
+    }],
+    precedence: {
+        [role_precedence:number]: ObjectId,
+    }
 }

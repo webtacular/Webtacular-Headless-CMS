@@ -90,7 +90,7 @@ export default async function(addon:AddonInterface, type:string, content:{ conte
             }) ;
         }
 
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.content_collection).insertOne(pushOBJ as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.content).insertOne(pushOBJ as any, (err:any, result:any) => {
             if (err) {
                 if(returnError === true) return reject({
                     local_key: locals.KEYS.DB_ERROR,

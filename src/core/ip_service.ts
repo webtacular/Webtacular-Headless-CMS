@@ -25,7 +25,7 @@ export function getIP(req:any):string {
 */
 export async function checkIPlogs(ip:string, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> {
     return new Promise((resolve, reject) => {
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.ip_collection).findOne({ ip } as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.ip).findOne({ ip } as any, (err:any, result:any) => {
             if (err) {
                 if(returnError === true) return reject({
                     code: 0,
@@ -97,7 +97,7 @@ let log_new = async (ip:string, id:ObjectId, returnError?:boolean, config?:IPobj
         }
     
         // Attempt to insert the new ip
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.ip_collection).insertOne(ipOBJ as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.ip).insertOne(ipOBJ as any, (err:any, result:any) => {
             
             // In the event of an error, return the error
             if (err) {
@@ -141,7 +141,7 @@ let log_old = async (ip:string, id:ObjectId, ip_history:IPhistoryInterface, retu
         }
         
         // Attempt to update the ip history
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.ip_collection).findOneAndUpdate(mongoDBfindOBJ, { $set: ip_history } as any, (err:any, result:any) => {
+        mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.ip).findOneAndUpdate(mongoDBfindOBJ, { $set: ip_history } as any, (err:any, result:any) => {
             
             // If an error occured, return it
             if (err) {

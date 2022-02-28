@@ -16,7 +16,7 @@ export default async(object:{
     // TODO: Validate all the permissions, currently we
     // havent made a permission handler.
 
-    // TODO: Add the precendence to the Global Role Object
+    // TODO: Add the precende nce to the Global Role Object
     // TODO: Announce the role to the Global Role Object
 
     return new Promise(async(resolve, reject) => {
@@ -36,9 +36,12 @@ export default async(object:{
 
         // Validate the permissions
         object.permissions.forEach(async(permission) => {
-            // some validation function
+            // TODO: some validation function
 
             // Validate the value
+            // 0: True
+            // 1: False
+            // 2: None
             if(permission.value < 0 || permission.value > 2) return reject({
                 code: 1,
                 local_key: locals.KEYS.INVALID_ROLE_PERMISSION_VALUE,
@@ -46,14 +49,14 @@ export default async(object:{
             });
         });
         
-        // Construct the object to be inserted
+        // Construct the object to be inserted into the database
         const toBeInserted:any = {
             name: object.name,
             permissions: object.permissions,
         }
 
         // Add the role to the database
-        mongoDB.getClient(global.__DEF_MONGO_DB__, global.__COLLECTIONS__.role_collection).insertOne(toBeInserted, (err:any, result:any) => {
+        mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.role).insertOne(toBeInserted, (err:any, result:any) => {
             // Check if there was an error
             if (err) return reject({
                 code: 0,

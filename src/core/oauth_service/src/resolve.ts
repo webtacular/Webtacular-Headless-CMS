@@ -23,7 +23,7 @@ export default async function (id:string, filter?:any):Promise<OauthInterface[]>
 
     // get the users from the database
     return await mongoDB.getClient(
-        global.__DEF_MONGO_DB__, 
-        global.__COLLECTIONS__.oauth_collection
+        global.__MONGO_DB__, 
+        global.__COLLECTIONS__.oauth
     ).aggregate(mask).toArray() as OauthInterface[];
 }

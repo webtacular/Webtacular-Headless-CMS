@@ -67,7 +67,7 @@ export default async function (user:SingupInterface):Promise<UserInterface | Err
         let ipHistory = await checkIPlogs(user.ip).catch(err => { return reject(err); });
 
         // Check if this IP has reached the limit of allowed accounts
-        if(ipHistory?.settings?.bypass_account_limit === false && ipHistory.count >= global.__CONFIG__.security.) return reject({
+        if(ipHistory?.settings?.bypass_account_limit === false && ipHistory.count >= global.__CONFIG__.security.ip.max) return reject({
             code: 1,
             local_key: locals.KEYS.IP_ACCOUNT_LIMIT_REACHED,
             message: returnLocal(locals.KEYS.IP_ACCOUNT_LIMIT_REACHED),

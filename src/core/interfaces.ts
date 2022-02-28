@@ -178,16 +178,6 @@ export let UserInterfaceTemplate = (): any => {
     };
 }
 
-export interface RoleInterface {
-    _id: ObjectId;
-    name: string;
-    color: string;
-    permissions: [{
-        value: number, 
-        _id:ObjectId 
-    }]
-}
-
 export interface ErrorInterface {
     code: number;
     local_key: string;
@@ -335,17 +325,32 @@ export interface OauthInterface {
     user_id: ObjectId;
 }
 
+export interface RoleInterface {
+    _id: ObjectId;
+    name: string;
+    color?: string;
+    description?: string;
+    core: boolean;  
+    permissions: Array<{
+        value: number, 
+        _id:ObjectId,
+        locked?: boolean,
+    }>
+}
+
 export interface GlobalRoleObjectInterface {
     _id: ObjectId,  
-    core_permissions: [{
+    core_permissions: Array<{
+        _id: ObjectId,
+        name: string,
+        description: string,
+    }>,
+    addon_permissions?: Array<{
         permission_id: ObjectId,
         name: string,
-    }],
-    addon_permissions: [{
-        permission_id: ObjectId,
-        name: string,
-        addon_id: ObjectId,
-    }],
+        _id: ObjectId,
+    }>,
+    roles: Array<RoleInterface>,
     precedence: {
         [role_precedence:number]: ObjectId,
     }

@@ -1,7 +1,13 @@
+//
+// Please ignore how messy this file is. Its used as a testing ground for the core of GCHMS.
+// Once the core is stable, this file will be refactored.
+//
 import Fastify from "fastify";
 export const app = Fastify({
     logger: false,
 });
+
+import init from "./init";
 
 import { mongoDB } from './core/db_service';
 import { addons } from './core/addon_service';
@@ -29,8 +35,13 @@ declare global {
 }
     
 (async() => {
+
     await mongoDB.addDB(settings.api.mongodb.dev_uri, settings.api.mongodb.dev_db, settings.api.mongodb.dev_collection);
+    
     global.__MONGO_DB__ = settings.api.mongodb.dev_db;
+
+    // Initialize the configuration
+    let config:any = await init();
 
     global.__COLLECTIONS__ = { //TODO: Add specific interfaces for these
         ip: 'ip',

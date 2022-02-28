@@ -16,45 +16,28 @@ System
 
 # Random notes
 
-Ill start writing tests after we get stable.
-Once we have a stable build we will branch from master.
-
-[1]: Configureing MongoDB
-
-for the token system to work, youll need to set the 'token' parameter to be a UNIQUE key
-A token is composed of the _id of the token and the unhashed token seperated by a dot
-
-e.g. _id.token -> 61e8bb1b0e441225b6b9e7cf.8468376cfc46a555063b828eb6a727efa2216f92
-
-We validate the token by spliting it into two parts, the _id and the unhashed token, think of the _id as a email and the token as a password,
-we use the _id to find the token in the db, and we compare the token to the hash thats stored in the db.
-
-with cacheing enabled, we shave of 60-70 ms of the request time! down from 70-80ms to 15-25 ms
-
-graphQL queries to the DB take on average 10-20ms, ofcourse, the server it self is hosted localy, but the DB is hosted on a remote server somewhere in the cloud.
-
-for the user, you have to set the 'email' to be a UNIQUE key
-
+Oauth 2.0 authentication has been setup for discord, a content management system has been created, it allows plugins and the core of ghcms to CRUD items in the data base with full history.
+Discord inspired role based permission has been implemented.
 
 ## Goals
 
 | Goals | Progress |
 | ------------- |:-------------:|
-| Oauth 2.0             | ❌ |
+| Oauth 2.0             | ✅ |
 | Plugin system         | ✅ |
 | Antivirus file scan   | ❌ |
 | GraphQL               | ✅ |
 | Backup system         | ❌ |
-| Role based permission | ✅* |
+| Role based permission | ✅ |
 | Document level permission | ✅ |
-| Localization          | ✅ |
+| Localization          | ✅* |
 | Importing             | ❌ |
 | Exporting             | ❌ |
 | Asset fingerprinting  | ❌ |
 | Static file delivery  | ❌ |
 | CLI                   | ❌ |
 | User Managment        | ✅* |
-| Documentation         | ❌* |
+| Documentation         | ✅* |
 | Content Scheduling    | ❌ |
 | Img encoding          | ❌ |
 | Automatic setup       | ❌ |

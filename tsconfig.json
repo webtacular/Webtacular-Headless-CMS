@@ -17,7 +17,7 @@
   },
   "include": [
     "src"
-  ],
+, "globalRoleObject.ts"  ],
   "exclude": [ 
     "node_modules" 
   ]

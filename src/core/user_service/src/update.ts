@@ -8,42 +8,35 @@ import { locals, returnLocal } from "../../response_handler";
  * 
  * @param id - The user id to update
  * @param user ObjectId - The user object to update
- * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
- * @returns Promise<UserInterface | boolean | ErrorInterface> - The user object or the error key
+ * @returns Promise<UserInterface | ErrorInterface> - The updated user or an error object
  */
-export default async function (id:ObjectId, user:any, returnError?:boolean):Promise<UserInterface | boolean | ErrorInterface> {
+export default async function (id:ObjectId, user:any):Promise<UserInterface | ErrorInterface> {
     return new Promise((resolve:any, reject:any) => {
 
         // The object to find in the database
         let mongoDBfindOBJ:any = {
             _id: id
         }
-
+        
+        // try and update the user
         mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.user).findOneAndUpdate(mongoDBfindOBJ, { $set: user }, async(err:any, result:any) => {
             // If the DB throws an error, pass it to the error handler
-            if(err) {
-                if(returnError === true) return reject({
-                    code: 0,
-                    local_key: locals.KEYS.DB_ERROR,
-                    message: returnLocal(locals.KEYS.DB_ERROR),
-                    where: 'user_service.update',              
-                } as ErrorInterface);
-                
-                return reject(false);
-            }
+            if(err) return reject({
+                code: 0,
+                local_key: locals.KEYS.DB_ERROR,
+                message: returnLocal(locals.KEYS.DB_ERROR),
+                where: 'user_service.update',              
+            } as ErrorInterface);
+
 
             //----------[ No user found ]----------//
 
             // If we cant find the user, return a 404
-            if (!result) {
-                if(returnError === true) return reject({
-                    code: 1,
-                    local_key: locals.KEYS.NOT_FOUND,
-                    message: returnLocal(locals.KEYS.NOT_FOUND),
-                });
-    
-                return reject(false);
-            }
+            if (!result) return reject({
+                code: 1,
+                local_key: locals.KEYS.NOT_FOUND,
+                message: returnLocal(locals.KEYS.NOT_FOUND),
+            });
 
             //----------[ User found ]----------//
             

@@ -39,24 +39,17 @@ export async function addDB(cs:string, db:string, collection:string):Promise<Mon
  * This function is used to get a MongoDB collection, if the collection does not exist, it will be created.
  * 
  * @param db string - the name of the database to get the collection from
- * @param collection string - the name of the collection to get, optional, uses the default collection if not provided
- * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
+ * @param collection string - the name of the collection to get, optional, uses the default collection if not provided 
  * 
- * @returns Collection - the collection object
+ * @returns Promise<Collection> - a promise that resolves to a MongoDB collection
 **/
-export function getClient(db:string, collection?:string, returnError?:boolean):Collection<{[key: string | number]: any}> | ErrorInterface {
+export function getClient(db:string, collection?:string):Collection<{[key: string | number]: any}> | ErrorInterface {
     // If the database doesn't exist, throw an error
-    if(!mongo_databases[db]) {
-        // If the response object is defined, send an error to the client
-        if(returnError === true) return {
-            code: 0,
-            local_key: 'DATABASE_UNKNOWN_ERROR',
-            message: returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR)
-        } as ErrorInterface;
-
-        // Otherwise, throw an error
-        else throw new Error(`MongoDB database ${db} not found`);
-    }
+    if(!mongo_databases[db]) return {
+        code: 0,
+        local_key: 'DATABASE_UNKNOWN_ERROR',
+        message: returnLocal(locals.KEYS.DATABASE_UNKNOWN_ERROR)
+    } as ErrorInterface;
 
     // If a collection is not provided, use the default collection
     if(!collection) collection = mongo_databases[db].collection;

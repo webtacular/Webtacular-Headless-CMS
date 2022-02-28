@@ -36,6 +36,10 @@ export interface ConfigInterface {
             salt_rounds: number,
             max_attempts: number,
             max_history: number,
+        },
+        ip: {
+            max: number,
+            timeout: number,
         }
     },
     collections: {
@@ -69,6 +73,10 @@ const defaultConfig = ():ConfigInterface => {
                 salt_rounds: 12,
                 max_attempts: 5,
                 max_history: 15,
+            },
+            ip: {
+                max: 15,
+                timeout: 600,   
             }
         },
         collections: {

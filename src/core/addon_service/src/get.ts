@@ -7,29 +7,24 @@ import { current_addons } from "./scan";
  * This function is used to get details about an addon using its ID or name.
  * 
  * @param id the ID or name of the addon
- * @param returnError if true, the function will return the error key instead of the addon
- * @returns the addon object, or the error key if 'returnError' is true
+ * @returns the addon object, or the error object
  */
-export default (id:ObjectID | string, returnError?: boolean):boolean | AddonInterface | ErrorInterface => {
+export default (id:ObjectID | string):boolean | AddonInterface | ErrorInterface => {
     let usingID:boolean = false;
 
     // Validate ID
-    if (id instanceof ObjectID && !ObjectID.isValid(id.toString())) {
+    if (id instanceof ObjectID && !ObjectID.isValid(id.toString())) return {
+        local_key: locals.KEYS.INVALID_ID,
+        message: returnLocal('INVALID_ID'),
+        where: id.toString(),
+    } as ErrorInterface;
 
-        if(returnError === true) return {
-            local_key: locals.KEYS.INVALID_ID,
-            message: returnLocal('INVALID_ID'),
-            where: id.toString(),
-        } as ErrorInterface;
+    // We are looking for an ID
+    usingID = true;
 
-        return false;
-    } else {
-        // We are looking for an ID
-        usingID = true;
+    // set the id to a string as you cant store an ObjectID in bson
+    id = id.toString();
 
-        // set the id to a string as you cant store an ObjectID in bson
-        id = id.toString();
-    }
 
     // Get the addon
     let found_addon:any; 
@@ -44,11 +39,9 @@ export default (id:ObjectID | string, returnError?: boolean):boolean | AddonInte
         return found_addon;
 
     // else error out
-    if(returnError === true) return {
+    return {
         local_key: locals.KEYS.NOT_FOUND,
         message: returnLocal('NOT_FOUND'),
         where: id.toString(),
     } as ErrorInterface;
-
-    return false;       
 }

@@ -20,33 +20,25 @@ export function getIP(req:any):string {
  * Checks the history for a specific IP and returns the last timestamp, users, etc
  * 
  * @param ip string - IP
- * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
- * @returns Promise<IPhistoryInterface | boolean | ErrorInterface> - Promise with the IP history or false if not found
+ * 
+ * @returns Promise<IPhistoryInterface | ErrorInterface>
 */
-export async function checkIPlogs(ip:string, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> {
+export async function checkIPlogs(ip:string):Promise<IPhistoryInterface | ErrorInterface> {
     return new Promise((resolve, reject) => {
         mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.ip).findOne({ ip } as any, (err:any, result:any) => {
-            if (err) {
-                if(returnError === true) return reject({
-                    code: 0,
-                    local_key: locals.KEYS.DB_ERROR,
-                    message: err.message,
-                    where: 'ip_service.checkIPlogs()',
-                } as ErrorInterface);
+            if (err) return reject({
+                code: 0,
+                local_key: locals.KEYS.DB_ERROR,
+                message: err.message,
+                where: 'ip_service.checkIPlogs()',
+            } as ErrorInterface);
 
-                return reject(false);
-            }
-
-            if(!result) {
-                if(returnError === true) return reject({
-                    code: 1,
-                    local_key: locals.KEYS.NOT_FOUND,
-                    message: locals.KEYS.NOT_FOUN,
-                    where: 'ip_service.checkIPlogs()',
-                } as ErrorInterface);
-
-                return reject(false);
-            }
+            if(!result) return reject({
+                code: 1,
+                local_key: locals.KEYS.NOT_FOUND,
+                message: locals.KEYS.NOT_FOUN,
+                where: 'ip_service.checkIPlogs()',
+            } as ErrorInterface);
 
             resolve(result as IPhistoryInterface)
         }); 
@@ -58,22 +50,22 @@ export async function checkIPlogs(ip:string, returnError?:boolean):Promise<IPhis
  * 
  * @param ip - the ip to be added to the database
  * @param user_id - the user id to be added to the database
- * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
- * @returns Promise<boolean | ErrorInterface> - if true, the ip is added to the database, if false, the ip is not added to the database
+ * @param config - the config object to be added to the database    
+ * @returns Promise<IPhistoryInterface | ErrorInterface> - if true, the ip is added to the database, if false, the ip is not added to the database
  */
-export async function logIP(ip:string, user_id:ObjectId, config?:IPobjectSettingsInterface, returnError?:boolean):Promise<IPhistoryInterface | boolean | ErrorInterface> {
-    let res = await checkIPlogs(ip, true).catch(err => {
+export async function logIP(ip:string, user_id:ObjectId, config?:IPobjectSettingsInterface):Promise<IPhistoryInterface | ErrorInterface> {
+    let res = await checkIPlogs(ip).catch(err => {
         if(err.code === 0) throw err;
     });      
 
     // Never seen this IP before, create a new entry
-    if(!res) return log_new(ip, user_id, returnError, config);
+    if(!res) return log_new(ip, user_id, config);
 
     // We have seen this IP before, update it
-    else return log_old(ip, user_id, res as IPhistoryInterface, returnError, config);
+    else return log_old(ip, user_id, res as IPhistoryInterface, config);
 }
 
-let log_new = async (ip:string, id:ObjectId, returnError?:boolean, config?:IPobjectSettingsInterface):Promise<IPhistoryInterface | boolean | ErrorInterface> => {
+let log_new = async (ip:string, id:ObjectId, config?:IPobjectSettingsInterface):Promise<IPhistoryInterface | ErrorInterface> => {
     return new Promise((resolve, reject) => {
 
         // Create the new IP object
@@ -100,24 +92,20 @@ let log_new = async (ip:string, id:ObjectId, returnError?:boolean, config?:IPobj
         mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.ip).insertOne(ipOBJ as any, (err:any, result:any) => {
             
             // In the event of an error, return the error
-            if (err) {
-                if(returnError === true) return reject({
-                    code: 0,
-                    local_key: locals.KEYS.DB_ERROR,
-                    message: err.message,
-                    where: 'ip_service.checkIPlogs()',
-                } as ErrorInterface);
-    
-                return reject(false);
-            }
-            
+            if (err) return reject({
+                code: 0,
+                local_key: locals.KEYS.DB_ERROR,
+                message: err.message,
+                where: 'ip_service.checkIPlogs()',
+            } as ErrorInterface);
+
             // If we were successful, return the object
             resolve((ipOBJ as any)?.value as IPhistoryInterface)
         });
     });
 }
 
-let log_old = async (ip:string, id:ObjectId, ip_history:IPhistoryInterface, returnError?:boolean, config?:IPobjectSettingsInterface):Promise<IPhistoryInterface | boolean | ErrorInterface> => {
+let log_old = async (ip:string, id:ObjectId, ip_history:IPhistoryInterface, config?:IPobjectSettingsInterface):Promise<IPhistoryInterface | ErrorInterface> => {
     return new Promise((resolve, reject) => {
         
         // Create the new IP history object
@@ -144,17 +132,13 @@ let log_old = async (ip:string, id:ObjectId, ip_history:IPhistoryInterface, retu
         mongoDB.getClient(global.__MONGO_DB__, global.__COLLECTIONS__.ip).findOneAndUpdate(mongoDBfindOBJ, { $set: ip_history } as any, (err:any, result:any) => {
             
             // If an error occured, return it
-            if (err) {
-                if(returnError === true) return reject({
-                    code: 0,
-                    local_key: locals.KEYS.DB_ERROR,
-                    message: err.message,
-                    where: 'ip_service.logSameIP()',
-                } as ErrorInterface);
-    
-                return reject(false);
-            }
-            
+            if (err) return reject({
+                code: 0,
+                local_key: locals.KEYS.DB_ERROR,
+                message: err.message,
+                where: 'ip_service.logSameIP()',
+            } as ErrorInterface);
+
             // If data is updated, return the updated data
             resolve(result as IPhistoryInterface)
         });

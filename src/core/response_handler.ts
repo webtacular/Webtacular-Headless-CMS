@@ -140,27 +140,19 @@ export const mongoErrorCodes: { [key:number]: { error:string, code:number } } = 
  * 
  * @param errorCode number - MongoDB error code, if not provided or invalid, defaults to 500
  */
-export function mongoErrorHandler(errorCode:number, where:string, returnError?:boolean):boolean | ErrorInterface {
-    if(!mongoErrorCodes[errorCode]) {
-        if(returnError) return {
-            local_key: locals.KEYS.DB_ERROR,
-            message: returnLocal(locals.KEYS.DB_ERROR),
-            code: 0,
-            where
-        };
+export function mongoErrorHandler(errorCode:number, where:string):boolean | ErrorInterface {
+    if(!mongoErrorCodes[errorCode]) return {
+        local_key: locals.KEYS.DB_ERROR,
+        message: returnLocal(locals.KEYS.DB_ERROR),
+        code: 0,
+        where
+    };
 
-        else return false;
-    }
-
-    else {
-        if(returnError) return {
-            local_key: mongoErrorCodes[errorCode].error,
-            message: returnLocal(mongoErrorCodes[errorCode].error),
-            code: 1,
-            where
-        };
-
-        else return false;
-    }
+    else return {
+        local_key: mongoErrorCodes[errorCode].error,
+        message: returnLocal(mongoErrorCodes[errorCode].error),
+        code: 1,
+        where
+    };
 }
 

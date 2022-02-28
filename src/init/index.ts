@@ -123,7 +123,10 @@ export default async() => {
     const config = yaml.parse(fs.readFileSync('./config.yml', 'utf8')) as ConfigInterface;
     logger.log({ message: 'Configuration loaded!' });
 
-    const env: boolean = config.server.dev;
+    const env: boolean = config.server.dev,
+        log: boolean = config.server.log;
+
+    logger.doLoging(log);
 
     // -----------------------------------//
     // Attempt to load the global objects //

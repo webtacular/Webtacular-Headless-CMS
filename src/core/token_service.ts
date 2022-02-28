@@ -29,14 +29,14 @@ let emptyTokenObject = ():TokenInterface => {
  * @param returnError boolean - if true and the func errors, it returns an ErrorInterface object, if false a boolean will be returned
  * @returns Promise<TokenInterface | boolean | ErrorInterface> - if true, the token is added to the database, if false, the token is not added to the database
  */
-export async function generateToken(userID:ObjectId, ttl:number = global.__SECURITY_OPTIONS__.security.token_length, admin:boolean = false, returnError?:boolean):Promise<TokenInterface | ErrorInterface | boolean> {
+export async function generateToken(userID:ObjectId, ttl:number = global.__CONFIG__.security.token.length, admin:boolean = false, returnError?:boolean):Promise<TokenInterface | ErrorInterface | boolean> {
     return new Promise(async (resolve, reject) => {
         
         // Generate a cryptographically random enough token
-        let raw_token = randomBytes(global.__SECURITY_OPTIONS__.security.token_length).toString('hex');
+        let raw_token = randomBytes(global.__CONFIG__.security.token.length).toString('hex');
 
         // hash the token
-        let token = await hashString(raw_token, global.__SECURITY_OPTIONS__.security.token_salt_rounds),
+        let token = await hashString(raw_token, global.__CONFIG__.security.token.salt_rounds),
             timestamp = getTimeInSeconds();
 
         // Object to be inserted in the database
@@ -99,8 +99,8 @@ export async function generateToken(userID:ObjectId, ttl:number = global.__SECUR
         }
 
         // if cacheing is enabled, push the token to cache
-        if(global.__SECURITY_OPTIONS__.security.token_cache === true) 
-            token_cache.put(toBeInserted._id.toString(), toCache, global.__SECURITY_OPTIONS__.security.token_cache_ttl * 1000);
+        if(global.__CONFIG__.security.token.cache === true) 
+            token_cache.put(toBeInserted._id.toString(), toCache, global.__CONFIG__.security.token.cache_ttl * 1000);
 
 
         // Return the token data
@@ -266,7 +266,7 @@ export async function revokeToken(token_id:ObjectId, returnError?:boolean):Promi
 export function refreshToken(tokenInfo:TokenInterface):void {
 
     // if the admin turned off token caching, dont do anything
-    if(global.__SECURITY_OPTIONS__.security.token_cache !== true)   
+    if(global.__CONFIG__.security.token.cache !== true)   
         return;
 
     // we need the combined token to be able to continue
@@ -285,7 +285,7 @@ export function refreshToken(tokenInfo:TokenInterface):void {
     }
 
     // push the token to cache, * 1000 because this package uses milliseconds and we use seconds
-    token_cache.put(tokenInfo._id.toString(), toCache, global.__SECURITY_OPTIONS__.security.token_cache_ttl * 1000);
+    token_cache.put(tokenInfo._id.toString(), toCache, global.__CONFIG__.security.token.cache_ttl * 1000);
 }
 
 /**
@@ -330,10 +330,10 @@ export async function checkForToken(req:any, returnError?:boolean, skipCache:boo
 
     //--------[ TOKEN CACHE ]--------// 
     // if the token is found in the cache, return the token data
-    if(skipCache === false && global.__SECURITY_OPTIONS__.security.token_cache === true){
+    if(skipCache === false && global.__CONFIG__.security.token.cache === true){
 
         // get the token from the cache
-        let tokenCache = token_cache.get(token.split('.')[0]);
+        let tokenCache = token.cache.get(token.split('.')[0]);
 
         // if the token is found in the cache, return the token data unless the user is an admin
         if(tokenCache !== undefined && tokenCache !== null && tokenCache?.admin !== true)

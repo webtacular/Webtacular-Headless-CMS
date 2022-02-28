@@ -52,7 +52,7 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
         }
 
         // Hash the password
-        user.password = await hashString(user.password, global.__SECURITY_OPTIONS__.security.password_salt_rounds).catch(err => {
+        user.password = await hashString(user.password, global.__CONFIG__.security.password_salt_rounds).catch(err => {
             return reject(err);
         });
 
@@ -72,7 +72,7 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
         let ipHistory = await checkIPlogs(user.ip, true).catch(err => { return reject(err); });
 
         // Check if this IP has reached the limit of allowed accounts
-        if(ipHistory?.settings?.bypass_account_limit === false && ipHistory.count >= global.__SECURITY_OPTIONS__.ip.max_per_ip) {
+        if(ipHistory?.settings?.bypass_account_limit === false && ipHistory.count >= global.__CONFIG__.ip.max_per_ip) {
             if(returnError === true) return reject({
                 code: 1,
                 local_key: locals.KEYS.IP_ACCOUNT_LIMIT_REACHED,
@@ -84,11 +84,11 @@ export default async function (user:SingupInterface, returnError?:boolean):Promi
         }
 
         // Check if this IP has reached the timeout
-        if(ipHistory?.settings?.bypass_timeout === false && ipHistory.last_accessed + global.__SECURITY_OPTIONS__.ip.timeout > getTimeInSeconds()) {
+        if(ipHistory?.settings?.bypass_timeout === false && ipHistory.last_accessed + global.__CONFIG__.ip.timeout > getTimeInSeconds()) {
             if(returnError === true) return reject({
                 code: 1,
                 local_key: locals.KEYS.IP_TIMEOUT_REACHED,
-                message: returnLocal(locals.KEYS.IP_TIMEOUT_REACHED, undefined, { 0: (ipHistory.last_accessed + global.__SECURITY_OPTIONS__.ip.timeout) - getTimeInSeconds() }),
+                message: returnLocal(locals.KEYS.IP_TIMEOUT_REACHED, undefined, { 0: (ipHistory.last_accessed + global.__CONFIG__.ip.timeout) - getTimeInSeconds() }),
                 where: 'user_service.create',
             } as ErrorInterface);
 

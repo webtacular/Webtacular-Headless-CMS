@@ -4,6 +4,16 @@ import { globalRoleObject } from "../../../configuration_service";
 import { ErrorInterface, GlobalRoleObject, RoleInterface } from "../../../interfaces";
 import { locals, returnLocal } from "../../../response_handler";
 
+/**
+ * Changes the precedence of a specific role
+ * 
+ * @param object {
+ *    _id: ObjectId, // The _id of the role to edit
+ *    precedence: number // The new precedence
+ * }
+ * 
+ * @returns Promise<ErrorInterface | RoleInterface>
+ */
 export default async (role: {
     precedence: number, 
     _id: ObjectId
@@ -45,7 +55,6 @@ export default async (role: {
             }
         }
 
-
         // If the role we are trying to edit does not exist, return an error    
         if(found !== true) return reject({
             code: 1,
@@ -66,26 +75,35 @@ export default async (role: {
             if(toNumber(i) < 1) corePrecedence[i] = gro.precedence[i];
         }
 
+        // Let a temp variable to hold the new precedence's
+        // and the addition tally
         let newPrecedence:{ [key: string | number]: ObjectId } = {},
             addition = 1;
 
         for(let i = 1; i < roles.length + 1; i++) {
             let currentRole = gro.precedence[i];
 
+            // Is this a role that isint going to be affected by the edit? let it be
             if(i < role.precedence && currentRole?.toString() !== role._id.toString())
                 newPrecedence[i] = currentRole;
 
             // Check if I is equall to the precedence we are trying to set
             if(i === role.precedence) {
+
                 // Are we taking the place of another role?
                 if(currentRole?.toString() !== role._id.toString()) {
+                    // Allow the role that is currently at the precedence to stay
                     newPrecedence[i] = currentRole;
+
+                    // Add the role that is being moved to the new precedence + 1
                     newPrecedence[i + addition] = role._id
+
+                    // Increment the addition, so that the next role will be added after this one
                     addition++;
-                } else {
-                    // Add the role to the precedence
-                    newPrecedence[i] = role._id;
-                }
+                } 
+                
+                // If not, Add the role to the precedence
+                else newPrecedence[i] = role._id;
             }
 
             // Offset the precedence by x for the proceeding roles
@@ -93,9 +111,8 @@ export default async (role: {
                 newPrecedence[i + addition] = currentRole;
         }
 
-        let count = 1;
-
         // Re-arrange the precedence and merge it with the core precedence
+        let count = 1;
         Object.keys(newPrecedence).map((key) => {
             if(newPrecedence[key])
                 corePrecedence[count++] = newPrecedence[key]

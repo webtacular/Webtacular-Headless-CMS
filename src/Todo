@@ -1,1 +1,3 @@
 --everything has a 'returnError' Paramater, need to refactor to remove this-- DONE! Bar tokenService as that needs refactoring so theres no point right now
+
+Schema versioning system

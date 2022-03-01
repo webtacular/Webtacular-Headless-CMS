@@ -1,3 +1,4 @@
+// TODO: Make this not suck.
 import { ErrorInterface } from "./interfaces";
 
 let doLoging: boolean = true;

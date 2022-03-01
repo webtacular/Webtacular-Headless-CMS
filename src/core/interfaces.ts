@@ -338,7 +338,8 @@ export interface RoleInterface {
     }>
 }
 
-export interface GlobalRoleObjectInterface {
+
+export interface GlobalRoleObject {
     _id: ObjectId,  
     core_permissions: Array<{
         _id: ObjectId,
@@ -354,4 +355,36 @@ export interface GlobalRoleObjectInterface {
     precedence: {
         [role_precedence:number]: ObjectId,
     }
+}
+
+export interface UpdateGlobalRoleObject{
+    core_permissions?: Array<{
+        _id?: ObjectId,
+        name?: string,
+        description?: string,
+    }>,
+    addon_permissions?: Array<{
+        permission_id?: ObjectId,
+        name?: string,
+        _id?: ObjectId,
+    }>,
+    roles?: Array<RoleInterface>,
+    precedence?: {
+        [role_precedence:number]: ObjectId,
+    }
+}
+
+export interface FilterGlobalRoleObject {
+    core_permissions?: Array<{
+        _id?: number,
+        name?: number,
+        description?: number,
+    }> | number,
+    addon_permissions?: Array<{
+        permission_id?: number,
+        name?: number,
+        _id?: number,
+    }> | number,
+    roles?: number,
+    precedence?: number
 }

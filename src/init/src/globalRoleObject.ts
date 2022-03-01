@@ -1,11 +1,11 @@
 import { ObjectId } from "mongodb";
 import { ConfigInterface } from "..";
 import { mongoDB } from "../../core/db_service";
-import { ErrorInterface, GlobalRoleObjectInterface, RoleInterface } from "../../core/interfaces";
+import { ErrorInterface, GlobalRoleObject, RoleInterface } from "../../core/interfaces";
 import logger from "../../core/logger";
 import { locals, returnLocal } from "../../core/response_handler";
 
-export default async(config: ConfigInterface, env: boolean): Promise<GlobalRoleObjectInterface | ErrorInterface> => {
+export default async(config: ConfigInterface, env: boolean): Promise<GlobalRoleObject | ErrorInterface> => {
     return new Promise(async(resolve, reject) => {
         // Get the global role object ID
         const globalRoleID: ObjectId = env ? config.global_objects.dev.role : config.global_objects.prod.role;
@@ -85,7 +85,7 @@ export default async(config: ConfigInterface, env: boolean): Promise<GlobalRoleO
             // 
             // Construct the query
             //
-            const toBeInserted:GlobalRoleObjectInterface = {
+            const toBeInserted:GlobalRoleObject = {
                 _id: new ObjectId(globalRoleID),
                 core_permissions: [
                     {

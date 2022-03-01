@@ -7,15 +7,11 @@
         "axios": "^0.26.0",
         "bcrypt": "^5.0.0",
         "fastify": "^3.27.0",
-        "fastify-cookie": "^5.5.0",
         "ipaddr.js": "^2.0.1",
-        "leveldown": "^6.1.0",
-        "levelup": "^5.1.1",
         "lodash": "^4.17.21",
         "memory-cache": "^0.2.0",
         "mercurius": "^9.1.0",
         "mongodb": "^4.3.1",
-        "request-ip": "^2.1.3",
         "typescript": "^4.5.4",
         "yaml": "^1.10.2"
     },
@@ -27,7 +23,6 @@
         "@types/bcrypt": "^5.0.0",
         "@types/lodash": "^4.14.178",
         "@types/memory-cache": "^0.2.1",
-        "@types/request-ip": "^0.0.37",
         "nodemon": "^2.0.15"
     }
 }

@@ -114,6 +114,8 @@ export default async(config: ConfigInterface, env: boolean): Promise<GlobalRoleO
                     '0': generalRole._id, // 0 is the general role
                 },
                 roles: [ ownerRole, generalRole ],
+                default_role: generalRole._id,
+                owner_role: ownerRole._id,
             }
 
             // Create the global roles

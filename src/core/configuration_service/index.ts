@@ -3,5 +3,5 @@ import { get as getGlobalRoleObject, set as setGlobalRoleObject} from "./src/rol
 
 export const globalRoleObject = {
     get: async(filter?: FilterGlobalRoleObject): Promise<GlobalRoleObject | ErrorInterface> => getGlobalRoleObject(filter),
-    set: async(set: UpdateGlobalRoleObject, filter?: FilterGlobalRoleObject): Promise<GlobalRoleObject | ErrorInterface> => setGlobalRoleObject(set, filter)    
+    set: async(set: UpdateGlobalRoleObject): Promise<GlobalRoleObject | ErrorInterface> => setGlobalRoleObject(set)    
 }

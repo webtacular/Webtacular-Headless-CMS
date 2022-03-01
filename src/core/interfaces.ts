@@ -333,11 +333,23 @@ export interface RoleInterface {
     core: boolean;  
     permissions: Array<{
         value: number, 
-        _id:ObjectId,
+        _id: ObjectId,
         locked?: boolean,
     }>
 }
 
+export interface FilterRoleInterface {
+    _id?: number;
+    name?: number;
+    color?: number;
+    description?: number;
+    core?: number;  
+    permissions?: Array<{
+        value?: number, 
+        _id?: number,
+        locked?: number,
+    }> | number 
+}
 
 export interface GlobalRoleObject {
     _id: ObjectId,  
@@ -354,7 +366,9 @@ export interface GlobalRoleObject {
     roles: Array<RoleInterface>,
     precedence: {
         [role_precedence:number]: ObjectId,
-    }
+    },
+    default_role: ObjectId,
+    owner_role: ObjectId,
 }
 
 export interface UpdateGlobalRoleObject{
@@ -371,7 +385,7 @@ export interface UpdateGlobalRoleObject{
     roles?: Array<RoleInterface>,
     precedence?: {
         [role_precedence:number]: ObjectId,
-    }
+    },
 }
 
 export interface FilterGlobalRoleObject {
@@ -385,6 +399,8 @@ export interface FilterGlobalRoleObject {
         name?: number,
         _id?: number,
     }> | number,
-    roles?: number,
-    precedence?: number
+    roles?: number | Array<FilterRoleInterface>,
+    precedence?: number,
+    default_role?: number,
+    owner_role?: number,
 }

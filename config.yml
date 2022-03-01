@@ -14,6 +14,9 @@ security:
     salt_rounds: 12
     max_attempts: 5
     max_history: 15
+  ip:
+    max: 15
+    timeout: 600
 collections:
   prod:
     ip: ip
@@ -33,6 +36,6 @@ collections:
     oauth: oauth
 global_objects:
   prod:
-    role: 621ce083618747546a212ddb
+    role: 621df2f4bd77df09f276ca17
   dev:
-    role: 621ce083618747546a212ddc
+    role: 621df2f4bd77df09f276ca18

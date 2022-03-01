@@ -16,7 +16,9 @@ import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { discord } from "./core/oauth_service";
 import { authorization } from "./core/authorization_service";
-import { globalRoleObject } from "./core/configuration_service";
+import editPrecedence from "./core/role_service/src/other/editPrecedence";
+import { ObjectId } from "mongodb";
+import role_service from "./core/role_service";
 
 export const settings = require('../settings.json');
 
@@ -54,7 +56,6 @@ declare global {
     //scan and load plugins
     scanAddonDir(__dirname + '/addons');
 
-
     //load the gql schemas
     user.gql();
     addons.gql();
@@ -66,6 +67,22 @@ declare global {
 
     //load GQL
     lockGraphQL(app, true, '/gql'); 
+
+
+    // editPrecedence({
+    //     _id: new ObjectId('621e142348fc199d51e3fea6'),
+    //     precedence: 3,
+    // }).then(console.log).catch(console.error);
+
+    // role_service.create({
+    //     name: 'test_role10',
+    //     permissions: [
+    //         {
+    //             _id: new ObjectId('621df2f4bd77df09f276ca1c'),
+    //             value: 0,       
+    //         }
+    //     ]
+    // }).catch(console.error).then(console.log);
 
     // Finaly, Start the server
     app.listen(__CONFIG__.server.port, (error:any) => {

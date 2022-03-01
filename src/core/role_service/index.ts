@@ -72,5 +72,5 @@ import { ObjectId } from "mongodb";
 //          4. continue to merge the rest of the user's roles. 
 
 export default {
-    create: async(object: { name: string, permissions: Array<{ value: number, _id:ObjectId }>, precedence: number }) => require('./src/create').default(object),
+    create: async(object: { name: string, permissions: Array<{ value: number, _id:ObjectId }>, precedence?: number, color?:string, description?:string }) => require('./src/create').default(object),
 }

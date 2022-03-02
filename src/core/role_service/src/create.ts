@@ -57,8 +57,8 @@ export default async(object:{
 
             // Validate the value
             // 0: True
-            // 1: False
-            // 2: None
+            // 1: Inherit
+            // 2: False
             if(permission.value < 0 || permission.value > 2) return reject({
                 code: 1,
                 local_key: locals.KEYS.INVALID_ROLE_PERMISSION_VALUE,

@@ -87,7 +87,13 @@ declare global {
 
 
     role_service.update(new ObjectId('621fa9adbf77db31f0a198d6'), {
-        name: 'general'
+        name: 'general',
+        permissions: [
+            {
+                _id: new ObjectId('621fa9adbf77db31f0a198d5'),
+                value: 1,
+            }
+        ]
     }, 'replace').catch(console.error).then(console.log);
 
     // Finaly, Start the server

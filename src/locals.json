@@ -50,7 +50,8 @@
         "INVALID_ROLE_PERMISSION_VALUE": "You have entered an invalid role permission value 0-2 Inclusie",
         "CANNOT_EDIT_CORE_ROLE": "You cannot edit any of the core roles",
         "DB_ERROR": "Database error, please try again later",
-        "INVALID_ROLE_PERMISSION": "You have entered an invalid role permission, probably a role that does not exist"
+        "INVALID_ROLE_PERMISSION": "You have entered an invalid role permission, probably a role that does not exist",
+        "DUPLICATE_PERMISSION": "You have supplied a duplicate permission"
     },
     "KEYS": {
         "USER_SUCCESSFULLY_ADDED_EMAIL": "USER_SUCCESSFULLY_ADDED_EMAIL",
@@ -97,6 +98,7 @@
         "INVALID_ROLE_PERMISSION_VALUE": "INVALID_ROLE_PERMISSION_VALUE",
         "CANNOT_EDIT_CORE_ROLE": "CANNOT_EDIT_CORE_ROLE",
         "DB_ERROR": "DB_ERROR",
-        "INVALID_ROLE_PERMISSION": "INVALID_ROLE_PERMISSION"
+        "INVALID_ROLE_PERMISSION": "INVALID_ROLE_PERMISSION",
+        "DUPLICATE_PERMISSION": "DUPLICATE_PERMISSION"
     }
 }

@@ -349,7 +349,6 @@ export interface UpdateRoleInterface {
     permissions?: Array<{
         value?: number, 
         _id?: ObjectId,
-        locked?: boolean,
     }>
 }
 

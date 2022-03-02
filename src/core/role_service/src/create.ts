@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { globalRoleObject } from "../../configuration_service";
+import { globalRoleObject } from "../../global_service";
 import { mongoDB } from "../../db_service";
 import { ErrorInterface, GlobalRoleObject, RoleInterface } from "../../interfaces";
 import { role_name } from "../../regex_service";

@@ -1,6 +1,6 @@
 import { toNumber } from "lodash";
 import { ObjectId } from "mongodb";
-import { globalRoleObject } from "../../../configuration_service";
+import { globalRoleObject } from "../../../global_service";
 import { ErrorInterface, GlobalRoleObject, RoleInterface } from "../../../interfaces";
 import { locals, returnLocal } from "../../../response_handler";
 

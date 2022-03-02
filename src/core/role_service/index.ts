@@ -4,6 +4,7 @@
 // - 3. THe user object stores nothing about the roles, info about what roles the user has is stored in the user_roles collection
 
 import { ObjectId } from "mongodb";
+import { UpdateRoleInterface } from "../interfaces";
 
 // - 4. Roles are stored in a list, 0 is the default role, the lower the number, the lower the 'rank' aka precedence
 // - 5. Precedence will be stored in the global role object, { [role_precedence:number]: role_id }
@@ -74,4 +75,5 @@ import { ObjectId } from "mongodb";
 export default {
     create: async(object: { name: string, permissions: Array<{ value: number, _id:ObjectId }>, precedence?: number, color?:string, description?:string }) => require('./src/create').default(object),
     get: async(id: ObjectId | Array<ObjectId>) => require('./src/get').default(id),
+    update: async(id: ObjectId, update: UpdateRoleInterface, method:string) => require('./src/update').default(id, update, method),
 }

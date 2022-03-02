@@ -325,6 +325,10 @@ export interface OauthInterface {
     user_id: ObjectId;
 }
 
+//
+// ROLE INTERFACES
+//
+
 export interface RoleInterface {
     _id: ObjectId;
     name: string;
@@ -334,6 +338,17 @@ export interface RoleInterface {
     permissions: Array<{
         value: number, 
         _id: ObjectId,
+        locked?: boolean,
+    }>
+}
+
+export interface UpdateRoleInterface {
+    name?: string;
+    color?: string;
+    description?: string;
+    permissions?: Array<{
+        value?: number, 
+        _id?: ObjectId,
         locked?: boolean,
     }>
 }
@@ -350,6 +365,12 @@ export interface FilterRoleInterface {
         locked?: number,
     }> | number 
 }
+
+
+
+//
+// GLOBAL ROLE INTERFACES
+//
 
 export interface GlobalRoleObject {
     _id: ObjectId,  

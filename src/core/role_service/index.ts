@@ -73,4 +73,5 @@ import { ObjectId } from "mongodb";
 
 export default {
     create: async(object: { name: string, permissions: Array<{ value: number, _id:ObjectId }>, precedence?: number, color?:string, description?:string }) => require('./src/create').default(object),
+    get: async(id: ObjectId | Array<ObjectId>) => require('./src/get').default(id),
 }

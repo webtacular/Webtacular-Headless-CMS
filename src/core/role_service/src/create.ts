@@ -42,6 +42,7 @@ export default async(object:{
         // Check if a color was passed in, if not set it to a grey     
         if(!object?.color) object.color = '3f3f3f'; 
 
+        
         // Validate the precedence
         if(object.precedence < 1 || object.precedence % 1 !== 0) return reject({
             code: 1,

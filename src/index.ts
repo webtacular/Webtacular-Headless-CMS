@@ -16,9 +16,8 @@ import { lockGraphQL } from './api/src/graphql';
 import { scanAddonDir } from "./core/addon_service/src/scan";
 import { discord } from "./core/oauth_service";
 import { authorization } from "./core/authorization_service";
-import editPrecedence from "./core/role_service/src/other/editPrecedence";
-import { ObjectId } from "mongodb";
 import role_service from "./core/role_service";
+import { ObjectId } from "mongodb";
 
 export const settings = require('../settings.json');
 
@@ -83,6 +82,10 @@ declare global {
     //         }
     //     ]
     // }).catch(console.error).then(console.log);
+
+    role_service.get([new ObjectId('621e142348fc199d51e3fea6'), new ObjectId("621e142348fc199d51e3fea6")]).catch(console.error).then(console.log);  
+
+
 
     // Finaly, Start the server
     app.listen(__CONFIG__.server.port, (error:any) => {

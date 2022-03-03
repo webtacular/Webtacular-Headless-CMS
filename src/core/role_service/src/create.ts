@@ -64,33 +64,29 @@ export default async(object:{
         // Create an array to store id's to check for duplicates
         let idArray:Array<string> = [];
 
-        //TODO: RETURN IF NON VALID
         // Validate the permissions
         object.permissions.forEach(async(permission) => {
-            // Validate the permission
-            for(let groPerm in allPermissions) {
-                // Check if the perm exists in the duplicates array
-                if (idArray.includes(permission._id.toString())) return reject({
-                    code: 1,
-                    local_key: locals.KEYS.DUPLICATE_PERMISSION,
-                    message: returnLocal(locals.KEYS.DUPLICATE_PERMISSION),
-                } as ErrorInterface);
+            // Check if the permission exists
+            let exists = allPermissions.find(p => p._id.toString() === permission._id.toString()) ? true : false;
 
+            // If the permission does not exist, return an error
+            if(!exists) return reject({
+                code: 1,
+                local_key: locals.KEYS.INVALID_PERMISSION,
+                message: returnLocal(locals.KEYS.INVALID_PERMISSION),
+            });
 
-                // Dose the permission exist in the global role object?
-                if(allPermissions[groPerm]._id.toString() === permission._id.toString()){
-                    // Add the role's id to the duplicates array
-                    idArray.push(permission._id.toString());
+            // Check the idArray for duplicates
+            if(idArray.includes(permission._id.toString())) return reject({ 
+                code: 1,        
+                local_key: locals.KEYS.DUPLICATE_PERMISSION,
+                message: returnLocal(locals.KEYS.DUPLICATE_PERMISSION),         
+            });
 
-                    // Continue to check the next perm
-                    continue;
-                }
-            };
-
-            // Validate the value
-            // 0: True
-            // 1: Inherit
-            // 2: False
+            // Push the id to the idArray
+            idArray.push(permission._id.toString());
+           
+            // Validate the value 0: True 1: Inherit 2: False
             if(permission.value < 0 || permission.value > 2) return reject({
                 code: 1,
                 local_key: locals.KEYS.INVALID_ROLE_PERMISSION_VALUE,

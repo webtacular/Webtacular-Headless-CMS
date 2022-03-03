@@ -86,15 +86,9 @@ declare global {
     //role_service.get([new ObjectId('621e142348fc199d51e3fea6'), new ObjectId("621e142348fc199d51e3fea6")]).catch(console.error).then(console.log);  
 
 
-    role_service.update(new ObjectId('621fa9adbf77db31f0a198d6'), {
-        name: 'general',
-        permissions: [
-            {
-                _id: new ObjectId('621fa9adbf77db31f0a198d5'),
-                value: 1,
-            }
-        ]
-    }, 'replace').catch(console.error).then(console.log);
+    // role_service.update(new ObjectId('621fa9adbf77db31f0a198d6'), {
+    //     name: 'general'
+    // }, 'replace').catch(console.error).then(console.log);
 
     // Finaly, Start the server
     app.listen(__CONFIG__.server.port, (error:any) => {

@@ -28,7 +28,18 @@ export default async(object:{
             local_key: locals.KEYS.INVALID_ROLE_NAME,  
             message: returnLocal(locals.KEYS.INVALID_ROLE_NAME),
         } as ErrorInterface);
+
+        // Get the global role object, we will recycle this object
+        // Saving a call to the database
+        let gro = (await globalRoleObject.get({
+            precedence: 1,
+            core_permissions: 1,
+            addon_permissions: 1,
+            roles: 1,
+        }).catch(reject)) as GlobalRoleObject;
         
+        // This array containes all the permissions
+        let allPermissions = [...(gro.core_permissions || []), ...(gro.addon_permissions || [])];
 
         // Check if the precedence was passed in, if not set it to 1
         // One higher than the default role
@@ -50,10 +61,31 @@ export default async(object:{
             message: returnLocal(locals.KEYS.INVALID_ROLE_PRECEDENCE),
         });
 
+        // Create an array to store id's to check for duplicates
+        let idArray:Array<string> = [];
 
+        //TODO: RETURN IF NON VALID
         // Validate the permissions
         object.permissions.forEach(async(permission) => {
-            // TODO: some validation function
+            // Validate the permission
+            for(let groPerm in allPermissions) {
+                // Check if the perm exists in the duplicates array
+                if (idArray.includes(permission._id.toString())) return reject({
+                    code: 1,
+                    local_key: locals.KEYS.DUPLICATE_PERMISSION,
+                    message: returnLocal(locals.KEYS.DUPLICATE_PERMISSION),
+                } as ErrorInterface);
+
+
+                // Dose the permission exist in the global role object?
+                if(allPermissions[groPerm]._id.toString() === permission._id.toString()){
+                    // Add the role's id to the duplicates array
+                    idArray.push(permission._id.toString());
+
+                    // Continue to check the next perm
+                    continue;
+                }
+            };
 
             // Validate the value
             // 0: True
@@ -79,14 +111,6 @@ export default async(object:{
             core: false,
             _id: new ObjectId(),
         };
-
-
-        // Get the global role object, we will recycle this object
-        // Saving a call to the database
-        let gro = (await globalRoleObject.get({
-            precedence: 1,
-            roles: 1,
-        }).catch(reject)) as GlobalRoleObject;
 
         // Add the new role to the global role object
         gro.roles.push(query)

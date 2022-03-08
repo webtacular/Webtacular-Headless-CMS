@@ -1,3 +1,4 @@
+This is the legacy branch of GHCMS, starting from scratch, actual planing etc, tdd.
 
 ![GHCMS](https://raw.githubusercontent.com/GrzegorzManiak/GHCMS/master/GHcms.png)
 

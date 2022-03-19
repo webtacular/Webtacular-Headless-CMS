@@ -9,7 +9,7 @@ This module provides a simple error handler.
 ## Usage
 ```typescript
 
-import { GUID } from "general_library";
+import { GUID from "general_library";
 import { ErrorHandler } from "error_handler";
 
 // severity: 
@@ -30,7 +30,6 @@ const error = new ErrorHandler(
     }
 );
 
-// error.message: Error message
 // error.severity: Error severity
 // error.key: Error key
 // error.where: Error location
@@ -38,3 +37,7 @@ const error = new ErrorHandler(
 // error.date: Error date
 // error.id: Unique error ID
 ```
+
+## ToDo
+
+Add a way to log errors to a file

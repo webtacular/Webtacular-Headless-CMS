@@ -1,5 +1,6 @@
+![legacy](https://github.com/GrzegorzManiak/GHCMS/tree/legacy) Brach.
 
-![GHCMS](https://raw.githubusercontent.com/GrzegorzManiak/GHCMS/master/GHcms.png)
+![GHCMS](https://raw.githubusercontent.com/GrzegorzManiak/GHCMS/legacy/GHcms.png)
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) 
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/GrzegorzManiak/GHCMS)

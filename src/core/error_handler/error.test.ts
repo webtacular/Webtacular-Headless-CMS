@@ -1,4 +1,4 @@
-import { ErrorHandler } from ".";
+import { errorHandler } from ".";
 import GUID from "../general_library/src/guid";
 
 test('Error handler date validation', () => {
@@ -9,8 +9,8 @@ test('Error handler date validation', () => {
         function: 'constructor'
     };
 
-    const errorHandler = new ErrorHandler(error);
-    expect(errorHandler.date).toBeDefined();
+    const ErrorHandler = new errorHandler.handle(error);
+    expect(ErrorHandler.date).toBeDefined();
 });
 
 
@@ -22,8 +22,8 @@ test('Error handler severity validation', () => {
         function: 'constructor'
     };
 
-    const errorHandler = new ErrorHandler(error);
-    expect(errorHandler.severity).toBeDefined();
+    const ErrorHandler = new errorHandler.handle(error);
+    expect(ErrorHandler.severity).toBeDefined();
 });
 
 test('Error handler severity validation (too high)', () => {
@@ -35,7 +35,7 @@ test('Error handler severity validation (too high)', () => {
     };
 
     expect(() => {
-        const errorHandler = new ErrorHandler(error);
+        const ErrorHandler = new errorHandler.handle(error);
     }).toThrowError('Invalid severity');
 });
 
@@ -48,7 +48,7 @@ test('Error handler severity validation (to low)', () => {
     };
 
     expect(() => {
-        const errorHandler = new ErrorHandler(error);
+        const ErrorHandler = new errorHandler.handle(error);
     }).toThrowError('Invalid severity');
 });
 
@@ -60,8 +60,8 @@ test('Error handler id validation', () => {
         function: 'constructor'
     };
 
-    const errorHandler = new ErrorHandler(error);
-    expect(errorHandler.id).toBeDefined();
+    const ErrorHandler = new errorHandler.handle(error);
+    expect(ErrorHandler.id).toBeDefined();
 });
 
 test('Error handler id validation (invalid)', () => {
@@ -72,7 +72,7 @@ test('Error handler id validation (invalid)', () => {
         function: 'constructor'
     };
 
-    const errorHandler = new ErrorHandler(error);
-    expect(errorHandler.id).toBeDefined();
+    const ErrorHandler = new errorHandler.handle(error);
+    expect(ErrorHandler.id).toBeDefined();
 });
 

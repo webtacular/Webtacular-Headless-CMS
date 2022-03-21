@@ -73,7 +73,7 @@ const validate = (configuration:any, required:any, template:any): string[] => {
     return log;
 }
 
-const init = (userPath?:string): any[] => {
+const init = (userPath?:string, requestedVersion?:[number, number, number]): any[] => {
     // Get the current directory
     const currentDir = process.cwd(),
         dataPath = path.join(currentDir, './src/core/configuration/def/data.json');
@@ -111,22 +111,32 @@ const init = (userPath?:string): any[] => {
 
     // Check if a curent configuration exists
     if (!fs.existsSync(configPath)) {
-        // Find the latest version of the configuration
-        const latestVersion = versions.reduce((a, b) => a.version[0] > b.version[0] ? a : b);
+        let version;
+
+        if(requestedVersion) {
+            // Try and find the requested version
+            version = versions.find((version) => version.version[0] === requestedVersion[0] && version.version[1] === requestedVersion[1] && version.version[2] === requestedVersion[2]);
+            
+            // If nothing is found, throw an error
+            if(!version)
+                throw new Error('Requested version does not exist');
+
+        } else // Find the latest version of the configuration
+            version = versions.reduce((a, b) => a.version[0] > b.version[0] ? a : b);
 
         // Check if the defualt configuration exists
-        if (!fs.existsSync(latestVersion.path))
+        if (!fs.existsSync(version.path))
             throw new Error('The defualt configuration does not exist');
 
         // Read the defualt configuration
-        const defualtConfigData = require(latestVersion.path);
+        const defualtConfigData = require(version.path);
 
         // Write the configuration
         fs.writeFileSync(configPath, yaml.dump(defualtConfigData.template));
 
         return [
-            defualtConfigData,
-            latestVersion,
+            defualtConfigData.template,
+            version,
             (config: any) => validate(config, defualtConfigData.required, defualtConfigData.full),
             configPath
         ];
@@ -216,16 +226,16 @@ export default class Configuration {
     configPath: string = '';
     validate: (config: any) => any[] = (config) => [];
 
-    constructor(path?:string) {
+    constructor(path?:string, version?:[number, number, number], test:boolean = false) {
         // Make sure that the class can only be instantiated once
-        if (Configuration._instance)
+        if (Configuration._instance && test === false)
             throw new Error('Configuration can only be instantiated once');
 
         // Set the instance
         Configuration._instance = this;
 
         // Initialize the configuration
-        const data = init(path);
+        const data = init(path, version);
 
         this.configuration = data[0];
 
@@ -250,15 +260,17 @@ export default class Configuration {
 
         // Throw an error if the configuration is invalid
         if (logs.length > 0)
-            return new Error('The configuration is invalid because: ' + logs.join(', '));
+            throw new Error('The configuration is invalid because: ' + logs.join(', '));
 
-        // Set the new configuration
-        this.configuration = updated;
+        else {
+            // Set the new configuration
+            this.configuration = updated;
 
-        // Write the configuration
-        fs.writeFileSync(this.configPath, yaml.dump(updated));
+            // Write the configuration
+            fs.writeFileSync(this.configPath, yaml.dump(updated));
 
-        // Return the new configuration
-        return updated;
+            // Return the new configuration
+            return updated;
+        }
     }
 }

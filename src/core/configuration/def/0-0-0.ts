@@ -24,7 +24,7 @@ namespace configuration {
     }
 
     export const template: Interface = {
-        version: [0, 0, 1],
+        version: [0, 0, 0],
         a: 1
     }
 }

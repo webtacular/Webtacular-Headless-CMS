@@ -10,7 +10,7 @@ This module provides a simple error handler.
 ```typescript
 
 import { GUID from "general_library";
-import { ErrorHandler } from "error_handler";
+import { errorHandler } from "error_handler";
 
 // severity: 
 //  0 = non-fatal-user-fault (Function will try and recover), 
@@ -21,7 +21,7 @@ import { ErrorHandler } from "error_handler";
 // where: the file name and function name
 // function: the function name
 // log: boolean, if true (defualt), the error will be logged
-const error = new ErrorHandler(
+const error = new errorHandler.handle(
     {
         severity: 0,
         id: new GUID('0D9E8E9F-E9E9-4D9E-9E9E-9E9E9E9E9E9E'),

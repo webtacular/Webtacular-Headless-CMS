@@ -12,23 +12,65 @@ Within this module, the configuration files use a [3 number versioning system](h
 
 ## data.json
 
-This file contains information on how to update the configuration file.
+This file contains the configuration file names, these files are responsible for validating the configuration file,
+updating the current configuration file from the previous version, and generating a new configuration file.
 
 ```json
 {
-    "0.0.0": { // Version 0.0.0
+    "0.0.0": "0.0.0.ts",
+    "0.0.1": "0.0.1.ts", 
+    "0.0.2": "0.0.2.ts"
+}
+```
 
-        // This file is responsible for loading the default 
-        // configuration file for version 0.0.0 of the configuration file.
-        "defualt": "0.0.0.ts",
+## x-x-x.ts
 
-        // This file is responsible for converting the configuration file
-        // to the next version.
-        "update": "0.0.1.ts"
-    },
-    
-    "0.0.1": { // Version 0.0.1
-        "defualt": "0.0.1.ts",
-    }
+This file contains data for that specific version of the configuration file.
+
+```typescript
+// This constant is used to check if a parameter is required
+// All posible values need to be listed here
+export const required: Required = {
+    version: [true, true, true],
+    d: true,
+    e: true
+}
+
+// This constant contains all parameters, including the optional ones
+// This is used to validate the type of the parameter (A better way to do this would be an array that specifies the /// type of the parameter)
+export const full: Interface = {
+    version: [0, 0, 0],
+    d: 0,
+    e: ''
+}
+
+// This constant contains the default values for the parameters
+// If no configuration file is found, this will be used to generate a new configuration file
+// It has to have all the required parameters
+export const template: Interface = {
+    version: [0, 0, 2],
+    d: 1,
+    e: 'test'
+}
+
+// We also provide a function to update the configuration file
+// It will only be able to update a configuration file,
+// if the version of the configuration file is one version lower than 
+// the version its being updated to
+
+// EG Valid: 0.0.0 -> 0.0.1
+// EG Invalid: 0.0.0 -> 0.0.2
+// EG Valid: 0.0.0 -> 0.0.1 -> 0.0.2
+
+export const update = (config: any): Interface => {
+    // Clone the template config
+    let templateClone = {...template};
+
+    // Update the template config
+    if(config?.b)
+        templateClone.d = config.b;
+
+    // Return the updated config
+    return templateClone;
 }
 ```

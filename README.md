@@ -41,6 +41,14 @@ Such as:
 | Image encoding            | ❌ |
 | Automatic setup           | ⏳ |
 
+## Code Coverage
+
+| Module | Coverage |
+| -------------- |:--------------:|
+| error_handler             | ✅ |
+| general_library           | ✅ |
+| configuration             | ✅ |
+
 
 ## Dependencies?
 

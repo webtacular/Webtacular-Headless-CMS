@@ -7,47 +7,42 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/GrzegorzManiak/GHCMS)
 ![GitHub contributors](https://img.shields.io/github/contributors/GrzegorzManiak/GHCMS)
 
-# This is my attempt at learning Content managment systems.
+## Gregs Headless CMS
 
-Gregs
-Headless
-Content
-Managment
-System
+My goal with this project is to create a powerful CMS that can be used to create a websites, where most of the boring stuff is provided to you,
+and the interesting stuff is done by you with a simple bit of interaction with the addon boilerplate, no more worrying about if the user has permission to do something, etc, just let the CMS handle it all, all you have to do is `user.has('permissionName')`, want to send an email to a user? `user.sendEmail('subject', 'body')` and so on.
 
-# Random notes
-
-Oauth 2.0 authentication has been setup for discord, a content management system has been created, it allows plugins and the core of ghcms to CRUD items in the data base with full history.
-Discord inspired role based permission has been implemented.
-
-## Goals
+Such as:
+> GraphQL API Boilerplate
+> Role Based Access Control (Discord style)
+> Oauth2 Service provider
+> Easy Oauth2 Authentication
+> And much more...
 
 | Goals | Progress |
-| ------------- |:-------------:|
-| Oauth 2.0             | ✅ |
-| Plugin system         | ✅ |
-| Antivirus file scan   | ❌ |
-| GraphQL               | ✅ |
-| Backup system         | ❌ |
-| Role based permission | ✅ |
-| Document level permission | ✅ |
-| Localization          | ✅* |
-| Importing             | ❌ |
-| Exporting             | ❌ |
-| Asset fingerprinting  | ❌ |
-| Static file delivery  | ❌ |
-| CLI                   | ❌ |
-| User Managment        | ✅* |
-| Documentation         | ✅* |
-| Content Scheduling    | ❌ |
-| Img encoding          | ❌ |
-| Automatic setup       | ❌ |
+| -------------- |:--------------:|
+| Easy auth interface       | ❌ |
+| Oauth2 Provider           | ❌ |
+| Plugin system             | ❌ |
+| File Uploads              | ❌ |
+| Antivirus file scan       | ❌ |
+| GraphQL API               | ❌ |
+| Backup system             | ⏳ |
+| Role based permission     | ❌ |
+| Document level permission | ❌ |
+| Localization              | ❌ |
+| Importing Database        | ❌ |
+| Exporting Database        | ❌ |
+| Asset fingerprinting      | ❌ |
+| Static file delivery      | ❌ |
+| CLI                       | ❌ |
+| User Managment            | ❌ |
+| Documentation             | ❌ |
+| Image encoding            | ❌ |
+| Automatic setup           | ⏳ |
 
-*Parital
 
 ## Dependencies?
 
-I want this project to be as independant as possible, I dont want to depend on any other packages.
-This is a learning exercise, so excuse me if I rewrite a lot of modules.
-
+I want this project to be as independant as possible!
 If you see a dependency that you can write from scratch, contribute it!

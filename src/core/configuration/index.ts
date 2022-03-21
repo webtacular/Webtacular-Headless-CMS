@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 
-export const validate = (configuration:any, required:any, template:any): string[] => {
+const validate = (configuration:any, required:any, template:any): string[] => {
     // Check if the configuration is an object
     if (typeof configuration !== 'object')
         return ['configuration is not an object'];
@@ -52,22 +52,28 @@ export const validate = (configuration:any, required:any, template:any): string[
         if (!configValue && requiredValues[i].value === false) continue;
 
         // If no configValue is found and the requiredValue is true, set valid to false
-        if (!configValue && requiredValues[i].value === true) {
+        if (!configValue && requiredValues[i].value === true) 
             log.push(`Missing required value: ${requiredValues[i].path}, type: ${templateValue?.type}`);
-            continue;
-        }
 
         // Compare the type of the configValue to the type of the templateValue
-        if (configValue?.type !== templateValue?.type) {
-            log.push(`Invalid type for value: ${requiredValues[i].path}, original type: ${configValue?.type}, required type: ${templateValue?.type}`);
-            continue;
-        }
+        if (configValue?.type !== templateValue?.type) 
+            log.push(`Type mismatch for value: ${requiredValues[i].path}, current type: ${configValue?.type}, required type: ${templateValue?.type}`);
+    }
+
+    // Check if configValues contains any values that are not in the templateValues
+    for (let i = 0; i < configValues.length; i++) {
+        // Find the configValue in the templateValues
+        const templateValue = templateValues.find((value) => value.path === configValues[i].path);
+        
+        // If nothing is found, log the error
+        if(!templateValue)
+            log.push(`Invalid value: ${configValues[i].path}, type: ${configValues[i].type}`);
     }
 
     return log;
 }
 
-export const init = (): void => {
+const init = (userPath?:string): any[] => {
     // Get the current directory
     const currentDir = process.cwd(),
         dataPath = path.join(currentDir, './src/core/configuration/def/data.json');
@@ -101,7 +107,7 @@ export const init = (): void => {
     });
 
     // Config path
-    const configPath = path.join(currentDir, 'config.yml');
+    const configPath = userPath ? userPath : path.join(currentDir, 'config.yml');
 
     // Check if a curent configuration exists
     if (!fs.existsSync(configPath)) {
@@ -118,7 +124,12 @@ export const init = (): void => {
         // Write the configuration
         fs.writeFileSync(configPath, yaml.dump(defualtConfigData.template));
 
-        return;
+        return [
+            defualtConfigData,
+            latestVersion,
+            (config: any) => validate(config, defualtConfigData.required, defualtConfigData.full),
+            configPath
+        ];
     }
 
     // Read the config.yml file
@@ -140,13 +151,11 @@ export const init = (): void => {
     // Validate the configuration
     const current = require(versionData.path);
 
-    const log = validate(parsedConfig, current.required, current.full);
+    const logs = validate(parsedConfig, current.required, current.full);
 
     // Check if the configuration is valid
-    if (log.length > 0) {
-        log.forEach((error) => console.log(error));
-        throw new Error('The configuration is invalid');
-    }
+    if (logs.length > 0) 
+        throw new Error('The configuration is invalid because: ' + logs.join(', '));
 
     // Check if there is a newer version of the configuration
     const latestVersion = versions.reduce((a, b) => a.version[0] > b.version[0] ? a : b);
@@ -185,6 +194,71 @@ export const init = (): void => {
         parsedConfig = currentConfig;
     }
 
+    // Get the latest valid data
+    const latest = require(latestVersion.path);
+
     // return the configuration
-    return parsedConfig;
+    return [
+        parsedConfig,
+        latestVersion,
+        (config: any) => validate(config, latest.required, latest.full),
+        configPath
+    ];
+}
+
+export default class Configuration {
+    // Make sure that the class can only be instantiated once
+    private static _instance: Configuration;
+
+    configuration: any;
+    version: [number, number, number] = [0, 0, 0];
+    scriptPath: string = '';
+    configPath: string = '';
+    validate: (config: any) => any[] = (config) => [];
+
+    constructor(path?:string) {
+        // Make sure that the class can only be instantiated once
+        if (Configuration._instance)
+            throw new Error('Configuration can only be instantiated once');
+
+        // Set the instance
+        Configuration._instance = this;
+
+        // Initialize the configuration
+        const data = init(path);
+
+        this.configuration = data[0];
+
+        this.version = data[1].version;
+
+        this.scriptPath = data[1].path;
+
+        this.configPath = data[3];
+
+        this.validate = data[2];
+    }
+
+    update(config: any) {
+        // Clone the current configuration
+        const current = { ...this.configuration };
+
+        // Merge the new configuration with the current configuration
+        const updated = Object.assign(current, config);
+
+        // Verify that the new configuration is valid
+        const logs = this.validate(updated);
+
+        // Throw an error if the configuration is invalid
+        if (logs.length > 0)
+            return new Error('The configuration is invalid because: ' + logs.join(', '));
+
+        // Set the new configuration
+        this.configuration = updated;
+
+        // Write the configuration
+        fs.writeFileSync(this.configPath, yaml.dump(updated));
+
+        // Return the new configuration
+        return updated;
+    }
 }

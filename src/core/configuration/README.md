@@ -74,3 +74,36 @@ export const update = (config: any): Interface => {
     return templateClone;
 }
 ```
+
+## Configuration Class 
+
+This class can only be instantiated once, and is used to access and update the configuration file.
+
+```typescript
+import { Configuration } from "configuration";
+
+const config = new Configuration();
+// or
+const config = new Configuration('c://config.yml');
+
+// The current configuration
+config.configuration;
+
+// The current version of the configuration file
+config.version;
+
+// The path of the config script
+config.scriptPath;
+
+// The path of the config file
+config.configPath;
+
+// Validates a configuration object,
+// Returns an array of errors if any
+config.validate(config.configuration);
+
+// Updates the configuration file
+config.update({
+    d: 23
+});
+```

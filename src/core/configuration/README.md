@@ -80,7 +80,7 @@ export const update = (config: any): Interface => {
 This class can only be instantiated once, and is used to access and update the configuration file.
 
 ```typescript
-import { Configuration } from "configuration";
+import Configuration from "configuration";
 
 const config = new Configuration();
 // or

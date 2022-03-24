@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+import lodash from 'lodash';
 
 const validate = (configuration:any, required:any, template:any): string[] => {
     // Check if the configuration is an object
@@ -138,7 +139,8 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
             defualtConfigData.template,
             version,
             (config: any) => validate(config, defualtConfigData.required, defualtConfigData.full),
-            configPath
+            configPath,
+            defualtConfigData.full
         ];
     }
 
@@ -212,7 +214,8 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
         parsedConfig,
         latestVersion,
         (config: any) => validate(config, latest.required, latest.full),
-        configPath
+        configPath,
+        latest.full
     ];
 }
 
@@ -237,7 +240,7 @@ export default class Configuration {
         // Initialize the configuration
         const data = init(path, version);
 
-        this.configuration = data[0];
+        this.configuration = lodash.merge(data[4], data[0]);
 
         this.version = data[1].version;
 

@@ -1,2 +1,5 @@
-// import main from '../../';
+import filter from "./src/filter";
 
+export {
+    filter,
+}

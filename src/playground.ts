@@ -12,16 +12,17 @@ export default () => {
 
         type nested {
             name: String
+            other: nested2
+        }
+
+        type nested2 {
+            name: String
         }
     `), {
         hello: (a:any, b:any, context:any) => {
             console.log(formFilter(context));
 
             return 'Hello World!';
-        },
-
-        nested: {
-            name: 'nested',
         }
     });
 }

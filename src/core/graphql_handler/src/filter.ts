@@ -3,45 +3,37 @@ import _ from "lodash";
 export default (context:any) => {
     let filter:any = {};
 
-    const recurse = (selection:any, parentObj?:string[]) => {
-        // selection.map((new_selection:any) => {
-        //     console.log(selection);
-
-        //     // Check if the parentObj is defined
-        //     if(parentObj)
-        //         // Merge the two objects
-        //         _.merge(filter, [...parentObj, null].reduceRight((obj, next) => {
-        //             if(next === null) return ({[new_selection.name?.value]: 1});
-        //             return ({[next]: obj});
-        //         }, {}));
-
-        //     // Check for a nested selection set
-        //     if(new_selection.selectionSet?.selections !== undefined){
-        //         // If the selection has a selection set, then we need to recurse
-        //         if(!parentObj) getValues(new_selection.selectionSet?.selections, [new_selection.name.value]);
-
-        //         // If the selection is nested
-        //         else getValues(new_selection.selectionSet?.selections, [...parentObj, new_selection.name.value]);
-        //     }
-        // });
-
-        Object.keys(selection)?.forEach((newSelection:any) => {
+    const recurse = (selection:any, parentName:string[] = []) => {
+        
+        for(const newSelection in Object.keys(selection)) {
+            // Current selection
             const current = selection[newSelection];
-            console.log(current.name.value);
-            if(parentObj) {
-                // Merge the two objects
-                _.merge(filter, [...parentObj, null].reduceRight((obj, next) => {
-                    if(next === null) return ({[current.name.value]: 1});
-                    return ({[next]: obj});
-                }, {}));
-            }
-            
 
-            if(current?.selectionSet?.selections) {
-                if(!parentObj) recurse(current.selectionSet.selections);
-                else recurse(current.selectionSet.selections, [...parentObj, current.name.value]);
+            // If the current selection is a field
+            if(current?.kind === 'Field') {
+                // If the current selection name is not null
+                if(current.name === null) continue;
+
+                // If the parent name is not undefined
+                if(parentName[0] !== undefined)
+                    // turn tje parentName array into an object
+                    // eg [ 'hello', 'other' ], name => { hello: other: { name: 1 } }
+
+                    _.merge(filter, [...parentName, null].reduceRight((obj, next) => {
+                        if(next === null) return ({[current.name.value]: 1});
+
+                        return ({[next]: obj});
+                    }, {})); 
+                    
+                // If the parent name is null,
+                // then merge the filter with the current selection
+                else _.merge(filter, {[current.name.value]: 1});
             }
-        });
+
+            // If the current selection is an array, we need to recurse
+            if(current?.selectionSet?.selections)
+                recurse(current.selectionSet.selections, [...parentName, current.name.value]);
+        }
     }
 
     // Start the recursive function

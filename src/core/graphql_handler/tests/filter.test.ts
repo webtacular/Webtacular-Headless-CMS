@@ -226,7 +226,7 @@ test('Filter: Multiple paramaters query', async() => {
     });
 });
 
-test('Filter: Deeply nested + Single', async() => {
+test('Filter: Deeply nested query', async() => {
     // Create a promise that resolves when a request is received
     let value: Promise<any> = new Promise(() => {});
 
@@ -276,7 +276,7 @@ test('Filter: Deeply nested + Single', async() => {
     expect(value).resolves.toStrictEqual({ other: { other: { name: 1 } } });
 });
 
-test('Filter: Deeply nested + Single', async() => {
+test('Filter: Deeply nested + Single query', async() => {
     // Create a promise that resolves when a request is received
     let value: Promise<any> = new Promise(() => {});
 

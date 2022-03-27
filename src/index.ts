@@ -1,14 +1,15 @@
 import loadConfig from "./core/configuration";
-import Fastify from "fastify";
+import Fastify, { FastifyInstance } from "fastify";
 import hotQL from "fastify-hotql";
 
 import playground from "./playground";
+import Configuration from "./core/configuration";
 
 // Load configuration
-const config = new loadConfig();
+const config: Configuration = new loadConfig();
 
 // Initialize the server
-const app = Fastify({
+const app: FastifyInstance = Fastify({
     logger: config.configuration.fastify_log,
 });
 
@@ -20,10 +21,10 @@ const gql = new hotQL(app, {
 });
 
 // Start the server
-(async() => {
+(async(): Promise<void> => {
     playground()
 
-    app.listen(config.configuration.port, (error: any) => {
+    app.listen(config.configuration.port, (error: any): void => {
         if (error) throw error;
         else console.log(`Server started: http://127.0.0.1:${config.configuration.port}`);
     });

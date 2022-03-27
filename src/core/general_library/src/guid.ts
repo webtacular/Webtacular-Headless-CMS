@@ -1,4 +1,4 @@
-const validGuidRegex = /^[0-9a-f]{8}[-][0-9a-f]{4}[-][1-5][0-9a-f]{3}[-][89ab][0-9a-f]{3}[-][0-9a-f]{12}$/i;
+const validGuidRegex: RegExp = /^[0-9a-f]{8}[-][0-9a-f]{4}[-][1-5][0-9a-f]{3}[-][89ab][0-9a-f]{3}[-][0-9a-f]{12}$/i;
 
 class GUID {
     #guid = '';
@@ -16,15 +16,15 @@ class GUID {
         this.#guid = guid;
     }
 
-    toString() {
+    toString(): string {
         return this.#guid;
     }
 
-    isValid(guid:any) {
+    isValid(guid:any): boolean {
         return validateGuid(guid);
     }
 
-    equals(guid:any) {
+    equals(guid:any): boolean {
         // Check if the guid is an instance of the GUID class
         if(guid instanceof GUID)
             return this.#guid === guid.toString();
@@ -38,16 +38,16 @@ class GUID {
 }
 
 // Generate a new GUID
-const genGuid = (): string => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+const genGuid: () => string = (): string => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c :string) :string => {
+        const r: number = Math.random() * 16 | 0;
+        const v: number = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }
 
 // Validate a GUID
-const validateGuid = (guid: any): boolean => {
+const validateGuid:(guid: any) => boolean = (guid: any): boolean => {
     // Check if the GUID is a class instance
     if (guid instanceof GUID)
         return true;

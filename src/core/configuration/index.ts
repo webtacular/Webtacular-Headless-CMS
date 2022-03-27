@@ -19,10 +19,10 @@ const validate = (configuration:any, required:any, template:any): string[] => {
         templateValues: valArray[] = [];
 
     // Recursively go trough each nested item in the config
-    const recurse = (config:any, arr:Array<{ value: any, type: string, path: string }>, path?:string):void => {
-        Object.keys(config)?.forEach((key:string) => {
-            const value = config[key],
-                newPath = path ? path + '.' + key : key;
+    const recurse = (config: any, arr:Array<{ value: any, type: string, path: string }>, path?:string):void => {
+        Object.keys(config)?.forEach((key:string):void => {
+            const value: any = config[key],
+                newPath: string = path ? path + '.' + key : key;
 
             if(typeof value !== 'object') arr.push({
                 path: newPath,
@@ -42,12 +42,12 @@ const validate = (configuration:any, required:any, template:any): string[] => {
     let log: string[] = [];
 
     // Check if the all configValues are present in TemplateValues
-    for (let i = 0; i < requiredValues.length; i++) {
+    for (let i: number = 0; i < requiredValues.length; i++) {
         // Find the required value in the templateValues
-        const templateValue = templateValues.find((value) => value.path === requiredValues[i].path);
+        const templateValue: valArray | undefined = templateValues.find((value: valArray): boolean => value.path === requiredValues[i].path);
 
         // Try and find the configValue in the configValues
-        const configValue = configValues.find((value) => value.path === requiredValues[i].path);
+        const configValue: valArray | undefined = configValues.find((value: valArray): boolean => value.path === requiredValues[i].path);
 
         // If no configValue is found and the requiredValue is not optional, continue
         if (!configValue && requiredValues[i].value === false) continue;
@@ -62,9 +62,9 @@ const validate = (configuration:any, required:any, template:any): string[] => {
     }
 
     // Check if configValues contains any values that are not in the templateValues
-    for (let i = 0; i < configValues.length; i++) {
+    for (let i: number = 0; i < configValues.length; i++) {
         // Find the configValue in the templateValues
-        const templateValue = templateValues.find((value) => value.path === configValues[i].path);
+        const templateValue: valArray | undefined = templateValues.find((value: valArray): boolean => value.path === configValues[i].path);
         
         // If nothing is found, log the error
         if(!templateValue)
@@ -76,18 +76,18 @@ const validate = (configuration:any, required:any, template:any): string[] => {
 
 const init = (userPath?:string, requestedVersion?:[number, number, number]): any[] => {
     // Get the current directory
-    const currentDir = process.cwd(),
-        dataPath = path.join(currentDir, './src/core/configuration/def/data.json');
+    const currentDir: string = process.cwd(),
+        dataPath: string = path.join(currentDir, './src/core/configuration/def/data.json');
 
     // Check if the data.json file exists
     if (!fs.existsSync(dataPath))
         throw new Error('data.json does not exist');
 
     // Read the data.json file
-    const data = fs.readFileSync(dataPath, 'utf8');
+    const data: string = fs.readFileSync(dataPath, 'utf8');
     
     // Parse the data
-    const parsedData = JSON.parse(data);
+    const parsedData: any = JSON.parse(data);
 
     // Version array
     let versions: Array<{
@@ -96,9 +96,9 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
     }> = [];
 
     // Go through each key
-    Object.keys(parsedData).forEach((key) => {
+    Object.keys(parsedData).forEach((key: string): void => {
         // Get the version of the curent key
-        let version: number[] = key.split('.').map(x => parseInt(x));
+        let version: number[] = key.split('.').map((x: string): number => parseInt(x));
 
         // push the version to the array
         versions.push({
@@ -108,7 +108,7 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
     });
 
     // Config path
-    const configPath = userPath ? userPath : path.join(currentDir, 'config.yml');
+    const configPath: string = userPath ? userPath : path.join(currentDir, 'config.yml');
 
     // Check if a curent configuration exists
     if (!fs.existsSync(configPath)) {
@@ -116,21 +116,24 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
 
         if(requestedVersion) {
             // Try and find the requested version
-            version = versions.find((version) => version.version[0] === requestedVersion[0] && version.version[1] === requestedVersion[1] && version.version[2] === requestedVersion[2]);
+            version = versions.find((version: { version: number[]; path: string }): boolean => version.version[0] === requestedVersion[0] && version.version[1] === requestedVersion[1] && version.version[2] === requestedVersion[2]);
             
             // If nothing is found, throw an error
             if(!version)
                 throw new Error('Requested version does not exist');
 
         } else // Find the latest version of the configuration
-            version = versions.reduce((a, b) => a.version[0] > b.version[0] ? a : b);
+            version = versions.reduce((
+                a: { version: number[]; path: string }, 
+                b: { version: number[]; path: string }): { version: number[]; path: string } => 
+            a.version[0] > b.version[0] ? a : b);
 
         // Check if the defualt configuration exists
         if (!fs.existsSync(version.path))
             throw new Error('The defualt configuration does not exist');
 
         // Read the defualt configuration
-        const defualtConfigData = require(version.path);
+        const defualtConfigData: any = require(version.path);
 
         // Write the configuration
         fs.writeFileSync(configPath, yaml.dump(defualtConfigData.template));
@@ -138,39 +141,42 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
         return [
             defualtConfigData.template,
             version,
-            (config: any) => validate(config, defualtConfigData.required, defualtConfigData.full),
+            (config: any): string[] => validate(config, defualtConfigData.required, defualtConfigData.full),
             configPath,
             defualtConfigData.full
         ];
     }
 
     // Read the config.yml file
-    const config = fs.readFileSync(configPath, 'utf8');
+    const config: string = fs.readFileSync(configPath, 'utf8');
     
     // Parse the config
-    let parsedConfig = yaml.load(config) as any;
+    let parsedConfig: any = yaml.load(config) as any;
 
     // Get the version of the curent configuration
     const version: number[] = parsedConfig.version;
 
     // Find that version in the data.json
-    const versionData = versions.find(x => x.version[0] === version[0] && x.version[1] === version[1] && x.version[2] === version[2]);
+    const versionData: { version: number[]; path: string } | undefined = versions.find(
+        (x: { version: number[]; path: string }) :boolean => x.version[0] === version[0] && x.version[1] === version[1] && x.version[2] === version[2]);
 
     // Make sure the version was found
     if(!versionData)
         throw new Error('The configuration version does not exist');
 
     // Validate the configuration
-    const current = require(versionData.path);
+    const current: any = require(versionData.path);
 
-    const logs = validate(parsedConfig, current.required, current.full);
+    const logs: string[] = validate(parsedConfig, current.required, current.full);
 
     // Check if the configuration is valid
     if (logs.length > 0) 
         throw new Error('The configuration is invalid because: ' + logs.join(', '));
 
     // Check if there is a newer version of the configuration
-    const latestVersion = versions.reduce((a, b) => a.version[0] > b.version[0] ? a : b);
+    const latestVersion: { version: number[]; path: string } | undefined = versions.reduce((
+        a: { version: number[]; path: string }, 
+        b: { version: number[]; path: string}) => a.version[0] > b.version[0] ? a : b);
 
     // Check if we need to update the configuration
     if(latestVersion.version[0] > version[0] || latestVersion.version[1] > version[1] || latestVersion.version[2] > version[2]) {
@@ -185,12 +191,12 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
         );
 
         // This variable will hold the configuration that will be written to the config.yml file
-        let currentConfig = parsedConfig;
+        let currentConfig: any = parsedConfig;
 
         // One by one update the configuration
         newerVersions.forEach((version) => {
             // Read the configuration
-            const config = require(version.path);
+            const config: any = require(version.path);
             
             console.log(`Updating configuration to version: ${version.version.join('.')}`);
 
@@ -207,13 +213,13 @@ const init = (userPath?:string, requestedVersion?:[number, number, number]): any
     }
 
     // Get the latest valid data
-    const latest = require(latestVersion.path);
+    const latest: any = require(latestVersion.path);
 
     // return the configuration
     return [
         parsedConfig,
         latestVersion,
-        (config: any) => validate(config, latest.required, latest.full),
+        (config: any): string[] => validate(config, latest.required, latest.full),
         configPath,
         latest.full
     ];
@@ -227,7 +233,7 @@ export default class Configuration {
     version: [number, number, number] = [0, 0, 0];
     scriptPath: string = '';
     configPath: string = '';
-    validate: (config: any) => any[] = (config) => [];
+    validate: (config: any) => any[] = (config: any): string[] => [];
 
     constructor(path?:string, version?:[number, number, number], test:boolean = false) {
         // Make sure that the class can only be instantiated once
@@ -238,7 +244,7 @@ export default class Configuration {
         Configuration._instance = this;
 
         // Initialize the configuration
-        const data = init(path, version);
+        const data: any[] = init(path, version);
 
         this.configuration = lodash.merge(data[4], data[0]);
 
@@ -251,15 +257,15 @@ export default class Configuration {
         this.validate = data[2];
     }
 
-    update(config: any) {
+    update(config: any): any {
         // Clone the current configuration
-        const current = { ...this.configuration };
+        const current: any = { ...this.configuration };
 
         // Merge the new configuration with the current configuration
-        const updated = Object.assign(current, config);
+        const updated: any = Object.assign(current, config);
 
         // Verify that the new configuration is valid
-        const logs = this.validate(updated);
+        const logs: any[] = this.validate(updated);
 
         // Throw an error if the configuration is invalid
         if (logs.length > 0)

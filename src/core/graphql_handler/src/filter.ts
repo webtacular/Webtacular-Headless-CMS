@@ -1,13 +1,17 @@
 import _ from "lodash";
 
-export default (context:any) => {
-    let filter:any = {};
+interface FilterInterface {
+    [key: string]: number | FilterInterface
+}
 
-    const recurse = (selection:any, parentName:string[] = []) => {
+export default (context:any): FilterInterface => {
+    let filter:FilterInterface = {};
+
+    const recurse = (selection:any, parentName:string[] = []): void => {
         
         for(const newSelection in Object.keys(selection)) {
             // Current selection
-            const current = selection[newSelection];
+            const current: any = selection[newSelection];
 
             // If the current selection is a field
             if(current?.kind === 'Field') {
@@ -19,7 +23,7 @@ export default (context:any) => {
                     // turn tje parentName array into an object
                     // eg [ 'hello', 'other' ], name => { hello: other: { name: 1 } }
 
-                    _.merge(filter, [...parentName, null].reduceRight((obj, next) => {
+                    _.merge(filter, [...parentName, null].reduceRight((obj: {}, next : string | null):  { [x: string]: {}}  => {
                         if(next === null) return ({[current.name.value]: 1});
 
                         return ({[next]: obj});

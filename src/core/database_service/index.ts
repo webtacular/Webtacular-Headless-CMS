@@ -70,7 +70,7 @@ export default class {
         });
     }
 
-    getCollection(collection: string): Collection<Document> | ErrorHandler {
-        return this.getClient().db().collection(collection);
+    getCollection(database: string, collection: string): Collection<Document> | ErrorHandler {
+        return this.getClient().db(database).collection(collection);
     }
 }

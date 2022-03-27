@@ -40,7 +40,7 @@ test('Getting client before initializing', async () => {
 test('Getting collection before initializing', async () => {
     const service: MongoService = new MongoService(testConfig.db);
 
-    expect(() => service.getCollection('test')).toThrowError();
+    expect(() => service.getCollection('test', 'test')).toThrowError();
 });
 
 // Initialize service
@@ -65,7 +65,7 @@ test('Getting collection after initializing', async () => {
 
     await service.init();
 
-    expect(service.getCollection('test')).toBeDefined();
+    expect(service.getCollection('test', 'test')).toBeDefined();
 });
 
 // Try initializing service twice

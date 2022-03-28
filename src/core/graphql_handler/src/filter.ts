@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-interface FilterInterface {
+export interface FilterInterface {
     [key: string]: number | FilterInterface
 }
 

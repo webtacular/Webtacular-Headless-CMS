@@ -37,7 +37,7 @@ Such as:
 | Static file delivery      | ❌ |
 | CLI                       | ❌ |
 | User Managment            | ❌ |
-| Documentation             | ❌ |
+| Documentation             | ⏳ |
 | Image encoding            | ❌ |
 | Automatic setup           | ⏳ |
 
@@ -48,7 +48,8 @@ Such as:
 | error_handler             | ✅ |
 | general_library           | ✅ |
 | configuration             | ✅ |
-
+| database_service          | ✅ |
+| error_handler             | ✅ |
 
 ## Dependencies?
 

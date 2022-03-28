@@ -1,28 +1,20 @@
-import { gql } from './';
-import { buildSchema } from 'graphql';
+import User from "./core/user_class";
+import Authentication from "./core/user_class"
 
-import formFilter from './core/graphql_handler/src/filter';
+import { ObjectId } from "mongodb";
 
 export default () => {
-    gql.addSchema(buildSchema(`
-        type Query {
-            hello: String
-            other: nested
-        }
+    // const user: User = new User(
+    //     new ObjectId(),
+    // );
 
-        type nested {
-            name: String
-            other: nested2
-        }
+    const newUser = new User({
 
-        type nested2 {
-            name: String
-        }
-    `), {
-        hello: (a:any, b:any, context:any) => {
-            console.log(formFilter(context));
-
-            return 'Hello World!';
-        }
     });
+
+    // newUser.getUser(new ObjectId(), {
+        
+    // }).catch(err => {
+    //     console.log(err.key.toString());
+    // });
 }

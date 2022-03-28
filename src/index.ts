@@ -4,6 +4,7 @@ import hotQL from "fastify-hotql";
 
 import playground from "./playground";
 import Configuration from "./core/configuration";
+import MongoService from "./core/database_service";
 
 // Load configuration
 const config: Configuration = new loadConfig();
@@ -20,9 +21,14 @@ const gql = new hotQL(app, {
     graphiql_prefix: config.configuration.graphql.prefix + '/explore',
 });
 
+// Initialize the database service
+const db: MongoService = new MongoService(config.configuration.mongo.uri);
+
 // Start the server
 (async(): Promise<void> => {
-    playground()
+    await db.init();
+
+    playground();
 
     app.listen(config.configuration.port, (error: any): void => {
         if (error) throw error;
@@ -34,4 +40,5 @@ export {
     app,
     gql,
     config,
+    db,
 };

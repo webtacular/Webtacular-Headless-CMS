@@ -1,285 +1,124 @@
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import lodash from 'lodash';
+import { LatestVersion, Schema, Versions } from "./src/versioning";
+import { ErrorHandler, ErrorSeverity } from "../error_handler";
 
-const validate = (configuration:any, required:any, template:any): string[] => {
-    // Check if the configuration is an object
-    if (typeof configuration !== 'object')
-        return ['configuration is not an object'];
+import GUID from "../general_library/src/guid";
+import yaml from "js-yaml";
+import fs from "fs";
 
-    interface valArray {
-        path: string,
-        value: any,
-        type: string
-    }
+import validate from "./src/validate";
+import defualt from "./src/defualt";
+import update from "./src/update";
 
-    let configValues: valArray[] = [],
-        requiredValues: valArray[] = [],
-        templateValues: valArray[] = [];
+import _ from "lodash";
 
-    // Recursively go trough each nested item in the config
-    const recurse = (config: any, arr:Array<{ value: any, type: string, path: string }>, path?:string):void => {
-        Object.keys(config)?.forEach((key:string):void => {
-            const value: any = config[key],
-                newPath: string = path ? path + '.' + key : key;
+export default class {
+    absolutePath: string;
+    rawInput: string;
+    config: Schema;
 
-            if(typeof value !== 'object') arr.push({
-                path: newPath,
-                value,
-                type: typeof value,
-            });
+    constructor(absolutePath: string, testingMode: boolean = false) {
+        this.absolutePath = absolutePath;
 
-            if(typeof config[key] === 'object' && config[key] !== null)
-                recurse(value, arr, newPath);
-        });
-    }   
-    
-    recurse(configuration, configValues);
-    recurse(required, requiredValues);
-    recurse(template, templateValues);
+        // Validate the path
+        if (!fs.existsSync(absolutePath)) throw new ErrorHandler({
+            severity: ErrorSeverity.FATAL,
+            id: new GUID('b6aa4dec-f0da-45e9-9e62-cebefdd495ef'),
+            where: 'src\\core\\configuration\\index.ts',
+            function: 'constructor (path)',
+        }); 
 
-    let log: string[] = [];
+        // Read the file
+        this.rawInput = fs.readFileSync(absolutePath, "utf8");
 
-    // Check if the all configValues are present in TemplateValues
-    for (let i: number = 0; i < requiredValues.length; i++) {
-        // Find the required value in the templateValues
-        const templateValue: valArray | undefined = templateValues.find((value: valArray): boolean => value.path === requiredValues[i].path);
+        // Parse the file
+        let yamlRaw = yaml.load(this.rawInput) as any;
 
-        // Try and find the configValue in the configValues
-        const configValue: valArray | undefined = configValues.find((value: valArray): boolean => value.path === requiredValues[i].path);
-
-        // If no configValue is found and the requiredValue is not optional, continue
-        if (!configValue && requiredValues[i].value === false) continue;
-
-        // If no configValue is found and the requiredValue is true, set valid to false
-        if (!configValue && requiredValues[i].value === true) 
-            log.push(`Missing required value: ${requiredValues[i].path}, type: ${templateValue?.type}`);
-
-        // Compare the type of the configValue to the type of the templateValue
-        if (configValue?.type !== templateValue?.type) 
-            log.push(`Type mismatch for value: ${requiredValues[i].path}, current type: ${configValue?.type}, required type: ${templateValue?.type}`);
-    }
-
-    // Check if configValues contains any values that are not in the templateValues
-    for (let i: number = 0; i < configValues.length; i++) {
-        // Find the configValue in the templateValues
-        const templateValue: valArray | undefined = templateValues.find((value: valArray): boolean => value.path === configValues[i].path);
+        // -----------[ Versioning ]----------- //
         
-        // If nothing is found, log the error
-        if(!templateValue)
-            log.push(`Invalid value: ${configValues[i].path}, type: ${configValues[i].type}`);
-    }
-
-    return log;
-}
-
-const init = (userPath?:string, requestedVersion?:[number, number, number]): any[] => {
-    // Get the current directory
-    const currentDir: string = process.cwd(),
-        dataPath: string = path.join(currentDir, './src/core/configuration/def/data.json');
-
-    // Check if the data.json file exists
-    if (!fs.existsSync(dataPath))
-        throw new Error('data.json does not exist');
-
-    // Read the data.json file
-    const data: string = fs.readFileSync(dataPath, 'utf8');
-    
-    // Parse the data
-    const parsedData: any = JSON.parse(data);
-
-    // Version array
-    let versions: Array<{
-        version: number[],
-        path: string
-    }> = [];
-
-    // Go through each key
-    Object.keys(parsedData).forEach((key: string): void => {
-        // Get the version of the curent key
-        let version: number[] = key.split('.').map((x: string): number => parseInt(x));
-
-        // push the version to the array
-        versions.push({
-            version,
-            path: path.join(currentDir, './src/core/configuration/def/' + parsedData[key])
-        });
-    });
-
-    // Config path
-    const configPath: string = userPath ? userPath : path.join(currentDir, 'config.yml');
-
-    // Check if a curent configuration exists
-    if (!fs.existsSync(configPath)) {
-        let version;
-
-        if(requestedVersion) {
-            // Try and find the requested version
-            version = versions.find((version: { version: number[]; path: string }): boolean => version.version[0] === requestedVersion[0] && version.version[1] === requestedVersion[1] && version.version[2] === requestedVersion[2]);
-            
-            // If nothing is found, throw an error
-            if(!version)
-                throw new Error('Requested version does not exist');
-
-        } else // Find the latest version of the configuration
-            version = versions.reduce((
-                a: { version: number[]; path: string }, 
-                b: { version: number[]; path: string }): { version: number[]; path: string } => 
-            a.version[0] > b.version[0] ? a : b);
-
-        // Check if the defualt configuration exists
-        if (!fs.existsSync(version.path))
-            throw new Error('The defualt configuration does not exist');
-
-        // Read the defualt configuration
-        const defualtConfigData: any = require(version.path);
-
-        // Write the configuration
-        fs.writeFileSync(configPath, yaml.dump(defualtConfigData.template));
-
-        return [
-            defualtConfigData.template,
-            version,
-            (config: any): string[] => validate(config, defualtConfigData.required, defualtConfigData.full),
-            configPath,
-            defualtConfigData.full
+        let version: [number, number, number] = [
+            yamlRaw?.version[0] as number ?? -1, 
+            yamlRaw?.version[1] as number ?? -1,
+            yamlRaw?.version[2] as number ?? -1
         ];
-    }
-
-    // Read the config.yml file
-    const config: string = fs.readFileSync(configPath, 'utf8');
     
-    // Parse the config
-    let parsedConfig: any = yaml.load(config) as any;
-
-    // Get the version of the curent configuration
-    const version: number[] = parsedConfig.version;
-
-    // Find that version in the data.json
-    const versionData: { version: number[]; path: string } | undefined = versions.find(
-        (x: { version: number[]; path: string }) :boolean => x.version[0] === version[0] && x.version[1] === version[1] && x.version[2] === version[2]);
-
-    // Make sure the version was found
-    if(!versionData)
-        throw new Error('The configuration version does not exist');
-
-    // Validate the configuration
-    const current: any = require(versionData.path);
-
-    const logs: string[] = validate(parsedConfig, current.required, current.full);
-
-    // Check if the configuration is valid
-    if (logs.length > 0) 
-        throw new Error('The configuration is invalid because: ' + logs.join(', '));
-
-    // Check if there is a newer version of the configuration
-    const latestVersion: { version: number[]; path: string } | undefined = versions.reduce((
-        a: { version: number[]; path: string }, 
-        b: { version: number[]; path: string}) => a.version[0] > b.version[0] ? a : b);
-
-    // Check if we need to update the configuration
-    if(latestVersion.version[0] > version[0] || latestVersion.version[1] > version[1] || latestVersion.version[2] > version[2]) {
-        // Backup the configuration
-        fs.copyFileSync(configPath, path.join(currentDir, `config.backup.${Date.now()}.yml`));
-
-        // Find all the versions that are newer than the current version in order
-        const newerVersions = versions.filter(x => 
-            x.version[0] > version[0] || 
-            x.version[1] > version[1] || 
-            x.version[2] > version[2]
-        );
-
-        // This variable will hold the configuration that will be written to the config.yml file
-        let currentConfig: any = parsedConfig;
-
-        // One by one update the configuration
-        newerVersions.forEach((version) => {
-            // Read the configuration
-            const config: any = require(version.path);
-            
-            console.log(`Updating configuration to version: ${version.version.join('.')}`);
-
-            // Update the configuration
-            currentConfig = config.update(currentConfig);
-
-            console.log(`Updated configuration to version: ${version.version.join('.')}`);
+        let versionFound = false;
+    
+        Versions.forEach((schema, c_version) => {
+            if (version[0] === c_version[0] && 
+                version[1] === c_version[1] && 
+                version[2] === c_version[2]) versionFound = true;
+        });
+    
+        if(!versionFound) throw new ErrorHandler({
+            severity: ErrorSeverity.FATAL,
+            id: new GUID('27fa762a-81be-4021-ae17-7795950b3fbd'),
+            where: 'src\\core\\configuration\\index.ts',
+            function: 'constructor (version)',
         });
 
-        // Write the configuration
-        fs.writeFileSync(configPath, yaml.dump(currentConfig));
+        if (version[0] < LatestVersion[0] ||
+            (version[0] === LatestVersion[0] && version[1] < LatestVersion[1]) ||
+            (version[0] === LatestVersion[0] && version[1] === LatestVersion[1] && version[2] < LatestVersion[2])){
+            
+            console.log(`[WARNING] The configuration file is outdated. Updateing...`);
 
-        parsedConfig = currentConfig;
-    }
+            // Attempt to update the file
+            const updated = update(yamlRaw, version, testingMode);
 
-    // Get the latest valid data
-    const latest: any = require(latestVersion.path);
+            console.log(`[INFO] Updated to version ${LatestVersion[0]}.${LatestVersion[1]}.${LatestVersion[2]}`);
+                
+            // Backup the file
+            fs.copyFileSync(absolutePath, `${absolutePath}-${new Date().getTime()}-${version.join('.')}.bak`);
 
-    // return the configuration
-    return [
-        parsedConfig,
-        latestVersion,
-        (config: any): string[] => validate(config, latest.required, latest.full),
-        configPath,
-        latest.full
-    ];
-}
+            // Delete the old file
+            fs.unlinkSync(absolutePath);
 
-export default class Configuration {
-    // Make sure that the class can only be instantiated once
-    private static _instance: Configuration;
+            //Write the file
+            fs.writeFileSync(absolutePath, yaml.dump(updated));
 
-    configuration: any;
-    version: [number, number, number] = [0, 0, 0];
-    scriptPath: string = '';
-    configPath: string = '';
-    validate: (config: any) => any[] = (config: any): string[] => [];
+            yamlRaw = updated;
+        }    
 
-    constructor(path?:string, version?:[number, number, number], test:boolean = false) {
-        // Make sure that the class can only be instantiated once
-        if (Configuration._instance && test === false)
-            throw new Error('Configuration can only be instantiated once');
+        // -----------[ Validation ]----------- //
+        // Validate the file
+        const validation:string[] = validate(yamlRaw, LatestVersion);
 
-        // Set the instance
-        Configuration._instance = this;
+        // Check if it contains errors
+        if (validation.length !== 0){ 
+            console.error(validation.join("\n"));
 
-        // Initialize the configuration
-        const data: any[] = init(path, version);
-
-        this.configuration = lodash.merge(data[4], data[0]);
-
-        this.version = data[1].version;
-
-        this.scriptPath = data[1].path;
-
-        this.configPath = data[3];
-
-        this.validate = data[2];
-    }
-
-    update(config: any): any {
-        // Clone the current configuration
-        const current: any = { ...this.configuration };
-
-        // Merge the new configuration with the current configuration
-        const updated: any = Object.assign(current, config);
-
-        // Verify that the new configuration is valid
-        const logs: any[] = this.validate(updated);
-
-        // Throw an error if the configuration is invalid
-        if (logs.length > 0)
-            throw new Error('The configuration is invalid because: ' + logs.join(', '));
-
-        else {
-            // Set the new configuration
-            this.configuration = updated;
-
-            // Write the configuration
-            fs.writeFileSync(this.configPath, yaml.dump(updated));
-
-            // Return the new configuration
-            return updated;
+            throw new ErrorHandler({
+                severity: ErrorSeverity.FATAL,
+                id: new GUID('0c88c791-f409-4d02-b161-f37522abd478'),
+                where: 'src\\core\\configuration\\index.ts',
+                function: 'constructor (validate)',
+            });
         }
+
+        // Merge the default values with the configuration
+        this.config = _.merge(defualt(LatestVersion) as any, yamlRaw as Schema);
+        // -----------[ Validation ]----------- //
+    }
+
+    update(newConfig: any): void {
+        const combined = _.merge(this.config, newConfig);
+
+        // Validate the file
+        const validation:string[] = validate(combined, LatestVersion);
+
+        // Check if it contains errors
+        if (validation.length !== 0) { 
+            console.error(validation.join("\n"));
+
+            throw new ErrorHandler({
+                severity: ErrorSeverity.FATAL,
+                id: new GUID('0c88c791-f409-4d02-b161-f37522abd478'),
+                where: 'src\\core\\configuration\\index.ts',
+                function: 'update (validate)',
+            });
+        }
+
+        // Write the file
+        fs.writeFileSync(this.absolutePath, yaml.dump(combined));
     }
 }

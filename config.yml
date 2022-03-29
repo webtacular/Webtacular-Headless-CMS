@@ -1,12 +1,15 @@
 version:
   - 0
-  - 1
   - 0
+  - 1
 
 fastify_log: false
 
 graphql:
   graphiql: true
   prefix: /graphql
+
+mongo:
+  uri: mongodb+srv://fsdatabase:s8LXxtCIPnkoKZct@devdb.rxkbh.mongodb.net
 
 port: 70

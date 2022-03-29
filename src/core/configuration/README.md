@@ -1,5 +1,5 @@
 <h1 align="center">
-    Configuration
+    Configuration, Attempt 2
 </h1>
 
 ## Description
@@ -8,102 +8,108 @@ This module is the first module to be loaded. It is used to load the configurati
 It is also responsible for validating the configuration file, and updating the configuration file if needed.
 
 The configuration is stored in YML format, Each version of the configuration file is stored in the def directory,
-Within this module, the configuration files use a [3 number versioning system](https://en.wikipedia.org/wiki/Software_versioning).
+Within this module, the configuration files use a [3 number versioning system](https://en.wikipedia.org/wiki/Software_versioning)
 
-## data.json
+## xxx.ts
 
-This file contains the configuration file names, these files are responsible for validating the configuration file,
-updating the current configuration file from the previous version, and generating a new configuration file.
+```typescript
+import { SchemaProperty } from "../src/types";
+import Defualt from "../src/defualt";
 
-```json
-{
-    "0.0.0": "0.0.0.ts",
-    "0.0.1": "0.0.1.ts", 
-    "0.0.2": "0.0.2.ts"
+export namespace UserSchema {
+    export interface ConfigurationInterface {
+        version: [number, number, number],
+        imAnumber: number,
+        imAString: string,
+        imAnArray: string[],
+
+        imNested: {
+            imNestedNumber: number,
+        },
+    }
+
+    export const config = {
+        version: new SchemaProperty({
+            acceptedTypes: [
+                ['number', 'number', 'number'],
+            ],
+            required: false,
+            defaultValue: [0, 0, 1],
+            description: "The version of the schema",
+        }),
+
+        imAnumber: new SchemaProperty({
+            acceptedTypes: [
+                ['number'],
+            ],
+            required: true,
+            defaultValue: 0,
+            description: "A number",
+        }),
+
+        imAString: new SchemaProperty({
+            acceptedTypes: [
+                ['string'],
+            ],
+            required: true,
+            defaultValue: "",
+            description: "A string",
+        }),
+
+        imAnArray: new SchemaProperty({
+            acceptedTypes: [
+                ['string'],
+            ],
+            required: true,
+            defaultValue: [],
+            description: "An array of strings",
+        }),
+        
+        imNested:{ 
+            imNestedNumber: new SchemaProperty({
+                acceptedTypes: [
+                    ['number'],
+                ],
+                required: true,
+                defaultValue: 0,
+                description: "A number",
+            }),
+        }
+    }
+
+    export const update = (config: any): ConfigurationInterface =>  {
+        return Defualt([0, 0, 1]) as ConfigurationInterface;
+    }
 }
 ```
 
-## x-x-x.ts
-
-This file contains data for that specific version of the configuration file.
+## src/versioning.ts
 
 ```typescript
-// This constant is used to check if a parameter is required
-// All posible values need to be listed here
-export const required: Required = {
-    version: [true, true, true],
-    d: true,
-    e: true
+// Import your new schema
+import { UserSchema as Schema000 } from "../def/000";
+import { UserSchema as Schema001 } from "../def/001";
+
+//                              UPDATE ME TOO   //
+//                              VVV ------ VVV  //
+export interface Schema extends Schema001.ConfigurationInterface {}
+
+// MAP of the schema versions
+export const Versions = new Map<[number, number, number], any>([]);
+
+// And add them to the map
+Versions.set([0, 0, 0], Schema000);
+Versions.set([0, 0, 1], Schema001);
+
+// ----------[ Everything below this line is not to be modified ]----------//
+
+export let LatestVersion: [number, number, number] = [0, 0, 0];
+
+// Find the latest version
+for(let version of Versions.keys()) {
+    if(version[0] >= LatestVersion[0] && 
+        version[1] >= LatestVersion[1] && 
+        version[2] >= LatestVersion[2]) 
+        LatestVersion = version;
 }
-
-// This constant contains all parameters, including the optional ones
-// This is used to validate the type of the parameter (A better way to do this would be an array that specifies the /// type of the parameter)
-export const full: Interface = {
-    version: [0, 0, 0],
-    d: 0,
-    e: ''
-}
-
-// This constant contains the default values for the parameters
-// If no configuration file is found, this will be used to generate a new configuration file
-// It has to have all the required parameters
-export const template: Interface = {
-    version: [0, 0, 2],
-    d: 1,
-    e: 'test'
-}
-
-// We also provide a function to update the configuration file
-// It will only be able to update a configuration file,
-// if the version of the configuration file is one version lower than 
-// the version its being updated to
-
-// EG Valid: 0.0.0 -> 0.0.1
-// EG Invalid: 0.0.0 -> 0.0.2
-// EG Valid: 0.0.0 -> 0.0.1 -> 0.0.2
-
-export const update = (config: any): Interface => {
-    // Clone the template config
-    let templateClone = {...template};
-
-    // Update the template config
-    if(config?.b)
-        templateClone.d = config.b;
-
-    // Return the updated config
-    return templateClone;
-}
-```
-
-## Configuration Class 
-
-This class can only be instantiated once, and is used to access and update the configuration file.
-
-```typescript
-import Configuration from "configuration";
-
-const config = new Configuration();
-// or
-const config = new Configuration('c://config.yml');
-
-// The current configuration
-config.configuration;
-
-// The current version of the configuration file
-config.version;
-
-// The path of the config script
-config.scriptPath;
-
-// The path of the config file
-config.configPath;
-
-// Validates a configuration object,
-// Returns an array of errors if any
-config.validate(config.configuration);
-
-// Updates the configuration file
-config.update({
-    d: 23
-});
 ```

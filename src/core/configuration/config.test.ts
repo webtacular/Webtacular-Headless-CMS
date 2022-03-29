@@ -1,115 +1,66 @@
-// We want to test the configuration class, as everything else has built in error checking.
-
-import path from "path";
-import Configuration from ".";
 import fs from "fs";
+import yaml from "js-yaml";
+import path from "path";
+import configuration from ".";
 
-test('Configuration class (Double instance)', () => {
-    // Create a new configuration
-    new Configuration();
+const confPath = path.join(__dirname, './test/test.config.yml');
 
-    // Make sure that the class can only be instantiated once
-    expect(() => {
-        new Configuration();
-    }).toThrowError('Configuration can only be instantiated once');
+beforeEach(() => {
+    // Check if the test folder exists
+    if (fs.existsSync(path.join(__dirname, './test')))
+        fs.rmdirSync(path.join(__dirname, './test'), { recursive: true });
+
+    // create test folder
+    fs.mkdirSync(path.join(__dirname, './test'));
+
+    // Create a empty config file in the test directory
+    fs.writeFileSync(confPath, yaml.dump({
+        version: [0, 0, 0],
+
+        a: true,
+        b: 'dsfsdf'
+    }));
+});
+
+afterAll(() => {
+    if(fs.existsSync(path.join(__dirname, './test')))
+        // Delete the test folder
+        fs.rmdirSync(path.join(__dirname, './test'), { recursive: true });
 });
 
 test('Configuration class (Valid path)', () => {
-    // if a test.yml file exists, delete it
-    if(fs.existsSync(path.join(__dirname, 'test.yml')))
-        fs.unlinkSync(path.join(__dirname, 'test.yml'));
-
-    // Create a new configuration
-    expect(new Configuration(path.join(__dirname, 'test.yml'), [0,0,0], true).configuration).toBeDefined();
+    new configuration(confPath);
 });
 
-// test an invalid version
-test('Configuration class (Invalid version)', () => {
-    // if a test.yml file exists, delete it
-    if(fs.existsSync(path.join(__dirname, 'test.yml')))
-        fs.unlinkSync(path.join(__dirname, 'test.yml'));
-
-    // Create a new configuration
-    expect(() => {
-        new Configuration(path.join(__dirname, 'test.yml'), [551,100000,0], true);
-    }).toThrowError('Requested version does not exist');
+test('Configuration class (Invalid path)', () => {
+    expect(() => new configuration('f')).toThrow();
 });
 
-// validate the properties of the configuration
-test('Configuration class (Valid properties)', () => {
-    // if a test.yml file exists, delete it
-    if(fs.existsSync(path.join(__dirname, 'test.yml')))
-        fs.unlinkSync(path.join(__dirname, 'test.yml'));
+test('Configuration class (Properties)', () => {
+    const conf = new configuration(confPath, true);
 
-    // Create a new configuration
-    const configuration = new Configuration(path.join(__dirname, 'test.yml'), [0,0,0], true);
-
-    // Test the properties
-    expect(configuration.configuration.version).toEqual([0, 0 ,0]);
-    expect(configuration.configuration.a).toBe(1);
+    expect(conf.config.version).toEqual([0, 0, 1]);
 });
 
-// Test updating the configuration
-test('Configuration class (Update)', () => {
-    // if a test.yml file exists, delete it
-    if(fs.existsSync(path.join(__dirname, 'test.yml')))
-        fs.unlinkSync(path.join(__dirname, 'test.yml'));
+test('Configuration class (Update valid)', () => {
+    const conf = new configuration(confPath, true);
 
-    // Create a new configuration
-    const configuration = new Configuration(path.join(__dirname, 'test.yml'), [0,0,0], true);
-
-    // Test the properties
-    expect(configuration.configuration.version).toEqual([0, 0 ,0]);
-    expect(configuration.configuration.a).toBe(1);
-
-    // Update the configuration
-    configuration.update({
-        a: 5,
+    conf.update({
+        version: [0, 0, 1],
+        port: 1
     });
 
-    // Test the properties
-    expect(configuration.configuration.version).toEqual([0, 0 ,0]);
-    expect(configuration.configuration.a).toBe(5);
+    expect(conf.config.version).toEqual([0, 0, 1]);
+    expect(conf.config.port).toBe(1);
 });
 
-// Test updating the configuration with an invalid property types
-test('Configuration class (Update type mismatch)', () => {
-    // if a test.yml file exists, delete it
-    if(fs.existsSync(path.join(__dirname, 'test.yml')))
-        fs.unlinkSync(path.join(__dirname, 'test.yml'));
+test('Configuration class (Update invalid)', () => {
+    const conf = new configuration(confPath, true);
 
-    // Create a new configuration
-    const configuration = new Configuration(path.join(__dirname, 'test.yml'), [0,0,0], true);
-
-    // Test the properties
-    expect(configuration.configuration.version).toEqual([0, 0 ,0]);
-    expect(configuration.configuration.a).toBe(1);
-
-    // Update the configuration
-    expect(() => {
-        configuration.update({
-            a: '5',
-        });
-    }).toThrowError(/.+Type mismatch for value: a.+/);
+    expect(() => conf.update({
+        version: [0, 0, 1],
+        port: '1'
+    })).toThrow();
 });
 
-// Test updating the configuration with an non-existing property
-test('Configuration class (Update non-existing property)', () => {
-    // if a test.yml file exists, delete it
-    if(fs.existsSync(path.join(__dirname, 'test.yml')))
-        fs.unlinkSync(path.join(__dirname, 'test.yml'));
-
-    // Create a new configuration
-    const configuration = new Configuration(path.join(__dirname, 'test.yml'), [0,0,0], true);
-
-    // Test the properties
-    expect(configuration.configuration.version).toEqual([0, 0 ,0]);
-    expect(configuration.configuration.a).toBe(1);
-
-    // Update the configuration
-    expect(() => {
-        configuration.update({
-            b: 5,
-        });
-    }).toThrowError(/.+Invalid value: b+/);
-});
+// jest .+config.+

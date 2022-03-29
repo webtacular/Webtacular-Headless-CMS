@@ -37,6 +37,7 @@ export class ErrorHandler {
     where?: string;
     date?: Date;
     id?: GUID;
+    function?: string;
 
     /*
         This class is used to standardize error handling and error reporting.
@@ -61,6 +62,7 @@ export class ErrorHandler {
         this.key = error.id;
         this.where = error.where;
         this.date = new Date();
+        this.function = error.function;
         this.id = new general.GUID();
     }
 }

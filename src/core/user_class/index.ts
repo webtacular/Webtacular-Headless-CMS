@@ -1,10 +1,10 @@
-import { ObjectId } from "mongodb";
-import { ErrorHandler } from "../error_handler";
-import { config as Configuration } from "../../";
-import { FilterInterface } from "../graphql_handler/src/filter";
-import fetch from "./src/fetch";
-import { Schema, Versions, LatestVersion } from "./src/versioning";
-import Authentication from "./types"
+import { ObjectId } from 'mongodb';
+import { ErrorHandler } from '../error_handler';
+import { config as Configuration } from '../../';
+import { FilterInterface } from '../graphql_handler/src/filter';
+import fetch from './src/fetch';
+import { Schema, Versions, LatestVersion } from './src/versioning';
+import Authentication from './types'
 
 export interface UserConfig {
     _id?: ObjectId;
@@ -31,7 +31,6 @@ export default class {
             this._id = config._id;
 
         else {
-            const authConfig = Configuration.configuration.authentication;
 
             
         }

@@ -1,5 +1,5 @@
-import { SchemaProperty } from "../src/types";
-import Defualt from "../src/defualt";
+import { SchemaProperty } from '../src/types';
+import Defualt from '../src/defualt';
 
 export namespace UserSchema {
     export interface ConfigurationInterface {
@@ -26,46 +26,46 @@ export namespace UserSchema {
             ],
             required: false,
             defaultValue: [0, 0, 1],
-            description: "The version of the schema",
+            description: 'The version of the schema',
         }),
 
         fastify_log: new SchemaProperty({
-            acceptedTypes: ["boolean"],
+            acceptedTypes: ['boolean'],
             required: true,
             defaultValue: false,
-            description: "Should fastify log to the console?",
+            description: 'Should fastify log to the console?',
         }),
 
         graphql: {
             graphiql: new SchemaProperty({
-                acceptedTypes: ["boolean"],
+                acceptedTypes: ['boolean'],
                 required: true,
                 defaultValue: false,
-                description: "Should graphiql be enabled?",
+                description: 'Should graphiql be enabled?',
             }),
 
             prefix: new SchemaProperty({
-                acceptedTypes: ["string"],
+                acceptedTypes: ['string'],
                 required: true,
-                defaultValue: "/graphql",
-                description: "The prefix for the graphql endpoint",
+                defaultValue: '/graphql',
+                description: 'The prefix for the graphql endpoint',
             }),
         },
 
         mongo: {
             uri: new SchemaProperty({
-                acceptedTypes: ["string"],
+                acceptedTypes: ['string'],
                 required: true,
-                defaultValue: "mongodb://localhost:27017/test",
-                description: "The URI for the mongo database",
+                defaultValue: 'mongodb://localhost:27017/test',
+                description: 'The URI for the mongo database',
             }),
         },
 
         port: new SchemaProperty({
-            acceptedTypes: ["number"],
+            acceptedTypes: ['number'],
             required: true,
             defaultValue: 3000,
-            description: "The port for the server to listen on",
+            description: 'The port for the server to listen on',
         }),
     }
 

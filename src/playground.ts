@@ -1,7 +1,7 @@
-import User from "./core/user_class";
-import Authentication from "./core/user_class"
+import User from './core/user_class';
+import Authentication from './core/user_class'
 
-import { ObjectId } from "mongodb";
+import { ObjectId } from 'mongodb';
 
 export default () => {
     // const user: User = new User(

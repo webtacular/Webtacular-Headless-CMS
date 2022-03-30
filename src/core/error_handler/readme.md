@@ -1,4 +1,4 @@
-<h1 align="center">
+<h1 align='center'>
     Error handler
 </h1>
 
@@ -10,8 +10,8 @@ This module provides a simple error handler.
 
 ```typescript
 
-import { GUID from "general_library";
-import { errorHandler } from "error_handler";
+import { GUID from 'general_library';
+import { errorHandler } from 'error_handler';
 
 // severity: 
 //  0 = non-fatal-user-fault (Function will try and recover), 

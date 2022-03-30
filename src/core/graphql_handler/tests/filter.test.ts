@@ -1,9 +1,9 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { fastifyInstance } from "./helper";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { fastifyInstance } from './helper';
 
-import createFilter from "../src/filter";
-import { buildSchema } from "graphql";
-import hotQL from "fastify-hotql";
+import createFilter from '../src/filter';
+import { buildSchema } from 'graphql';
+import hotQL from 'fastify-hotql';
 
 const cfi = new fastifyInstance();
 

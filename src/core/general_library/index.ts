@@ -1,4 +1,4 @@
-import GUID from "./src/guid";
+import GUID from './src/guid';
 
 // Export the GUID_Class as guid
 export default {

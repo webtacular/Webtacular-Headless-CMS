@@ -1,5 +1,5 @@
-import { UserSchema as Schema000 } from "../def/000";
-import { UserSchema as Schema001 } from "../def/001";
+import { UserSchema as Schema000 } from '../def/000';
+import { UserSchema as Schema001 } from '../def/001';
 
 //                              UPDATE ME TOO   //
 //                              VVV ------ VVV  //

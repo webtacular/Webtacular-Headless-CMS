@@ -1,11 +1,9 @@
-import { Versions } from './versioning';
 import { SchemaProperty } from './types';
-
 import { ErrorHandler, ErrorSeverity } from '../../error_handler';
 import GUID from '../../general_library/src/guid';
 import _ from 'lodash';
 
-export default (version: [number, number, number]): any => {
+export default (version: [number, number, number], Versions: Map<[number, number, number], any>): any => {
     // Find the version
     let versionSchema: any = null;
 

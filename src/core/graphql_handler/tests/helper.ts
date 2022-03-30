@@ -1,4 +1,4 @@
-import fastify from "fastify";
+import fastify from 'fastify';
 
 export class fastifyInstance {
     public fastify: any;

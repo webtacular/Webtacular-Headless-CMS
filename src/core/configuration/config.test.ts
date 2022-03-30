@@ -1,7 +1,7 @@
-import fs from "fs";
-import yaml from "js-yaml";
-import path from "path";
-import configuration from ".";
+import fs from 'fs';
+import yaml from 'js-yaml';
+import path from 'path';
+import configuration from '.';
 
 const confPath = path.join(__dirname, './test/test.config.yml');
 

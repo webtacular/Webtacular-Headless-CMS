@@ -1,5 +1,5 @@
-import { ErrorHandler } from ".";
-import GUID from "../general_library/src/guid";
+import { ErrorHandler } from '.';
+import GUID from '../general_library/src/guid';
 
 test('Error handler date validation', () => {
     const error = {

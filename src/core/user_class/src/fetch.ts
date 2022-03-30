@@ -1,8 +1,8 @@
-import { db } from "../../..";
-import { ErrorHandler, ErrorSeverity } from "../../error_handler";
-import GUID from "../../general_library/src/guid";
-import { FilterInterface } from "../../graphql_handler/src/filter";
-import { ObjectId } from "mongodb";
+import { db } from '../../..';
+import { ErrorHandler, ErrorSeverity } from '../../error_handler';
+import GUID from '../../general_library/src/guid';
+import { FilterInterface } from '../../graphql_handler/src/filter';
+import { ObjectId } from 'mongodb';
 
 export default (_id: ObjectId, filter?: FilterInterface): Promise<ErrorHandler | Object> => {
     return new Promise((resolve, reject) => {

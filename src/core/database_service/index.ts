@@ -1,6 +1,6 @@
-import { ErrorHandler, ErrorSeverity } from "../error_handler";
+import { ErrorHandler, ErrorSeverity } from '../error_handler';
 import { Collection, MongoClient, MongoClientOptions } from 'mongodb';
-import GUID from "../general_library/src/guid";
+import GUID from '../general_library/src/guid';
 
 export default class {
     #connectionString: string = '';
@@ -30,7 +30,7 @@ export default class {
                 function: 'init'
             }));
 
-            // Check if the connection string is valid ("mongodb://" or "mongodb+srv://")
+            // Check if the connection string is valid ('mongodb://' or 'mongodb+srv://')
             const exp: RegExp = /^(mongodb:\/\/|mongodb\+srv:\/\/)/;
 
             if(!exp.test(this.#connectionString)) return reject(new ErrorHandler({

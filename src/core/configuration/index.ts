@@ -1,15 +1,15 @@
-import { LatestVersion, Schema, Versions } from "./src/versioning";
-import { ErrorHandler, ErrorSeverity } from "../error_handler";
+import { LatestVersion, Schema, Versions } from './src/versioning';
+import { ErrorHandler, ErrorSeverity } from '../error_handler';
 
-import GUID from "../general_library/src/guid";
-import yaml from "js-yaml";
-import fs from "fs";
+import GUID from '../general_library/src/guid';
+import yaml from 'js-yaml';
+import fs from 'fs';
 
-import validate from "./src/validate";
-import defualt from "./src/defualt";
-import update from "./src/update";
+import validate from './src/validate';
+import defualt from './src/defualt';
+import update from './src/update';
 
-import _ from "lodash";
+import _ from 'lodash';
 
 export default class {
     absolutePath: string;
@@ -28,7 +28,7 @@ export default class {
         }); 
 
         // Read the file
-        this.rawInput = fs.readFileSync(absolutePath, "utf8");
+        this.rawInput = fs.readFileSync(absolutePath, 'utf8');
 
         // Parse the file
         let yamlRaw = yaml.load(this.rawInput) as any;
@@ -85,7 +85,7 @@ export default class {
 
         // Check if it contains errors
         if (validation.length !== 0){ 
-            console.error(validation.join("\n"));
+            console.error(validation.join('\n'));
 
             throw new ErrorHandler({
                 severity: ErrorSeverity.FATAL,
@@ -108,7 +108,7 @@ export default class {
 
         // Check if it contains errors
         if (validation.length !== 0) { 
-            console.error(validation.join("\n"));
+            console.error(validation.join('\n'));
 
             throw new ErrorHandler({
                 severity: ErrorSeverity.FATAL,

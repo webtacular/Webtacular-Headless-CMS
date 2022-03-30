@@ -1,4 +1,4 @@
-import general from "../general_library/";
+import general from '../general_library/';
 import GUID from '../general_library/src/guid';
 
  //  0 = non-fatal-user-fault (Function will try and recover), 
@@ -13,11 +13,14 @@ export interface ErrorDescription {
     // Unique ID of the error
     id: GUID;
 
-    // Where the error occured, in the format: "src\\core\\error_handler\\error.test.ts"
+    // Where the error occured, in the format: 'src\\core\\error_handler\\error.test.ts'
     where: string;
 
     // Function that caused the error
     function: string;
+
+    // Message of the error
+    message?: string;
 }
 
 export const ErrorSeverity: {
@@ -38,6 +41,7 @@ export class ErrorHandler {
     date?: Date;
     id?: GUID;
     function?: string;
+    message?: string;
 
     /*
         This class is used to standardize error handling and error reporting.
@@ -64,5 +68,11 @@ export class ErrorHandler {
         this.date = new Date();
         this.function = error.function;
         this.id = new general.GUID();
+
+        // Set the message
+        if (error.message)
+            this.message = error.message;
+        else
+            this.message = `Error ${this.id}`;
     }
 }

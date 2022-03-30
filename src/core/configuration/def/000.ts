@@ -1,4 +1,4 @@
-import { SchemaProperty } from "../src/types";
+import { SchemaProperty } from '../src/types';
 
 export namespace UserSchema {
     export interface ConfigurationInterface {
@@ -15,21 +15,21 @@ export namespace UserSchema {
             ],
             required: true,
             defaultValue: [0, 0, 0],
-            description: "The version of the schema",
+            description: 'The version of the schema',
         }),
 
         a: new SchemaProperty({
-            acceptedTypes: ["boolean"],
+            acceptedTypes: ['boolean'],
             required: true,
             defaultValue: true,
-            description: "",
+            description: '',
         }),
 
         b: new SchemaProperty({
-            acceptedTypes: ["string"],
+            acceptedTypes: ['string'],
             required: true,
             defaultValue: true,
-            description: "",
+            description: '',
         })
     }
 }

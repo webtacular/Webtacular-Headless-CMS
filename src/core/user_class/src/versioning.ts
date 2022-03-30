@@ -1,14 +1,12 @@
-import { UserSchema as Schema000 } from "../def/000";
-import { UserSchema as Schema001 } from "../def/001";
+import { UserSchema as Schema000 } from '../def/000';
 
 //                              UPDATE ME TOO   //
 //                              VVV ------ VVV  //
-export interface Schema extends Schema001.User {}
+export interface Schema extends Schema000.User {}
 
 // MAP of the schema versions
 export const Versions = new Map<[number, number, number], any>([
-    [[0, 0, 0], Schema000],
-    [[0, 1, 0], Schema001], // <== Add new versions here
+    [[0, 0, 0], Schema000], // <== Add new versions here
 ]);
 
 

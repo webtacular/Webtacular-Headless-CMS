@@ -1,10 +1,8 @@
-import { Versions } from './versioning';
 import { SchemaProperty } from './types';
-
 import { ErrorHandler, ErrorSeverity } from '../../error_handler';
 import GUID from '../../general_library/src/guid';
 
-export default (configuration: any, version: [number, number, number]): string[] => {
+export default (configuration: any, version: [number, number, number], Versions: Map<[number, number, number], any>): true | ErrorHandler => {
     // Find the version
     let versionSchema: any;
 
@@ -38,5 +36,15 @@ export default (configuration: any, version: [number, number, number]): string[]
         return errorArray;
     }
 
-    return recurse(versionSchema.config, configuration);
+    errorArray = recurse(versionSchema.config, configuration);
+
+    if (errorArray.length > 0) return new ErrorHandler({
+        severity: ErrorSeverity.FATAL,
+        id: new GUID('27fa762a-81be-4021-ae17-7795950b3fbd'),
+        where: 'src\\core\\versioning\\src\\validate.ts',
+        function: 'default',
+        message: `The following errors were found in the validation: ${errorArray.join(', ')}`,
+    });
+
+    else return true;
 }

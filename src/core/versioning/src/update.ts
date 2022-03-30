@@ -1,26 +1,13 @@
-
-import { Versions } from './versioning';
-import { ErrorHandler, ErrorSeverity } from '../../error_handler';
-
-import GUID from '../../general_library/src/guid';
+import { ErrorHandler } from '../../error_handler';
 import validate from './validate';
 import _ from 'lodash';
 
-export default (yamlRaw:any, version: [number, number, number], testingMode:boolean) => {
+export default (yamlRaw:any, version: [number, number, number], Versions: Map<[number, number, number], any>, testingMode:boolean) => {
     // Validate the current file
-    const validation:string[] = validate(yamlRaw, version);
+    const validation: true | ErrorHandler = validate(yamlRaw, version, Versions);
 
     // Check if it contains errors
-    if (validation.length !== 0){ 
-        console.error(validation.join('\n'));
-
-        throw new ErrorHandler({
-            severity: ErrorSeverity.FATAL,
-            id: new GUID('0c88c791-f409-4d02-b161-f37522abd478'),
-            where: 'src\\core\\configuration\\index.ts',
-            function: 'constructor (validate)',
-        });
-    }
+    if (validation instanceof ErrorHandler) throw validation;
 
     // Find all the versions that are newer than the current version, in order
     let versions: Array<[number, number, number]> = [];
@@ -47,11 +34,7 @@ export default (yamlRaw:any, version: [number, number, number], testingMode:bool
     });
 
     versions.forEach((version, i) => {
-        if (i > 1) return;
-        
         const schema = Versions.get(version);
-
-        console.log(`[INFO] Updating to version ${version[0]}.${version[1]}.${version[2]}`);
 
         yamlRaw = schema.update(yamlRaw);
     });

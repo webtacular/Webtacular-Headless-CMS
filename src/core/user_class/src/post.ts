@@ -1,7 +1,7 @@
-import { ErrorHandler, ErrorSeverity } from "../../error_handler";
-import { Schema } from "../src/versioning";
-import { db } from "../../..";
-import GUID from "../../general_library/src/guid";
+import { ErrorHandler, ErrorSeverity } from '../../error_handler';
+import { Schema } from '../src/versioning';
+import { db } from '../../..';
+import GUID from '../../general_library/src/guid';
 
 export default (User: Schema): Promise<Schema | ErrorHandler> => {
     return new Promise((resolve, reject) => {

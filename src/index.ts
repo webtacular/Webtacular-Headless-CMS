@@ -5,6 +5,7 @@ import playground from './playground';
 import loadConfig from './core/configuration';
 import MongoService from './core/database_service';
 import path from 'path';
+import { buildSchema } from 'graphql';
 
 // Load configuration
 const config: loadConfig = new loadConfig(path.resolve(__dirname, '../config.yml'));
@@ -32,7 +33,7 @@ const db: MongoService = new MongoService(config.config.mongo.uri);
     // Start creating the user schema from the configuration
 
 
-    playground();
+    await playground();
 
     app.listen(config.config.port, (error: any): void => {
         if (error) throw error;

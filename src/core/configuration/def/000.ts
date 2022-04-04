@@ -1,4 +1,4 @@
-import { SchemaProperty } from '../src/types';
+import { SchemaProperty } from '../../versioning/src/types';
 
 export namespace UserSchema {
     export interface ConfigurationInterface {

@@ -1,20 +1,14 @@
-import User from './core/user_class';
-import Authentication from './core/user_class'
+import constructor from './core/schema_constructer';
+import { UserSchema } from './core/user_class/def/000';
+import { buildSchema } from 'graphql';
+import { gql } from '.';
 
-import { ObjectId } from 'mongodb';
+export default async() => {
+    
+    const userSchema = constructor.construct(UserSchema.config);
 
-export default () => {
-    // const user: User = new User(
-    //     new ObjectId(),
-    // );
 
-    const newUser = new User({
+    //gql.addSchema(buildSchema(userSchema));
 
-    });
-
-    // newUser.getUser(new ObjectId(), {
-        
-    // }).catch(err => {
-    //     console.log(err.key.toString());
-    // });
+    return;
 }

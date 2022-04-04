@@ -1,37 +1,63 @@
 import GUID from '../../general_library/src/guid';
 
-export type Types = Array<
+export type Types =
     'string' | 
     'number' | 
     'boolean' | 
-    'object' | 
+    'float' |
     'date' |
-    'array' | 
+    'objectId' |
+    'regex' |
     'array<string>' |
     'array<number>' |
     'array<boolean>' |
-    'array<object>' |
     'array<array>' |
-    'array<any>'
->;
+    'array<date>';
+
+export type acceptedTypes = Array<Types[]> | Types[]; 
+
+export class key {
+    key: any;
+
+    constructor(key: any) {
+        this.key = key;
+    }
+}
 
 export type TypeConstructor = {
-    acceptedTypes: Array<Types> | Types, 
+    acceptedTypes: acceptedTypes, 
     defaultValue: any, 
     required: boolean, 
     description: string,
     private?: boolean,
+
+    databasePath?: string,
+
     accessGroup?: Array<GUID | string>
+    modifyGroup?: Array<GUID | string>
+    
+    affects?: Array<string>
+    key?: string
+
+    toView?: (value: key) => boolean,
+    toEdit?: (value: key, newValue: any) => boolean,
 };
 
 export class SchemaProperty {
-    acceptedTypes: Array<Types> | Types;
+    arrRegex = /^array(<([a-z]+)>){0,1}$/;
+
+    acceptedTypes: acceptedTypes;
     defaultValue: any;
     required: boolean;
     description: string;
 
     private: boolean = true;
-    accessGroup: Array<GUID | string> = [];
+
+    // Makes it so that by default, administrators can access this property
+    accessGroup: Array<GUID | string> = ['administrator'];
+    modifyGroup?: Array<GUID | string> = ['administrator'];
+
+    affects: Array<string> = [];
 
     constructor(val: TypeConstructor) {
         this.acceptedTypes = val.acceptedTypes;
@@ -40,23 +66,33 @@ export class SchemaProperty {
         this.description = val.description;
 
         if (val.private) this.private = val.private;
+
+        if (val.accessGroup) this.accessGroup.push(...val.accessGroup);
+        if (val.modifyGroup) this.modifyGroup?.push(...val.modifyGroup);
+        if (val.affects) this.affects.push(...val.affects);
     }
 
     validate(val: any): boolean {
+        // If the value is undefined, and the property is required, return false
         if (this.required === true && val === undefined)
             return false;
 
+        // If no value is give, and the property is not required, return true
         if (this.required === false && val === undefined)
             return true;
 
         let value = false;
 
         this.acceptedTypes.forEach((type) => {
+            // regex is a special case
+            if (type === 'regex')
+                if (val instanceof RegExp)
+                    value = true;
+
             // Date is a special case
             if (type === 'date') 
                 if (val instanceof Date) value = true;
             
-            const arrRegex = /^array(<([a-z]+)>){0,1}$/;
             let result: any;
             
             // This array type signifies that the value should be an array
@@ -71,7 +107,7 @@ export class SchemaProperty {
             // type: array<string>
             // val: ['a', 'b', 'c', 1]
             //
-            if (result = arrRegex.exec(type.toString()) && Array.isArray(val)) {
+            if (result = this.arrRegex.exec(type.toString()) && Array.isArray(val)) {
                 const arrType = result[2];
                 let typeCheck = true;
   

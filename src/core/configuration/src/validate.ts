@@ -1,5 +1,5 @@
 import { Versions } from './versioning';
-import { SchemaProperty } from './types';
+import { SchemaProperty } from '../../versioning/src/types';
 
 import { ErrorHandler, ErrorSeverity } from '../../error_handler';
 import GUID from '../../general_library/src/guid';

@@ -1,4 +1,4 @@
-import { SchemaProperty } from '../src/types';
+import { SchemaProperty } from '../../versioning/src/types';
 import Defualt from '../src/defualt';
 
 export namespace UserSchema {
@@ -14,6 +14,10 @@ export namespace UserSchema {
 
         mongo: {
             uri: string,
+        }
+
+        regex: {
+            username: RegExp,
         }
 
         port: number,
@@ -35,6 +39,15 @@ export namespace UserSchema {
             defaultValue: false,
             description: 'Should fastify log to the console?',
         }),
+
+        regex: {
+            username: new SchemaProperty({
+                acceptedTypes: ['string'],
+                required: true,
+                defaultValue: '/^[a-zA-Z0-9_]{3,20}$/',
+                description: 'Regex that validates the username',
+            }),
+        },
 
         graphql: {
             graphiql: new SchemaProperty({

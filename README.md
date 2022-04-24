@@ -9,8 +9,7 @@
 
 ## Gregs Headless CMS
 
-My goal with this project is to create a powerful CMS that can be used to create a websites, where most of the boring stuff is provided to you,
-and the interesting stuff is done by you with a simple bit of interaction with the addon boilerplate, no more worrying about if the user has permission to do something, etc, just let the CMS handle it all, all you have to do is `user.has('permissionName')`, want to send an email to a user? `user.sendEmail('subject', 'body')` and so on.
+GHCMS is the perfect tool for developers who want to create a website quickly and easily. With its simple addon boilerplate, you can create a website in minutes without worrying about permissions or user management. With its powerful GraphQL API, you can easily query and update your content.
 
 Our aim is to make GHCMS as adaptable as possible, Providing fine grained access control to staticly stored content, such as blogposts, images, videos, etc,
 just files and folders.
@@ -18,11 +17,6 @@ just files and folders.
 Whilst providing a authentication platform, easy to use addon API, GraphQL endpoint
 
 We aim to provide:
-> GraphQL API Endpoint
-> Role Based Access Control (Discord style)
-> Oauth2 Service provider
-> Easy Oauth2 Authentication
-> And much more...
 
 | Goals | Progress |
 | -------------- |:--------------:|

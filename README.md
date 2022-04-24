@@ -12,6 +12,8 @@
 My goal with this project is to create a powerful CMS that can be used to create a websites, where most of the boring stuff is provided to you,
 and the interesting stuff is done by you with a simple bit of interaction with the addon boilerplate, no more worrying about if the user has permission to do something, etc, just let the CMS handle it all, all you have to do is `user.has('permissionName')`, want to send an email to a user? `user.sendEmail('subject', 'body')` and so on.
 
+Our aim is to make GHCMS as adaptable as possible, Providing fine grained access control to staticly stored content, such as blogposts, images, videos, etc, whilst providing a authentication platform, easy to use addon API.
+
 Such as:
 > GraphQL API Boilerplate
 > Role Based Access Control (Discord style)

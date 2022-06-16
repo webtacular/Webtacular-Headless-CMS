@@ -70,9 +70,8 @@ export class ErrorHandler {
         this.id = new general.GUID();
 
         // Set the message
-        if (error.message)
-            this.message = error.message;
-        else
-            this.message = `Error ${this.id}`;
+        if (error.message) this.message = error.message;
+
+        else this.message = `Error ${this.id}`;
     }
 }
